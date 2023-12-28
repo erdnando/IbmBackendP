@@ -1,0 +1,96 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DataBase\Client\Commands\Delete\**" />
+    <Compile Remove="DataBase\Country\Commands\Delete\**" />
+    <Compile Remove="DataBase\Country\Querys\**" />
+    <Compile Remove="DataBase\RolMenu\Commands\ConsultRolMenu\**" />
+    <Compile Remove="DataBase\RolMenu\Commands\GetlistRolMenu\**" />
+    <Compile Remove="DataBase\RolMenu\Commands\UpdateRolMenu\**" />
+    <Compile Remove="DataBase\Rol\Commands\GetlistRol\**" />
+    <Compile Remove="DataBase\Rol\Commands\UpdateRol\**" />
+    <Compile Remove="DataBase\Rol\Queries\**" />
+    <Compile Remove="DataBase\User\Commands\UpdateUser\**" />
+    <Compile Remove="DataBase\User\Queries\**" />
+    <EmbeddedResource Remove="DataBase\Client\Commands\Delete\**" />
+    <EmbeddedResource Remove="DataBase\Country\Commands\Delete\**" />
+    <EmbeddedResource Remove="DataBase\Country\Querys\**" />
+    <EmbeddedResource Remove="DataBase\RolMenu\Commands\ConsultRolMenu\**" />
+    <EmbeddedResource Remove="DataBase\RolMenu\Commands\GetlistRolMenu\**" />
+    <EmbeddedResource Remove="DataBase\RolMenu\Commands\UpdateRolMenu\**" />
+    <EmbeddedResource Remove="DataBase\Rol\Commands\GetlistRol\**" />
+    <EmbeddedResource Remove="DataBase\Rol\Commands\UpdateRol\**" />
+    <EmbeddedResource Remove="DataBase\Rol\Queries\**" />
+    <EmbeddedResource Remove="DataBase\User\Commands\UpdateUser\**" />
+    <EmbeddedResource Remove="DataBase\User\Queries\**" />
+    <None Remove="DataBase\Client\Commands\Delete\**" />
+    <None Remove="DataBase\Country\Commands\Delete\**" />
+    <None Remove="DataBase\Country\Querys\**" />
+    <None Remove="DataBase\RolMenu\Commands\ConsultRolMenu\**" />
+    <None Remove="DataBase\RolMenu\Commands\GetlistRolMenu\**" />
+    <None Remove="DataBase\RolMenu\Commands\UpdateRolMenu\**" />
+    <None Remove="DataBase\Rol\Commands\GetlistRol\**" />
+    <None Remove="DataBase\Rol\Commands\UpdateRol\**" />
+    <None Remove="DataBase\Rol\Queries\**" />
+    <None Remove="DataBase\User\Commands\UpdateUser\**" />
+    <None Remove="DataBase\User\Queries\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="DataBase\AssignmentReport\Commands\Consult\**" />
+    <Compile Remove="DataBase\AssignmentReport\Commands\Delete\**" />
+    <Compile Remove="DataBase\AssignmentReport\Commands\Update\**" />
+    <Compile Remove="DataBase\Client\Commands\Delete\**" />
+    <Compile Remove="DataBase\HorusReport\Commands\Delete\**" />
+    <EmbeddedResource Remove="DataBase\AssignmentReport\Commands\Consult\**" />
+    <EmbeddedResource Remove="DataBase\AssignmentReport\Commands\Delete\**" />
+    <EmbeddedResource Remove="DataBase\AssignmentReport\Commands\Update\**" />
+    <EmbeddedResource Remove="DataBase\Client\Commands\Delete\**" />
+    <EmbeddedResource Remove="DataBase\HorusReport\Commands\Delete\**" />
+    <None Remove="DataBase\AssignmentReport\Commands\Consult\**" />
+    <None Remove="DataBase\AssignmentReport\Commands\Delete\**" />
+    <None Remove="DataBase\AssignmentReport\Commands\Update\**" />
+    <None Remove="DataBase\Client\Commands\Delete\**" />
+    <None Remove="DataBase\HorusReport\Commands\Delete\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="ITfoxtec.Identity.Saml2" Version="4.10.4" />
+    <PackageReference Include="ITfoxtec.Identity.Saml2.MvcCore" Version="4.10.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.11" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="7.0.3" />
+    <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.22" />
+    <PackageReference Include="NodaTime" Version="3.1.9" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
+    <PackageReference Include="Sustainsys.Saml2.AspNetCore2" Version="2.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Algar.Hours.Domain\Algar.Hours.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DataBase\Aprobador\Commands\Update\" />
+    <Folder Include="DataBase\AssignmentReport\Queries\" />
+    <Folder Include="DataBase\Client\Queries\" />
+    <Folder Include="DataBase\Country\Commands\Delete\" />
+    <Folder Include="DataBase\Country\Querys\" />
+    <Folder Include="DataBase\HorusReport\Queries\" />
+    <Folder Include="DataBase\Menu\Queries\" />
+    <Folder Include="DataBase\Parameters\Commands\GetParameters\" />
+    <Folder Include="DataBase\Parameters\Queries\" />
+    <Folder Include="DataBase\User\Commands\GetList\" />
+    <Folder Include="DataBase\User\Queries\" />
+    <Folder Include="DataBase\WorkingHorus\Commands\GetList\" />
+  </ItemGroup>
+
+</Project>
