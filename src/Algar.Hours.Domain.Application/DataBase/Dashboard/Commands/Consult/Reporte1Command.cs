@@ -152,11 +152,17 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             foreach (var a in allWeekDays)
             {
-                var restARP = arp.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
-                var restStanBy = StandByRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}")));
-                var restOverTime = OverTimeRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}")));
-                var restTSE = tse.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
-                var restSTE = ste.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
+                /* var restARP = arp.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
+                 var restStanBy = StandByRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}")));
+                 var restOverTime = OverTimeRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}")));
+                 var restTSE = tse.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
+                 var restSTE = ste.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));*/
+
+                var restARP = arp.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+                var restStanBy = StandByRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}")));
+                var restOverTime = OverTimeRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}")));
+                var restTSE = tse.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+                var restSTE = ste.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
 
                 var SumaMinutos = 0.0;
                 var SumaHoras = 0.0;
@@ -166,7 +172,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 }
                 WeekDaysTls weekDaysTls = new()
                 {
-                    Fecha = $"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}",
+                    Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
                     TotalHoras = SumaMinutos / 60
                 };
                 SumaMinutos = 0.0;
@@ -178,7 +184,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 }
                 weekDaysTls = new()
                 {
-                    Fecha = $"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}",
+                    Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
                     TotalHoras = SumaHoras
                 };
                 SumaHoras = 0.0;
@@ -190,7 +196,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 }
                 weekDaysTls = new()
                 {
-                    Fecha = $"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}",
+                    Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
                     TotalHoras = SumaHoras
                 };
                 SumaHoras = 0.0;
@@ -202,7 +208,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 }
                 weekDaysTls = new()
                 {
-                    Fecha = $"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}",
+                    Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
                     TotalHoras = SumaMinutos
                 };
                 SumaMinutos = 0.0;
@@ -215,7 +221,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 }
                 weekDaysTls = new()
                 {
-                    Fecha = $"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}",
+                    Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
                     TotalHoras = SumaMinutos
                 };
                 SumaMinutos = 0.0;
@@ -338,7 +344,5 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             }
             return firstWeekDay.AddDays((weekOfYear * 7) + 1);
         }
-
-       
     }
 }
