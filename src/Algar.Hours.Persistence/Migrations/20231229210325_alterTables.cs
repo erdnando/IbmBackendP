@@ -5,7 +5,7 @@
 namespace Algar.Hours.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class alterAllTables : Migration
+    public partial class alterTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,6 +18,7 @@ namespace Algar.Hours.Persistence.Migrations
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"CountryEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"FestivosEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"HorusReportEntity\"  OWNER to \"ibm-cloud-base-user\";");
+            migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"MenuEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"ParametersArpInitialEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"ParametersEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"ParametersSteInitialEntity\"  OWNER to \"ibm-cloud-base-user\";");
@@ -35,8 +36,6 @@ namespace Algar.Hours.Persistence.Migrations
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"UsersExceptions\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"assignmentReports\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"workinghoursEntity\"  OWNER to \"ibm-cloud-base-user\";");
-
-
         }
 
         /// <inheritdoc />

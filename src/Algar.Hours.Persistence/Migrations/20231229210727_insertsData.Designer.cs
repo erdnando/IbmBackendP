@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    [Migration("20231224172108_testing1")]
-    partial class testing1
+    [Migration("20231229210727_insertsData")]
+    partial class insertsData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -203,6 +203,9 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<Guid>("IdHorusReport")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("ARPLoadingId")
+                        .HasColumnType("text");
 
                     b.Property<int>("Acitivity")
                         .HasColumnType("integer");
