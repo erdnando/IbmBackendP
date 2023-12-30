@@ -105,12 +105,12 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                 //        new[] { new Claim(ClaimTypes.Name, username) },
                 //        CookieAuthenticationDefaults.AuthenticationScheme)));
 
-                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, ""));
+                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
             }
             
 
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, ""));
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
             
 
