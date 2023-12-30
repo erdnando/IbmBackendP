@@ -46,7 +46,8 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("Callback")]
-        public async Task<IActionResult> Callback()
+       // public async Task<IActionResult> Callback()
+        public Task<Task<RedirectResult>> Callback([FromQuery] string returnUrl = "/")
         {
 
            
@@ -94,27 +95,15 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
                 var officeLocation = samlResponse.GetCustomAttribute("OfficeAddress");
 
-                //the user has been authenticated
-                //now call context.SignInAsync() for ASP.NET Core
-                //or call FormsAuthentication.SetAuthCookie() for .NET Framework
-                //or do something else, like set a cookie or something...
+        
 
-                ////FOR EXAMPLE this is how you sign-in a user in ASP.NET Core 3,5,6,7
-                //await context.SignInAsync(new ClaimsPrincipal(
-                //    new ClaimsIdentity(
-                //        new[] { new Claim(ClaimTypes.Name, username) },
-                //        CookieAuthenticationDefaults.AuthenticationScheme)));
-
-                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
+                return Task.FromResult(Task.FromResult(Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?qwerty=232322323323232")));
+              //  return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
             }
-            
+            return Task.FromResult(Task.FromResult(Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?qwerty=232322323323232")));
 
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
-
-            
-
-
+            // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
         }
         [HttpGet("Aproved")]
         public async Task<IActionResult> Aproved(
