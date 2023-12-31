@@ -46,11 +46,8 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("Callback")]
-       // public async Task<IActionResult> Callback()
-        public Task<Task<RedirectResult>> Callback([FromQuery] string returnUrl = "/")
+        public async Task<IActionResult> Callback()
         {
-
-           
             // 1. TODO: specify the certificate that your SAML provider gave you
             /*string samlCertificate = @"-----BEGIN CERTIFICATE-----
                 MIIDUDCCAjgCCQDPNT2FaAHozzANBgkqhkiG9w0BAQsFADBqMQswCQYDVQQGEwJVUzELMAkGA1UECAwCTlkxDzANBgNVBAcMBkFybW9uazEMMAoGA1UECgwDSUJNMQwwCgYDVQQLDANDSU8xITAfBgNVBAMMGHByZXByb2QubG9naW4udzMuaWJtLmNvbTAeFw0xOTEwMTAxMjA1NDRaFw0yNDEwMDgxMjA1NDRaMGoxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJOWTEPMA0GA1UEBwwGQXJtb25rMQwwCgYDVQQKDANJQk0xDDAKBgNVBAsMA0NJTzEhMB8GA1UEAwwYcHJlcHJvZC5sb2dpbi53My5pYm0uY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAul2TrFWH1h+0ReRRwT2EsCsS6EXFd6zsWm51f2VfqJnt3tswO5UgjmReLKAJc5T+nritP8fbfDc8I+i3B1ITeYrcH24Ho8crfJGj34TNkGW/rDjB2q3YGy05+Vw3LXuqTwkiaoKAjkrf4wj4EFfcNT6G3xYlw2cg9ThCWptpWPjMBTINbpIwtjM7k0PoAqsjiooVDuW6dmiAkzhxX/tnxQda0jmp9VWU1DxnGbSSHcAqVB7ea2jmG5P6hZcR7jCh7TXRGazgcZmNhgzx6AyqE2Ae0S8dyXcADrTeXefmbgpTxvsC21kVx43i9KkIBnPNqr8hdwTUwZZLIYOS2s9b2QIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQA5DByy7f6pgwT+ZaRW5Hz5JS1jCpoEz9GrZIE1I4/i/OoGw+1L+5PnctsRMcYP/7TzyyQjM9Aouzk4TJCqVff3BFFFNsBFYmkgmGTKNLiCF9rtRILEATtF5C6rcb/DU8bbc9gTIpIj4M0QzlQcHvL5Aj1lVNYHMb5jNYNQpzqbniG1IuUXx9jcjwyDF/KsQUsIexGVXMfwYnSeXBEIJ9+EPiSzTdh6Da9wyK8I1PdiQ/iqhlBxJfbv0qPHLpj/ftgrxOiYLKuDcD4P6AmD5hDClk/fMBhinVZwb33DFObubIMLZOA7e1k+qTDaM5kiOcARFYLl59iWQXj/cnxJX5d/
@@ -96,14 +93,11 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                 var officeLocation = samlResponse.GetCustomAttribute("OfficeAddress");
 
         
-
-                return Task.FromResult(Task.FromResult(Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?qwerty=232322323323232")));
-              //  return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
+                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
             }
-            return Task.FromResult(Task.FromResult(Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?qwerty=232322323323232")));
 
-            // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
+             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
         }
         [HttpGet("Aproved")]
         public async Task<IActionResult> Aproved(
