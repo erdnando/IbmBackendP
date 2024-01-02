@@ -25,13 +25,13 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             _mapper = mapper;
         }
 
-        public async Task<GralReportesHrsTSO> Reporte1(int semana, string usuario)
+        public async Task<GralReportesHrsTSO> Reporte1(int semana, string usuario, int anio)
         {
             GralReportesHrsTSO GralReportes = new();
             GralReportHoras GralReportesHoras = new();
             List<ReporteHorasTLS> reporteHorasTLS = new();
 
-            var firstDate = FirstDateOfWeek(2023, semana);
+            var firstDate = FirstDateOfWeek(anio, semana);
             var allWeekDays = new List<DateTime>();
             allWeekDays.Add(firstDate);
             var currentDate = firstDate;

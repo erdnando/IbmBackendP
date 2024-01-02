@@ -21,10 +21,10 @@ namespace Algar.Hours.Api.Controllers
     public class DashoardController : Controller
     {
 
-        [HttpGet("Reporte1/{semana}/{usuario}")]
-        public async Task<IActionResult> Reporte1(int semana, string usuario, [FromServices] IReporte1Command reporte)
+        [HttpGet("Reporte1/{semana}/{usuario}/{anio}")]
+        public async Task<IActionResult> Reporte1(int semana, string usuario,int anio, [FromServices] IReporte1Command reporte)
         {
-            var data = await reporte.Reporte1(semana, usuario);
+            var data = await reporte.Reporte1(semana, usuario, anio);
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
 

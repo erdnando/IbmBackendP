@@ -10,7 +10,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 {
     public interface IReporte1Command
     {
-        Task<GralReportesHrsTSO> Reporte1(int semana, string usuario);
+        Task<GralReportesHrsTSO> Reporte1(int semana, string usuario, int anio);
         Task<GralReporteHorasMesTLS> ReporteGraficas(int anio, string usuario);
 
     }
