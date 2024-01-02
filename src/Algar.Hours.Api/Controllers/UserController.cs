@@ -48,7 +48,17 @@ namespace Algar.Hours.Api.Controllers
 
         }
 
-        
+        [HttpGet("Login")]
+        public async Task<IActionResult> Loginget(
+         [FromBody] LoginUserModel model, [FromServices] ILoginUserCommand loginuserCommand)
+        {
+
+            //var data = await loginuserCommand.Execute(model);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, "ok"));
+
+        }
+
+
         [HttpPost("Callback")]
         [Produces("application/json")]
         public async Task<IActionResult> Callback()
