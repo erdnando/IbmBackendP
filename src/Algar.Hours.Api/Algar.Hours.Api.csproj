@@ -13,10 +13,12 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetSaml" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNet.WebPages" Version="3.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Owin.Cors" Version="4.2.2" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NodaTime" Version="3.1.9" />

@@ -29,7 +29,7 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowAnyMethod();
     })
-    ); 
+    );
 
 
 var app = builder.Build();
@@ -51,5 +51,3 @@ app.UseHttpsRedirection();
 app.UseCors("NuevaPolitica");
 app.MapControllers();
 app.Run();
-
-
