@@ -33,6 +33,8 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.Update
 
             rol.NameRole = model.NameRole;
 
+            //delete
+            
             foreach (var modellist in model.MenuEntity)
             {
 
@@ -44,6 +46,9 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.Update
                 rolMenu.MenuEntityId = entityMenu.IdMenu;
                 rolMenu.RoleId = rol.IdRole;
                 _dataBaseService.RoleMenuEntity.Add(rolMenu);
+
+               // _dataBaseService.RoleMenuEntity.Update(rolMenu);
+               // _dataBaseService.SaveAsync();
 
             }
 
