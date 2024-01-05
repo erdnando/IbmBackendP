@@ -98,10 +98,24 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             //logger.LogInformation(Request.Form["SAMLResponse"]);
             // 2. Let's read the data - SAML providers usually POST it into the "SAMLResponse" var
             var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
+
+            Console.WriteLine(samlResponse);
+            try
+            {
+                Console.WriteLine(samlResponse.IsValid());
+                Console.WriteLine(samlResponse.GetEmail());
+                Console.WriteLine(samlResponse.GetFirstName());
+                Console.WriteLine(samlResponse.GetUpn());
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             
 
+
             // 3. DONE!
-             if (samlResponse.IsValid()) //all good?
+            /*
+            if (samlResponse.IsValid()) 
              {
                 //WOOHOO!!! the user is logged in
                 // var username = samlResponse.GetNameID(); //let's get the username
@@ -149,20 +163,23 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
 
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
+                */
 
-
-                // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
-                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-
-
-
-            }
             // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
-            return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+            // return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
+
+           //if   }
+
+
+            // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
+            //return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
 
         }
+
         [HttpGet("Aproved")]
         public async Task<IActionResult> Aproved(
        [FromQuery] int nivel, [FromServices] IConsultAprobadorCommand ConsultAprobadorCommand)
