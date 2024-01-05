@@ -25,36 +25,29 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.Update
         {
             var message = new BaseResponseModel();
             var rol = await _dataBaseService.RoleEntity.FirstOrDefaultAsync(r => r.IdRole == model.IdRole);
+            var rolMenuEnt = await _dataBaseService.RoleMenuEntity.Where(r => r.RoleId == rol.IdRole).ToListAsync();
+            if (rolMenuEnt.Count > 0)
+            {
+                _dataBaseService.RoleMenuEntity.RemoveRange(rolMenuEnt);
+            }
 
             if (rol == null)
             {
                 return false;
             }
 
-            rol.NameRole = model.NameRole;
-
-            //delete
-            
             foreach (var modellist in model.MenuEntity)
             {
-
-                RoleMenuEntity rolMenu = new RoleMenuEntity();
-
                 var entityMenu = _mapper.Map<MenuModelc>(modellist);
-
-                rolMenu.IdRoleMenu = Guid.NewGuid();
-                rolMenu.MenuEntityId = entityMenu.IdMenu;
-                rolMenu.RoleId = rol.IdRole;
+                RoleMenuEntity rolMenu = new()
+                {
+                    IdRoleMenu = Guid.NewGuid(),
+                    MenuEntityId = entityMenu.IdMenu,
+                    RoleId = rol.IdRole,
+                };
                 _dataBaseService.RoleMenuEntity.Add(rolMenu);
-
-               // _dataBaseService.RoleMenuEntity.Update(rolMenu);
-               // _dataBaseService.SaveAsync();
-
             }
-
-            _dataBaseService.RoleEntity.Update(rol);
-            _dataBaseService.SaveAsync();
-
+            await _dataBaseService.SaveAsync();
             return true;
         }
     }
