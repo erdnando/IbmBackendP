@@ -92,14 +92,15 @@ e5iji31qV7XiducvqxW7POWG3vi9dPg2nhP6UGae5TgRpWJksh/uhTn/zeVOznY4
 AB7XkC7atqVVYhLhRXClgxt45wme
 -----END CERTIFICATE-----";
 
-            
+
             //using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
             //////ILogger logger = factory.CreateLogger("Program");
             //logger.LogInformation(Request.Form["SAMLResponse"]);
             // 2. Let's read the data - SAML providers usually POST it into the "SAMLResponse" var
-            var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
+            var samlResponse = Request.Form["SAMLResponse"].ToString();
+           // var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
 
-            Console.WriteLine(samlResponse);
+           /* Console.WriteLine(samlResponse);
             try
             {
                 Console.WriteLine(samlResponse.IsValid());
@@ -109,7 +110,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             }catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-            }
+            }*/
             
 
 
