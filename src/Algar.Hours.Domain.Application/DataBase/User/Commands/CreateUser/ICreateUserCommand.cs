@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Algar.Hours.Domain.Entities.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,5 +10,6 @@ namespace Algar.Hours.Application.DataBase.User.Commands.CreateUser
     public interface ICreateUserCommand
     {
         Task<CreateUserModelc> Execute(CreateUserModelc model);
+        Task<UserEntity> ExecuteId(CreateUserModelc model);
     }
 }

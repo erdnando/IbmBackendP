@@ -12,5 +12,6 @@ namespace Algar.Hours.Application.DataBase.Country.Commands.Consult
 		Task<CountryModel> Consult(Guid id);
 		Task<List<CountryModel>> List();
         Task<Guid> ConsultIdbyName(string pais);
+        Task<CountryModel> ConsultIdbyCode(string codigo);
     }
 }

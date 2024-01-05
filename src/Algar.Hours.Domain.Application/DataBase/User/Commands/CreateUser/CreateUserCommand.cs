@@ -31,5 +31,17 @@ namespace Algar.Hours.Application.DataBase.User.Commands.CreateUser
             await _dataBaseService.SaveAsync();
             return model;
         }
+
+        public async Task<UserEntity> ExecuteId(CreateUserModelc model)
+        {
+            var entity = _mapper.Map<UserEntity>(model);
+            if (entity.IdUser == Guid.Empty)
+            {
+                entity.IdUser = Guid.NewGuid();
+            }
+            await _dataBaseService.UserEntity.AddAsync(entity);
+            await _dataBaseService.SaveAsync();
+            return entity;
+        }
     }
 }

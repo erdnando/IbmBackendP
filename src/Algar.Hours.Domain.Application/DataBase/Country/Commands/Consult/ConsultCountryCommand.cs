@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Domain.Entities.Client;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using static Algar.Hours.Application.Enums.Enums;
 
 namespace Algar.Hours.Application.DataBase.Country.Commands.Consult
 {
@@ -22,12 +23,20 @@ namespace Algar.Hours.Application.DataBase.Country.Commands.Consult
 			return entity;
 		}
 
+        public async Task<CountryModel> ConsultIdbyCode(string codigo)
+        {
+            var data = await _dataBaseService.CountryEntity.FirstOrDefaultAsync(d => d.CodigoPais == codigo);
+            var entity = _mapper.Map<CountryModel>(data);
+            return entity;
+        }
+
         public async Task<Guid> ConsultIdbyName(string pais)
         {
             var data = await _dataBaseService.CountryEntity.FirstOrDefaultAsync(d => d.NameCountry == pais);
             var entity = _mapper.Map<CountryModel>(data);
             return entity.IdCounty;
         }
+        
 
         public async Task<List<CountryModel>> List()
 		{

@@ -14,6 +14,7 @@ using System.Text;
 using System.Text.Json;
 using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Application.DataBase.Country.Commands.Consult;
+using Algar.Hours.Domain.Entities.User;
 
 
 namespace Algar.Hours.Api.Controllers
@@ -97,86 +98,73 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             //////ILogger logger = factory.CreateLogger("Program");
             //logger.LogInformation(Request.Form["SAMLResponse"]);
             // 2. Let's read the data - SAML providers usually POST it into the "SAMLResponse" var
-            var samlResponse = Request.Form["SAMLResponse"].ToString();
-           // var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
+           // var samlResponse = Request.Form["SAMLResponse"].ToString();
+            var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
 
-           /* Console.WriteLine(samlResponse);
-            try
-            {
-                Console.WriteLine(samlResponse.IsValid());
-                Console.WriteLine(samlResponse.GetEmail());
-                Console.WriteLine(samlResponse.GetFirstName());
-                Console.WriteLine(samlResponse.GetUpn());
-            }catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }*/
+            
             
 
 
             // 3. DONE!
-            /*
-            if (samlResponse.IsValid()) 
-             {
-                //WOOHOO!!! the user is logged in
-                // var username = samlResponse.GetNameID(); //let's get the username
-                // var officeLocation = samlResponse.GetCustomAttribute("OfficeAddress");
+            
+            //if (samlResponse.IsValid()) 
+             try{
+                
+                var codeEmployee = samlResponse.GetCustomAttribute("uid");
 
+                var dataCountry = await _consultCountryCommand.ConsultIdbyCode(codeEmployee.Substring(codeEmployee.Length-3));
 
-                CreateUserModelc restUs = new();
-                var data1 = await _getListUsuarioCommand.GetByEmail(samlResponse.GetEmail());
+                UserEntity restUs = new();
+                var data1 = await _getListUsuarioCommand.GetByEmail(samlResponse.GetCustomAttribute("emailAddress"));
                 if (data1==null)
                 {
                     CreateUserModelc newUsr = new()
                     {
-                        NameUser = samlResponse.GetFirstName(),
-                        Email = samlResponse.GetEmail(),
-                        EmployeeCode = samlResponse.GetNameID(),
+                        NameUser = samlResponse.GetCustomAttribute("firstName"),
+                        Email = samlResponse.GetCustomAttribute("emailAddress"),
+                        EmployeeCode = samlResponse.GetCustomAttribute("uid"),
                         Password = "123456789",
-                        surnameUser = samlResponse.GetLastName(),
-                        RoleEntityId = new Guid("5a0ab2a2-f790-4f96-9dee-da0b9111f7c7"),//Rol Standar
-                        CountryEntityId = new Guid("2028f36a-bfab-4cf4-b1f6-e2c5cc63bb31"),//Mexico
+                        surnameUser = samlResponse.GetCustomAttribute("lastName"),
+                        RoleEntityId = new Guid("5a0ab2a2-f790-4f96-9dee-da0b9111f7c7"),//Rol Standard
+                        CountryEntityId = dataCountry.IdCounty
 
                     };
-                    restUs = await _createUserCommand.Execute(newUsr);
+                    restUs = await _createUserCommand.ExecuteId(newUsr);
                 }
 
-                //var dataCountry = await _consultCountryCommand.ConsultIdbyName(samlResponse.GetLocation());
-                var dataCountry = await _consultCountryCommand.ConsultIdbyName("Mexico");
 
                 var jsonSaml = new
                 {
                     idUser= data1==null? restUs.IdUser: data1.IdUser,
-                    email = samlResponse.GetEmail(),
-                    nombre = samlResponse.GetFirstName(),
-                    lastName = samlResponse.GetLastName(),
-                    location = samlResponse.GetLocation(),
-                    upn = samlResponse.GetUpn(),
-                    company = samlResponse.GetCompany(),
-                    department = samlResponse.GetDepartment(),
-                    nameid = samlResponse.GetNameID(),
-                    phone = samlResponse.GetPhone(),
+                    email = samlResponse.GetCustomAttribute("emailAddress"),
+                    nombre = samlResponse.GetCustomAttribute("firstName"),
+                    lastName = samlResponse.GetCustomAttribute("lastName"),
                     roleEntityId = "5a0ab2a2-f790-4f96-9dee-da0b9111f7c7",
                     nameRole= "Usuario estandar",
-                    countryEntityId = dataCountry,
-                    nameCountry= "Mexico"
+                    countryEntityId = dataCountry.IdCounty,
+                    nameCountry= dataCountry.NameCountry,
+                    employeeCode = samlResponse.GetCustomAttribute("uid"),
                 };
 
 
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
-                */
+                
 
             // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
-            // return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
+             return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+           // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
 
-           //if   }
+            }catch(Exception ex)
+            {
+                encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML"+ex.Message));
+                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+            }
 
 
             // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
-            //return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
+            return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+           // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
 
         }
