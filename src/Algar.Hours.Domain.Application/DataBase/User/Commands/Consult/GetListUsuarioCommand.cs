@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static NodaTime.TimeZones.TzdbZone1970Location;
 
 namespace Algar.Hours.Application.DataBase.User.Commands.Consult
 {
@@ -60,6 +61,13 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
 
             var userModels = _mapper.Map<List<CreateUserModel>>(userbyrolid);
             return userModels;
+        }
+
+        public async Task<UserEntity> GetByEmail(string EmailUser)
+        {
+            var userEntity = await _dataBaseService.UserEntity.FirstOrDefaultAsync(u => u.Email.Trim().ToUpper() == EmailUser.Trim().ToUpper());
+            
+            return userEntity;
         }
     }
 }
