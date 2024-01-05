@@ -27,8 +27,13 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             var startTime = DateTime.Parse(model.StartTime);
             var endTime = DateTime.Parse(model.EndTime);
-            DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy/MM/dd HH:mm", CultureInfo.InvariantCulture);
+
+            //2023-12-14T00:00:00.0000000
+            DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+
+           ////// DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            //string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-ddTHH:mm:ss");
 
             var data = _dataBaseService.HorusReportEntity
                 .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato))

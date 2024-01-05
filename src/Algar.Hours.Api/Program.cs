@@ -46,6 +46,7 @@ JsonSerializerOptions options = new()
     ReferenceHandler = ReferenceHandler.IgnoreCycles,
     WriteIndented = true
 };
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 app.UseHttpsRedirection();
 app.UseCors("NuevaPolitica");
