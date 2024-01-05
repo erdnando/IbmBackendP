@@ -56,10 +56,10 @@ namespace Algar.Hours.Api.Controllers
         [Produces("application/json")]
         public async Task<IActionResult> Callback()
         {
-           
 
 
 
+            string encodedStr = "";
             string samlCert = @"-----BEGIN CERTIFICATE-----
 MIIDcTCCAligAwIBAgIBADANBgkqhkiG9w0BAQ0FADBSMQswCQYDVQQGEwJ1czEL
 MAkGA1UECAwCVVMxDDAKBgNVBAoMA0lCTTEMMAoGA1UEAwwDVExTMQwwCgYDVQQH
@@ -114,7 +114,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                     };
 
                
-                string encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
+                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
 
 
                 // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
