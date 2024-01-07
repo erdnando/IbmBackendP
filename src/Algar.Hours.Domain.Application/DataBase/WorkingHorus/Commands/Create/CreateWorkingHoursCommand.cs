@@ -29,6 +29,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
 
                 foreach (var entity in entityList)
                 {
+                    entity.FechaWorking = DateTime.Now;
                     var existingEntity = await  _databaseService.workinghoursEntity
                         .FirstOrDefaultAsync(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano && e.Day == entity.Day);
 
