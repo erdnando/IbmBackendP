@@ -15,6 +15,7 @@ using Algar.Hours.Application.DataBase.Dashboard.Commands.Consult;
 using Algar.Hours.Application.DataBase.Festivos.Consult;
 using Algar.Hours.Application.DataBase.Festivos.Create;
 using Algar.Hours.Application.DataBase.Festivos.Update;
+using Algar.Hours.Application.DataBase.Festivos.Delete;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Consult;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Create;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment;
@@ -93,6 +94,7 @@ namespace Algar.Hours.Application
             services.AddTransient<ICreateAprobadorCommand, CreateAprobadorCommand>();
             services.AddTransient<IUpdateAprobadorCommand, UpdateAprobadorCommand>();
             services.AddTransient<IUpdateFestivoCommand, UpdateFestivoCommand>();
+            services.AddTransient<IDeleteFestivoCommand, DeleteFestivoCommand>();
             services.AddTransient<ICreateFestivoCommand, CreateFestivoCommand>();
             services.AddTransient<IConsultFestivosCommand, ConsultFestivosCommand>();
             services.AddTransient<IConsultRolMenuCommand, ConsultRolMenuCommand>();

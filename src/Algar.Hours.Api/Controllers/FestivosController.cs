@@ -1,5 +1,6 @@
 ﻿using Algar.Hours.Application.DataBase.Festivos.Consult;
 using Algar.Hours.Application.DataBase.Festivos.Create;
+using Algar.Hours.Application.DataBase.Festivos.Delete;
 using Algar.Hours.Application.DataBase.Festivos.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
@@ -28,6 +29,16 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }
+
+        [HttpPost("delete")]
+        public async Task<IActionResult> Delete(
+          [FromBody] CreateFestivoModel model, [FromServices] IDeleteFestivoCommand deleteFestivoCommand)
+        {
+            var data = await deleteFestivoCommand.Delete(model);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+
+        }
+
         [HttpGet("ListAllFestivo")]
         public async Task<IActionResult> ListAll(
         [FromQuery] Guid CountryId,[FromServices] IConsultFestivosCommand consultFestivosCommand)

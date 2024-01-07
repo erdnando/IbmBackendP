@@ -23,7 +23,7 @@ namespace Algar.Hours.Application.DataBase.Festivos.Consult
         public async Task<List<FestivosModel>> ListAll(Guid CountryId)
         {
             var entity = await _dataBaseService.FestivosEntity
-                .Include(e => e.Country)
+               // .Include(e => e.Country)
                 .Where(e => e.CountryId == CountryId)
                 .ToListAsync();
             var model = _mapper.Map<List<FestivosModel>>(entity);

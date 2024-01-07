@@ -28,6 +28,13 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
             {
                 foreach (var item in model)
                 {
+                   /* var dia =item.DiaFestivo.Day;
+                    var mes = item.DiaFestivo.Month;
+                    var anio = item.DiaFestivo.Year;
+                    var newDate = new DateTime(anio, dia, mes);
+
+                    item.DiaFestivo = newDate;*/
+
                     var entity = _mapper.Map<FestivosEntity>(item);
 
                     var existingEntity = await _dataBaseService.FestivosEntity
