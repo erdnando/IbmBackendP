@@ -51,6 +51,17 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
             return userEntity.IdUser;
         }
 
+        public async Task<Guid> GetUserIdByID(string employeeId, Guid countryId)
+        {
+            var userEntity = await _dataBaseService.UserEntity
+                .FirstOrDefaultAsync(u => u.IdUser == Guid.Parse(employeeId) && u.CountryEntityId == countryId);
+            if (userEntity == null)
+            {
+                return Guid.Empty;
+            }
+            return userEntity.IdUser;
+        }
+
         public async Task<List<CreateUserModel>> ConsultUsersByRoleId(Guid roleId)
         {
             var userbyrolid = await _dataBaseService.UserEntity
