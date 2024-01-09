@@ -34,18 +34,27 @@ namespace Algar.Hours.Api.Controllers
 		[FromBody] CreateHorusReportModel model, [FromServices] ICreateHorusReportCommand createHorusReportCommand)
 		{
 			var data = await createHorusReportCommand.Execute(model);
-			
-            _emailCommand.SendEmail(new EmailModel
+			try
 			{
-                To = (await _usuarioCommand.GetByUsuarioId(model.ApproverId)).Email,
-				Plantilla="2"
-			});
 
-            _emailCommand.SendEmail(new EmailModel
-            {
-                To = (await _usuarioCommand.GetByUsuarioId(model.UserEntityId)).Email,
-                Plantilla = "1"
-            });
+                _emailCommand.SendEmail(new EmailModel
+                {
+                    To = (await _usuarioCommand.GetByUsuarioId(model.ApproverId)).Email,
+                    Plantilla = "2"
+                });
+
+                _emailCommand.SendEmail(new EmailModel
+                {
+                    To = (await _usuarioCommand.GetByUsuarioId(model.UserEntityId)).Email,
+                    Plantilla = "1"
+                });
+
+            }
+            catch(Exception ex)
+			{
+                Console.WriteLine(ex.ToString());
+			}
+           
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 

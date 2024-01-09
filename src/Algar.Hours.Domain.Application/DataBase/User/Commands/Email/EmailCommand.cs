@@ -80,7 +80,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
         public Boolean SendEmail(EmailModel model)
         {
             
-            var smtpClient = new SmtpClient("smtp.sendgrid.net")
+            var smtpClient = new SmtpClient(DecodeBase64("c210cC5zZW5kZ3JpZC5uZXQ="))
             {
                 Port = 587,
                 Credentials = new NetworkCredential(DecodeBase64("YXBpa2V5"), DecodeBase64("U0cuQ3NwNjlNVE1UVHUwOUEwSThCMDNmUS55WTVNOXRXa1BUbkVVTlhqd1B2NERKcHdWdnlEZl9YblB1OEFZSWhvWWNZ")),
