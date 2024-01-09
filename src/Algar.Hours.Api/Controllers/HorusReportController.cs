@@ -38,7 +38,7 @@ namespace Algar.Hours.Api.Controllers
             _emailCommand.SendEmail(new EmailModel
 			{
                 To = (await _usuarioCommand.GetByUsuarioId(model.ApproverId)).Email,
-				Plantilla="1"
+				Plantilla="2"
 			});
 
             _emailCommand.SendEmail(new EmailModel

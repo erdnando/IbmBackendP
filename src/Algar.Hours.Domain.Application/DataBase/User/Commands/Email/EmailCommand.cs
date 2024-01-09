@@ -63,7 +63,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             switch (model.Plantilla)
             {
                 case "1":
-                    body = "ALERTA \"PORTAL TLS\" APROBACION DE KORAS"; break;
+                    body = "ALERTA \"PORTAL TLS\" APROBACION DE HORAS"; break;
                 case "2":
                     body = "ALERTA \"PORTAL TLS \" Su registro fue \"aprobado, rechazado\""; break;
                 case "3":
@@ -83,13 +83,14 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             var smtpClient = new SmtpClient("smtp.sendgrid.net")
             {
                 Port = 587,
-                Credentials = new NetworkCredential("", ""),
+                Credentials = new NetworkCredential(DecodeBase64("YXBpa2V5"), DecodeBase64("U0cuQ3NwNjlNVE1UVHUwOUEwSThCMDNmUS55WTVNOXRXa1BUbkVVTlhqd1B2NERKcHdWdnlEZl9YblB1OEFZSWhvWWNZ")),
                 EnableSsl = true,
             };
+
             try
             {
-                model.To = "wpiracon@co.ibm.com";
-                smtpClient.Send("notifications@cognos.ibm.con", model.To, GetSubject(model), GetBody(model));
+                
+                smtpClient.Send("notifications@cognos.ibm.com", model.To, GetSubject(model), GetBody(model));
                 
                 return true;
             }
@@ -100,6 +101,14 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             }
         }
 
-       
+        public static string DecodeBase64(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+            var valueBytes = System.Convert.FromBase64String(value);
+            return System.Text.Encoding.UTF8.GetString(valueBytes);
+        }
+
+
     }
 }
