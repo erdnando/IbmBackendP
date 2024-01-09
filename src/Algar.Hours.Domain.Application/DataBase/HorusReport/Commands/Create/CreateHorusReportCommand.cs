@@ -37,7 +37,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             //string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-ddTHH:mm:ss");
 
             var data = _dataBaseService.HorusReportEntity
-                .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato))
+                .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId== model.UserEntityId)
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, model.StartTime, model.EndTime) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
