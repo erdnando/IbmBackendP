@@ -36,6 +36,7 @@ namespace Algar.Hours.Api.Controllers
             _createUserCommand = createUserCommand;
             _consultCountryCommand = consultCountryCommand;
         }
+
         [HttpPost("create")]
         public async Task<IActionResult> Create(
            [FromBody] CreateUserModelc model, [FromServices] ICreateUserCommand createUserCommand)
@@ -71,16 +72,17 @@ namespace Algar.Hours.Api.Controllers
 
             
             //(string from, string to,string plantilla
-            var smtpClient = new SmtpClient("smtp.sendgrid.net")
+            /*var smtpClient = new SmtpClient("smtp.sendgrid.net")
             {
                 Port= 587,
                 Credentials = new NetworkCredential("apikey", "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"),
                 EnableSsl=true,
-            };
+            };*/
             try
             {
                 
-                smtpClient.Send("notifications@cognos.ibm.con", model.To,  emailCommand.GetSubject(model),  emailCommand.GetBody(model));
+               // smtpClient.Send("notifications@cognos.ibm.con", model.To,  emailCommand.GetSubject(model),  emailCommand.GetBody(model));
+                emailCommand.SendEmail(model);
             }
             catch(Exception ex)
             {

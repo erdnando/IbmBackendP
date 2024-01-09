@@ -17,5 +17,6 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
         Task<Guid> GetUserIdByEmployeeCode(string employeeCode, Guid countryId);
         Task<Guid> GetUserIdByID(string employeeId, Guid countryId);
         Task<UserEntity> GetByEmail(string EmailUser);
+        Task<UserEntity> GetByUsuarioId(Guid Id);
     }
 }

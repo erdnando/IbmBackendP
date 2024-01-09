@@ -80,5 +80,13 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
             
             return userEntity;
         }
+
+        public async Task<UserEntity> GetByUsuarioId(Guid Id)
+        {
+            var userEntity = await _dataBaseService.UserEntity
+                 .FirstOrDefaultAsync(u => u.IdUser == Id);
+            
+            return userEntity;
+        }
     }
 }

@@ -1,8 +1,13 @@
-﻿using Algar.Hours.Application.DataBase.HorusReport.Commands;
+﻿using Algar.Hours.Application.DataBase.Aprobador.Commands.Consult;
+using Algar.Hours.Application.DataBase.Country.Commands.Consult;
+using Algar.Hours.Application.DataBase.HorusReport.Commands;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Create;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Update;
 using Algar.Hours.Application.DataBase.HoursReport.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Application.DataBase.User.Commands.ListHoursUser;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
@@ -15,12 +20,34 @@ namespace Algar.Hours.Api.Controllers
 	[TypeFilter(typeof(ExceptionManager))]
 	public class HorusReportController : ControllerBase
 	{
-		[HttpPost("create")]
+
+        private IEmailCommand _emailCommand;
+		private IGetListUsuarioCommand _usuarioCommand;
+        public HorusReportController(IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
+        {
+            _emailCommand = emailCommand;
+            _usuarioCommand = usuarioCommand;
+        }
+
+        [HttpPost("create")]
 		public async Task<IActionResult> Create(
 		[FromBody] CreateHorusReportModel model, [FromServices] ICreateHorusReportCommand createHorusReportCommand)
 		{
 			var data = await createHorusReportCommand.Execute(model);
-			return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+			
+            _emailCommand.SendEmail(new EmailModel
+			{
+                To = (await _usuarioCommand.GetByUsuarioId(model.ApproverId)).Email,
+				Plantilla="1"
+			});
+
+            _emailCommand.SendEmail(new EmailModel
+            {
+                To = (await _usuarioCommand.GetByUsuarioId(model.UserEntityId)).Email,
+                Plantilla = "1"
+            });
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
 		}
 		[HttpGet("Consult")]

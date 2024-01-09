@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -73,6 +75,29 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             }
             return body;
 
+        }
+
+        public Boolean SendEmail(EmailModel model)
+        {
+            
+            var smtpClient = new SmtpClient("smtp.sendgrid.net")
+            {
+                Port = 587,
+                Credentials = new NetworkCredential("", ""),
+                EnableSsl = true,
+            };
+            try
+            {
+                model.To = "wpiracon@co.ibm.com";
+                smtpClient.Send("notifications@cognos.ibm.con", model.To, GetSubject(model), GetBody(model));
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
 
        

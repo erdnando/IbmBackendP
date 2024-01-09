@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.AssignmentReport.Commands;
+using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Domain.Entities.HorusReport;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +85,12 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             _dataBaseService.assignmentReports.Add(assigmentreportentity);
 
             await _dataBaseService.SaveAsync();
+
+
+            
+
+
+
             return horusModel;
         }
 
