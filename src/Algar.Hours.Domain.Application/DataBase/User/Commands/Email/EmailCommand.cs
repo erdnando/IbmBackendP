@@ -80,10 +80,10 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
         public Boolean SendEmail(EmailModel model)
         {
             
-            var smtpClient = new SmtpClient(DecodeBase64("c210cC5zZW5kZ3JpZC5uZXQ="))
+            var smtpClient = new SmtpClient(d642s("c210cC5zZW5kZ3JpZC5uZXQ="))
             {
                 Port = 587,
-                Credentials = new NetworkCredential(DecodeBase64("YXBpa2V5"), DecodeBase64("U0cuQ3NwNjlNVE1UVHUwOUEwSThCMDNmUS55WTVNOXRXa1BUbkVVTlhqd1B2NERKcHdWdnlEZl9YblB1OEFZSWhvWWNZ")),
+                Credentials = new NetworkCredential(d642s("YXBpa2V5"), d642s("U0cuQ3NwNjlNVE1UVHUwOUEwSThCMDNmUS55WTVNOXRXa1BUbkVVTlhqd1B2NERKcHdWdnlEZl9YblB1OEFZSWhvWWNZ")),
                 EnableSsl = true,
             };
 
@@ -101,7 +101,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             }
         }
 
-        public static string DecodeBase64(string value)
+        public static string d642s(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return string.Empty;
