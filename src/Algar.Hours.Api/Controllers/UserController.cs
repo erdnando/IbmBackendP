@@ -15,6 +15,8 @@ using System.Text.Json;
 using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Application.DataBase.Country.Commands.Consult;
 using Algar.Hours.Domain.Entities.User;
+using System.Net.Mail;
+using Algar.Hours.Application.DataBase.User.Commands.Email;
 
 
 namespace Algar.Hours.Api.Controllers
@@ -60,8 +62,34 @@ namespace Algar.Hours.Api.Controllers
 
         }
 
-       
 
+
+        [HttpPost("SendEmail")]
+        public async Task<IActionResult> SendEmail(
+        [FromBody] EmailModel model, [FromServices] IEmailCommand emailCommand)
+        {
+
+            
+            //(string from, string to,string plantilla
+            var smtpClient = new SmtpClient("smtp.sendgrid.net")
+            {
+                Port= 587,
+                Credentials = new NetworkCredential("apikey", "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"),
+                EnableSsl=true,
+            };
+            try
+            {
+                
+                smtpClient.Send("notifications@cognos.ibm.con", model.To,  emailCommand.GetSubject(model),  emailCommand.GetBody(model));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, "OK"));
+        }
 
         [HttpPost("Callback")]
         [Produces("application/json")]
