@@ -1,4 +1,6 @@
 ﻿using Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserAproveed;
+using Algar.Hours.Application.DataBase.User.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Domain.Entities.AssignmentReport;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -14,16 +16,21 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private IEmailCommand _emailCommand;
+        private IGetListUsuarioCommand _usuarioCommand;
 
-        public UpdateAproveedCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public UpdateAproveedCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+
+            _emailCommand = emailCommand;
+            _usuarioCommand = usuarioCommand;
         }
-        public ModelAproveed Execute(ModelAproveed modelAprobador)
+        public  ModelAproveed Execute(ModelAproveed modelAprobador)
         {
 
-            var ReportUpdate =  _dataBaseService.assignmentReports.
+            var ReportUpdate = _dataBaseService.assignmentReports.
                         Where(x => x.HorusReportEntityId == modelAprobador.HorusReportEntityId)
                         .FirstOrDefault();
 
@@ -41,7 +48,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
 
                 CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
-    
+
                 assignmentReport.UserEntityId = modelAprobador.UserId;
                 assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
                 assignmentReport.State = (byte)Enums.Enums.Aprobacion.Pendiente;
@@ -65,7 +72,32 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 }
             }
 
-            
+            try
+            {
+                if (modelAprobador.State == 1)
+                {
+                    //aprovado
+                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador1UserEntityId).Result).Email, Plantilla = "5" });
+                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
+                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "5" });
+                }
+                else
+                {
+                    //rechazado
+                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador1UserEntityId).Result).Email, Plantilla = "4" });
+                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "4" });
+                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "3" });
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+
+
             return modelAprobador;
 
         }
@@ -77,6 +109,10 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
             _dataBaseService.assignmentReports.AddAsync(entity);
             _dataBaseService.SaveAsync();
+
+
+
+
 
             return model;
         }
