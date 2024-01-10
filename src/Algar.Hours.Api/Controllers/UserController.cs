@@ -71,17 +71,11 @@ namespace Algar.Hours.Api.Controllers
         {
 
             
-            //(string from, string to,string plantilla
-            /*var smtpClient = new SmtpClient("smtp.sendgrid.net")
-            {
-                Port= 587,
-                Credentials = new NetworkCredential("apikey", "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"),
-                EnableSsl=true,
-            };*/
+          
             try
             {
                 
-               // smtpClient.Send("notifications@cognos.ibm.con", model.To,  emailCommand.GetSubject(model),  emailCommand.GetBody(model));
+            
                 emailCommand.SendEmail(model);
             }
             catch(Exception ex)

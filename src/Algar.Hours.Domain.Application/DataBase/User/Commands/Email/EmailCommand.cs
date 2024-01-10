@@ -43,13 +43,15 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             switch (model.Plantilla)
             {
                 case "1":
-                    body = "Su reporte se encuentra en estado: \"aprobado, rechazado, pendiente\", por favor comuniquese con el respectivo aprobador para dar gestion"; break;
+                    body = "Su reporte se encuentra en estado: \"aprobado, rechazado, pendiente\", por favor comuniquese con el respectivo aprobador para dar gestión"; break;
                 case "2":
                     body = "Ha llegado un reporte, por favor tome acciones \"aprobar, rechazar\""; break;
                 case "3":
                     body = "Su reporte ha sido rechazado, por favor comuníquese con su aprobador para tener más información"; break;
                 case "4":
                     body = "El reporte ha sido rechazado correctamente, por favor comuníquese con la persona a la cual se le rechazo el registro"; break;
+                case "5":
+                    body = "Su reporte ha sido aprobado, por favor comuniquese con su aprobador para tener más información"; break;
                 default:
                     break;
             }
@@ -70,6 +72,8 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     body = "ALERTA \"PORTAL TLS \" Su registro fue \"rechazado\""; break;
                 case "4":
                     body = "ALERTA \"PORTAL TLS\" El registro fue rechazado correctamente"; break;
+                case "5":
+                    body = "ALERTA \"PORTAL TLS \" Su registro fue \"aprobado\""; break;
                 default:
                     break;
             }
