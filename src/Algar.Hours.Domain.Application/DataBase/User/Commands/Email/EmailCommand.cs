@@ -52,6 +52,10 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     body = "El reporte ha sido rechazado correctamente, por favor comuníquese con la persona a la cual se le rechazo el registro"; break;
                 case "5":
                     body = "Su reporte ha sido aprobado, por favor comuniquese con su aprobador para tener más información"; break;
+                case "6":
+                    body = "Su reporte ha sido aprobado, por favor comuniquese con su aprobador para tener más información"; break;
+                case "7":
+                    body = "Sus limites legales han sido modificados"; break;
                 default:
                     break;
             }
@@ -61,23 +65,27 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
 
         public  string GetSubject(EmailModel model)
         {
-            string body = "";
+            string subject = "";
             switch (model.Plantilla)
             {
                 case "1":
-                    body = "ALERTA \"PORTAL TLS\" APROBACION DE HORAS"; break;
+                    subject = "ALERTA \"PORTAL TLS\" APROBACION DE HORAS"; break;
                 case "2":
-                    body = "ALERTA \"PORTAL TLS \" Su registro fue \"aprobado, rechazado\""; break;
+                    subject = "ALERTA \"PORTAL TLS \" Su registro fue \"aprobado, rechazado\""; break;
                 case "3":
-                    body = "ALERTA \"PORTAL TLS \" Su registro fue \"rechazado\""; break;
+                    subject = "ALERTA \"PORTAL TLS \" Su registro fue \"rechazado\""; break;
                 case "4":
-                    body = "ALERTA \"PORTAL TLS\" El registro fue rechazado correctamente"; break;
+                    subject = "ALERTA \"PORTAL TLS\" El registro fue rechazado correctamente"; break;
                 case "5":
-                    body = "ALERTA \"PORTAL TLS \" Su registro fue \"aprobado\""; break;
+                    subject = "ALERTA \"PORTAL TLS \" Su registro fue \"aprobado\""; break;
+                case "6":
+                    subject = "ALERTA \"PORTAL TLS \" Su horario ha sido modificado"; break;
+                case "7":
+                    subject = "ALERTA \"PORTAL TLS \" Sus limites legales han sido modificados"; break;
                 default:
                     break;
             }
-            return body;
+            return subject;
 
         }
 

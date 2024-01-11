@@ -1,4 +1,6 @@
-﻿using Algar.Hours.Domain.Entities.Parameters;
+﻿using Algar.Hours.Application.DataBase.User.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.Email;
+using Algar.Hours.Domain.Entities.Parameters;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,11 +15,17 @@ namespace Algar.Hours.Application.DataBase.Parameters.Commands.UpdateParameters
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private IEmailCommand _emailCommand;
+        private IGetListUsuarioCommand _usuarioCommand;
 
-        public UpdtaeParametersCommand(IDataBaseService dataBaseService, IMapper mapper)
+
+
+        public UpdtaeParametersCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _emailCommand = emailCommand;
+            _usuarioCommand = usuarioCommand;
         }
 
         public async Task<bool> Execute(UpdateParametersModel model)
@@ -35,6 +43,24 @@ namespace Algar.Hours.Application.DataBase.Parameters.Commands.UpdateParameters
 
                 _dataBaseService.ParametersEntity.Update(entity);
                 await _dataBaseService.SaveAsync();
+
+
+
+                //---------------------------------------------
+                try
+                {
+                    _emailCommand.SendEmail(new EmailModel { To = (await _usuarioCommand.GetByUsuarioId(model.EmpleadoUserEntityId)).Email, Plantilla = "6" });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
+
+
+
+
+
                 return true;
             }
             return false;
