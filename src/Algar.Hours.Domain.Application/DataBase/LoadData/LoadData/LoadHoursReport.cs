@@ -190,10 +190,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                         _dataBaseService.ParametersArpInitialEntity.Add(parametersInitialEntity);
-                        await _dataBaseService.SaveAsync();
+                        
 
                     }
                 }
+                await _dataBaseService.SaveAsync();
                 return true;
             }
             catch (Exception ex)
