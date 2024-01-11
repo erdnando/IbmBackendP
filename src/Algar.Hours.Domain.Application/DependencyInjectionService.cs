@@ -50,6 +50,8 @@ using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
+using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Create;
 
 namespace Algar.Hours.Application
 {
@@ -107,6 +109,8 @@ namespace Algar.Hours.Application
             services.AddTransient<IUpdateUsersExceptionCommand, UpdateUsersExceptionCommand>();
             services.AddTransient<ICreateUsersExceptionCommand, CreateUsersExceptionCommand>();
             services.AddTransient<ILoadWorkingHoursCommand, LoadWorkingHoursCommand>();
+            services.AddTransient<ILoadHorusReportManagerCommand, LoadHoursReportManagerCommand>();
+            services.AddTransient<ICreateHorusReportManagerCommand, CreateHorusReportManagerCommand>();
             services.AddTransient<IReporte1Command, Reporte1Command>();
             services.AddTransient<IEmailCommand, EmailCommand>();
 

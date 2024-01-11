@@ -7,11 +7,13 @@ using Algar.Hours.Domain.Entities.ParametrosInicial;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 {
@@ -684,9 +686,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
             try
             {
-
                 foreach (var entity in model)
                 {
+                    var convert2 = Newtonsoft.Json.JsonConvert.DeserializeObject<dynamic>(entity.ToJsonString());
                     var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<STELoadEntity>(entity.ToJsonString());
                     convert.IdSTELoad = Guid.NewGuid();
                     if (string.IsNullOrEmpty(convert.AccountCMRNumber)) { convert.AccountCMRNumber = "1234"; }

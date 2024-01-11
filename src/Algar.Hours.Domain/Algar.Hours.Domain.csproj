@@ -10,6 +10,7 @@
     <PackageReference Include="ITfoxtec.Identity.Saml2" Version="4.10.4" />
     <PackageReference Include="ITfoxtec.Identity.Saml2.MvcCore" Version="4.10.4" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="7.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NodaTime" Version="3.1.9" />
     <PackageReference Include="Sustainsys.Saml2.AspNetCore2" Version="2.9.2" />
   </ItemGroup>

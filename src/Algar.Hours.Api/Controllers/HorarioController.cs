@@ -1,5 +1,6 @@
 ﻿using Algar.Hours.Application.DataBase.Festivos.Create;
 using Algar.Hours.Application.DataBase.Festivos.Update;
+using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Consult;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load;
@@ -50,6 +51,14 @@ namespace Algar.Hours.Api.Controllers
                 [FromBody] JsonArray model, [FromServices] ILoadWorkingHoursCommand loadWorkingHoursCommand)
         {
             var data = await loadWorkingHoursCommand.LoadExcel(model);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+
+        [HttpPost("LoadExcelMan")]
+        public async Task<IActionResult> LoadExcelMan(
+                [FromBody] JsonArray model, [FromServices] ILoadHorusReportManagerCommand loadHorusReportManagerCommand)
+        {
+            var data = await loadHorusReportManagerCommand.LoadExcel(model);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
     }

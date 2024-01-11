@@ -45,5 +45,27 @@ namespace Algar.Hours.Api.Controllers
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
+
+        [HttpPost("UploadARP")]
+        public async Task<IActionResult> UploadARP([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var dataFinal = await loadHoursReport.LoadARP(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+        [HttpPost("UploadTSE")]
+        public async Task<IActionResult> UploadTSE([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var dataFinal = await loadHoursReport.LoadTSE(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+        [HttpPost("UploadSTE")]
+        public async Task<IActionResult> UploadSTE([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var dataFinal = await loadHoursReport.LoadSTE(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
     }
 }

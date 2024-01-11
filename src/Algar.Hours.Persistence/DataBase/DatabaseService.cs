@@ -8,6 +8,7 @@ using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Domain.Entities.Festivos;
 using Algar.Hours.Domain.Entities.Horario;
 using Algar.Hours.Domain.Entities.HorusReport;
+using Algar.Hours.Domain.Entities.HorusReportManagerEntity;
 using Algar.Hours.Domain.Entities.Load;
 using Algar.Hours.Domain.Entities.Load.Philadedata;
 using Algar.Hours.Domain.Entities.Menu;
@@ -59,6 +60,7 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<ParametersSteInitialEntity> ParametersSteInitialEntity { get; set; }
         public DbSet<UserZonaHoraria> UserZonaHoraria { get; set; }
         public DbSet<Philadedata> Philadedata { get; set; }
+        public DbSet<HorusReportManagerEntity> HorusReportManagerEntity { get; set; }
 
         public async Task<bool> SaveAsync()
         {
@@ -96,6 +98,7 @@ namespace Algar.Hours.Persistence.DataBase
             new QueuesAcceptanceEntityTSEConfiguration(modelBuilder.Entity<QueuesAcceptanceEntityTSE>());
             new QueuesAcceptanceEntitySTEConfiguration(modelBuilder.Entity<QueuesAcceptanceEntitySTE>());
             new UserZonaHorariaConfiguration(modelBuilder.Entity<UserZonaHoraria>());
+            new HorusReportManagerEntityConfiguration(modelBuilder.Entity<HorusReportManagerEntity>());
 
 
         }

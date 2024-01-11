@@ -5,6 +5,7 @@ using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Domain.Entities.Festivos;
 using Algar.Hours.Domain.Entities.Horario;
 using Algar.Hours.Domain.Entities.HorusReport;
+using Algar.Hours.Domain.Entities.HorusReportManagerEntity;
 using Algar.Hours.Domain.Entities.Load;
 using Algar.Hours.Domain.Entities.Load.Philadedata;
 using Algar.Hours.Domain.Entities.Menu;
@@ -26,6 +27,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<ClientEntity> ClientEntity { get; set; }
         DbSet<CountryEntity> CountryEntity { get; set; }
         DbSet<HorusReportEntity> HorusReportEntity { get; set; }
+        DbSet<HorusReportManagerEntity> HorusReportManagerEntity { get; set; }
         DbSet<MenuEntity> MenuEntity { get; set; }
         DbSet<ParametersEntity> ParametersEntity { get; set; }
         DbSet<RoleEntity> RoleEntity { get; set; }

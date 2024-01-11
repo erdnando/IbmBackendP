@@ -9,6 +9,9 @@ using Algar.Hours.Application.DataBase.Dashboard.Commands.Consult;
 using Algar.Hours.Application.DataBase.Festivos.Consult;
 using Algar.Hours.Application.DataBase.Festivos.Create;
 using Algar.Hours.Application.DataBase.HorusReport.Commands;
+using Algar.Hours.Application.DataBase.HorusReportManager.Commands;
+using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Create;
+using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Consult;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Create;
 using Algar.Hours.Application.DataBase.LoadData.LoadData;
@@ -33,6 +36,7 @@ using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Domain.Entities.Festivos;
 using Algar.Hours.Domain.Entities.Horario;
 using Algar.Hours.Domain.Entities.HorusReport;
+using Algar.Hours.Domain.Entities.HorusReportManagerEntity;
 using Algar.Hours.Domain.Entities.Load;
 using Algar.Hours.Domain.Entities.Menu;
 using Algar.Hours.Domain.Entities.Parameters;
@@ -86,10 +90,12 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<UsersExceptions, UserExceptionModel>().ReverseMap();
             CreateMap<UsersExceptions, UsersExceptionsModelC>().ReverseMap();
             CreateMap<ParametersTseInitialEntity, ParametersTseInitialEntityC>().ReverseMap();
+            CreateMap<HorusReportManagerEntity, CreateHorusReportManagerModel>().ReverseMap();
 
             CreateMap<CreateHorusReportModel,HorusReportModel>()
                 .ForMember(x=> x.StartDate , 
                 opt => opt.MapFrom(src =>  DateTime.Parse(src.StartTime)));
+           
 
         }
 
