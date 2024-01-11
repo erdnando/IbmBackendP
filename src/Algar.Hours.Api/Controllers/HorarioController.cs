@@ -7,6 +7,7 @@ using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
 using Microsoft.AspNetCore.Mvc;
+using System.ServiceModel.Channels;
 using System.Text.Json.Nodes;
 
 namespace Algar.Hours.Api.Controllers
@@ -43,7 +44,19 @@ namespace Algar.Hours.Api.Controllers
          [FromQuery] Guid IdUser, string week, string ano,[FromServices] IConsultWorkingHoursCommand consultWorkingHours)
         {
             var data = await consultWorkingHours.Consult(IdUser, week, ano);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+            if(data.Count() > 0)
+            {
+                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, null));
+            }
+           
+                
+            
+           
+            
         }
 
         [HttpPost("LoadExcel")]
