@@ -20,17 +20,21 @@ using Algar.Hours.Domain.Entities.RolMenu;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using Algar.Hours.Persistence.Configuration;
+using EFCore.BulkExtensions;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Algar.Hours.Persistence.DataBase
 {
     public class DatabaseService : DbContext, IDataBaseService
     {
+        //DbContext _dbContext;
+        
         public DatabaseService(DbContextOptions options) : base(options)
         {
-
-
+            
+            //, DbContext dbContext
+            // _dbContext = dbContext;
 
         }
 
@@ -62,10 +66,25 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<Philadedata> Philadedata { get; set; }
         public DbSet<HorusReportManagerEntity> HorusReportManagerEntity { get; set; }
 
+        public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
+        {
+            this.BulkInsert(records);
+            //throw new NotImplementedException();
+        }
+
+
+        /* public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
+         {
+             _dbContext.BulkInsert(records);
+         }*/
+
         public async Task<bool> SaveAsync()
         {
             return await SaveChangesAsync() > 0;
         }
+      
+        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

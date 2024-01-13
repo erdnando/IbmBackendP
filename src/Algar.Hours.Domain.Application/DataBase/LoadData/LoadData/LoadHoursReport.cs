@@ -9,6 +9,7 @@ using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Internal;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json.Nodes;
@@ -26,7 +27,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public LoadHoursReport(IDataBaseService dataBaseService, IMapper mapper)
         {
             _dataBaseService = dataBaseService;
-            _mapper = mapper;
+            _mapper = mapper; 
         }
 
 
@@ -43,158 +44,230 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             try
             {
-                ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
-                {
-                    Estado = 1,
-                    FechaCreacion = DateTime.Now,
-                    IdArpLoad = Guid.NewGuid(),
-                    userEntityId = Guid.Parse("3696718D-D05A-4831-96CE-ED500C5BBC97")
-                };
+                
+                #region Se registra la carga en ARPLoadEntity
+                    ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
+                    {
+                        Estado = 1,
+                        FechaCreacion = DateTime.Now,
+                        IdArpLoad = Guid.NewGuid(),
+                        userEntityId = Guid.Parse("3696718D-D05A-4831-96CE-ED500C5BBC97")
+                    };
 
-                await _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
+                    await _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
+                    await _dataBaseService.SaveAsync();
+                #endregion
 
+                Int64 counter = 0;
+                List<ParametersArpInitialEntity> listParametersInitialEntity = new List<ParametersArpInitialEntity>();
+                
+
+
+                #region por cada registro obtenido en el excel, se evalua
                 foreach (var entity in model)
-                {
-                    var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<ARPLoadDetailEntity>(entity.ToJsonString());
-                    convert.IdDetail = Guid.Empty;
-                    convert.IdDetail = Guid.NewGuid();
-                    convert.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;
-
-                    if (convert.ESTADO.Trim() == "EXTRACTED") { convert.ESTADO = "Extracted"; }
-                    if (convert.ESTADO.Trim() == "FINAL") { convert.ESTADO = "Submitted"; }
-                    if (string.IsNullOrEmpty(convert.NUMERO_CLIENTE)) { convert.NUMERO_CLIENTE = "1234"; }
-
-
-                    if (!string.IsNullOrEmpty(convert.FECHA_REP))
                     {
-                        try
-                        {
-                            string fecha = convert.FECHA_REP;
-                            DateTimeOffset fechaRep;
+                    counter++;
+                    #region Validaciones de datos
+
+                            var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<ARPLoadDetailEntity>(entity.ToJsonString());
+                               // convert.IdDetail = Guid.Empty;
+                                convert.IdDetail = Guid.NewGuid();//ok
+                                convert.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;
+
+                                if (convert.ESTADO.Trim() == "EXTRACTED") { convert.ESTADO = "Extracted"; }
+                                if (convert.ESTADO.Trim() == "FINAL") { convert.ESTADO = "Submitted"; }
+                                if (string.IsNullOrEmpty(convert.NUMERO_CLIENTE)) { convert.NUMERO_CLIENTE = "1234"; }
 
 
-                            if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                            {
-                                convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                            }
-                            else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                            {
-                                convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                            }
-                            else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                            {
-                                convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                            }
-                            else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                            {
-                                convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                            }
-                            else
-                            {
-                                return false;
-                            }
-
-
-
-                        }
-                        catch (FormatException)
-                        {
-                            if (DateTime.TryParseExact(convert.FECHA_REP, "MM/dd/yy", null, DateTimeStyles.None, out DateTime fechaConvertida) ||
-                                DateTime.TryParseExact(convert.FECHA_REP, "M/d/yy", null, DateTimeStyles.None, out fechaConvertida))
-                            {
-                                convert.FECHA_REP = fechaConvertida.ToString("dd/MM/yyyy");
-                            }
-                            else
-                            {
-                                Console.WriteLine("No se pudo convertir la cadena de fecha");
-                            }
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(convert.FECHA_EXTRATED))
-                    {
-
-                        convert.FECHA_EXTRATED = convert.FECHA_REP;
-                    }
-
-
-                    var ArpLoading = _dataBaseService.ARPLoadDetailEntity.ToList();
-
-                    foreach (var arp in ArpLoading)
-                    {
-                        var semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
-                        CultureInfo cul = CultureInfo.CurrentCulture;
-                        List<HorarioReturn> fueraH = new List<HorarioReturn>();
-                        var esfestivo = new FestivosEntity();
-
-                        int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-                        workinghoursEntity horario = _dataBaseService.workinghoursEntity.Where(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking == semanahorario).FirstOrDefault();
-                        if (horario != null)
-                        {
-                            esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
-                            if (esfestivo == null)
-                            {
-                                fueraH = FueraHorario(arp.HORA_INICIO, arp.HORA_FIN, horario.HoraInicio, horario.HoraFin);
-                                if (fueraH != null && fueraH.Count > 0)
+                                if (!string.IsNullOrEmpty(convert.FECHA_REP))
                                 {
-                                    foreach (var nquence in fueraH)
+                                    try
                                     {
+                                        string fecha = convert.FECHA_REP;
+                                        DateTimeOffset fechaRep;
 
-                                        QueuesAcceptanceEntity queuesAcceptanceEntity = new QueuesAcceptanceEntity();
-                                        queuesAcceptanceEntity.IdQueuesAcceptanceEntity = Guid.NewGuid();
-                                        queuesAcceptanceEntity.ARPLoadDetailEntityId = arp.IdDetail;
-                                        queuesAcceptanceEntity.Id_empleado = arp.ID_EMPLEADO;
-                                        queuesAcceptanceEntity.AprobadoSistema = DateTime.Now;
-                                        queuesAcceptanceEntity.Hora_Inicio = nquence.Inicio;
-                                        queuesAcceptanceEntity.Hora_Fin = nquence.Fin;
-                                        queuesAcceptanceEntity.Horas_Total = nquence.Total;
-                                        queuesAcceptanceEntity.FechaRe = arp.FECHA_REP;
-                                        queuesAcceptanceEntity.Comentario = "";
-                                        queuesAcceptanceEntity.Estado = (byte)Enums.Enums.Aprobacion.Aprobado;
+
+                                        if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                                        {
+                                            convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                        }
+                                        else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                                        {
+                                            convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                        }
+                                        else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                                        {
+                                            convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                        }
+                                        else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                                        {
+                                            convert.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                        }
+                                        else
+                                        {
+                                            return false;
+                                        }
+
+
 
                                     }
+                                    catch (FormatException)
+                                    {
+                                        if (DateTime.TryParseExact(convert.FECHA_REP, "MM/dd/yy", null, DateTimeStyles.None, out DateTime fechaConvertida) ||
+                                            DateTime.TryParseExact(convert.FECHA_REP, "M/d/yy", null, DateTimeStyles.None, out fechaConvertida))
+                                        {
+                                            convert.FECHA_REP = fechaConvertida.ToString("dd/MM/yyyy");
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("No se pudo convertir la cadena de fecha");
+                                        }
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(convert.FECHA_EXTRATED))
+                            {
+
+                                convert.FECHA_EXTRATED = convert.FECHA_REP;
+                            }
+
+                    await _dataBaseService.ARPLoadDetailEntity.AddAsync(convert);
+                    //await _dataBaseService.SaveAsync();
+
+                    #endregion
+
+                    // var ArpLoading = _dataBaseService.ARPLoadDetailEntity.ToList();
+
+                    #region evaluacion contra ARPLoadDetailEntity
+
+                    var arp = convert;
+                        //foreach (var arp in ArpLoading)
+                        //{
+                                //var semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
+                                var semanahorario = new DateTimeOffset();// arp.FECHA_REP;
+                                DateTimeOffset fechaRepx;
+
+                                if (DateTimeOffset.TryParseExact(arp.FECHA_REP, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRepx))
+                                {
+                                    semanahorario = fechaRepx;
+                                }
+                                else if (DateTimeOffset.TryParseExact(arp.FECHA_REP, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRepx))
+                                {
+                                    semanahorario = fechaRepx;
+                                }
+                                else if (DateTimeOffset.TryParseExact(arp.FECHA_REP, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRepx))
+                                {
+                                    semanahorario = fechaRepx;
+                                }
+                                else if (DateTimeOffset.TryParseExact(arp.FECHA_REP, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRepx))
+                                {
+                                    semanahorario = fechaRepx;
+                                }
+                                else if (DateTimeOffset.TryParseExact(arp.FECHA_REP, "d/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRepx))
+                                {
+                                    semanahorario = fechaRepx;
+                                }
+
+
+
+
+                                CultureInfo cul = CultureInfo.CurrentCulture;
+                                List<HorarioReturn> fueraH = new List<HorarioReturn>();
+                                var esfestivo = new FestivosEntity();
+
+                                int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                                
+                                //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
+                                workinghoursEntity horario = _dataBaseService.workinghoursEntity.Where(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && 
+                                                                                                            x.week == Semana.ToString() && 
+                                                                                                            x.FechaWorking == semanahorario).FirstOrDefault();
+                                
+                                if (horario != null)
+                                {
+                                    esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
+                                    if (esfestivo == null)
+                                    {
+                                        fueraH = FueraHorario(arp.HORA_INICIO, arp.HORA_FIN, horario.HoraInicio, horario.HoraFin);
+                                        if (fueraH != null && fueraH.Count > 0)
+                                        {
+                                            foreach (var nquence in fueraH)
+                                            {
+
+                                                QueuesAcceptanceEntity queuesAcceptanceEntity = new QueuesAcceptanceEntity();
+                                                queuesAcceptanceEntity.IdQueuesAcceptanceEntity = Guid.NewGuid();
+                                                queuesAcceptanceEntity.ARPLoadDetailEntityId = arp.IdDetail;
+                                                queuesAcceptanceEntity.Id_empleado = arp.ID_EMPLEADO;
+                                                queuesAcceptanceEntity.AprobadoSistema = DateTime.Now;
+                                                queuesAcceptanceEntity.Hora_Inicio = nquence.Inicio;
+                                                queuesAcceptanceEntity.Hora_Fin = nquence.Fin;
+                                                queuesAcceptanceEntity.Horas_Total = nquence.Total;
+                                                queuesAcceptanceEntity.FechaRe = arp.FECHA_REP;
+                                                queuesAcceptanceEntity.Comentario = "";
+                                                queuesAcceptanceEntity.Estado = (byte)Enums.Enums.Aprobacion.Aprobado;
+
+                                            }
+
+                                        }
+                                    }
+                                }
+
+                                ParametersArpInitialEntity parametersInitialEntity = new ParametersArpInitialEntity();
+
+                                parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
+                                if (horario != null)
+                                {
+                                    parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                                    parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
+                                    parametersInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
 
                                 }
-                            }
-                        }
+                                else
+                                {
+                                    workinghoursEntity workinghoursEntity = new workinghoursEntity();
+                                    workinghoursEntity.HoraInicio = "0";
+                                    workinghoursEntity.HoraFin = "0";
 
-                        ParametersArpInitialEntity parametersInitialEntity = new ParametersArpInitialEntity();
+                                    parametersInitialEntity.HoraInicio = workinghoursEntity.HoraInicio;
+                                    parametersInitialEntity.HoraFin = workinghoursEntity.HoraFin;
 
-                        parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                        if (horario != null)
-                        {
-                            parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                            parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
-                            parametersInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
-
-                        }
-                        else
-                        {
-                            workinghoursEntity workinghoursEntity = new workinghoursEntity();
-                            workinghoursEntity.HoraInicio = "0";
-                            workinghoursEntity.HoraFin = "0";
-
-                            parametersInitialEntity.HoraInicio = workinghoursEntity.HoraInicio;
-                            parametersInitialEntity.HoraFin = workinghoursEntity.HoraFin;
-
-                        }
+                                }
 
 
-                        parametersInitialEntity.OutIme = fueraH.Count > 0 ? "Y" : "N";
-                        parametersInitialEntity.OverTime = fueraH.Count > 0 ? "Y" : "N";
-                        parametersInitialEntity.Semana = Semana;
-                        parametersInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
-                        parametersInitialEntity.ARPLoadDetailEntityId = arp.IdDetail;
-                        parametersInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
+                                parametersInitialEntity.OutIme = fueraH.Count > 0 ? "Y" : "N";
+                                parametersInitialEntity.OverTime = fueraH.Count > 0 ? "Y" : "N";
+                                parametersInitialEntity.Semana = Semana;
+                                parametersInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
+                                parametersInitialEntity.ARPLoadDetailEntityId = arp.IdDetail;
+                                parametersInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
 
 
+                                listParametersInitialEntity.Add(parametersInitialEntity);
+                                //_dataBaseService.ParametersArpInitialEntity.Add(parametersInitialEntity);
+                                // await _dataBaseService.SaveAsync();
 
-                        _dataBaseService.ParametersArpInitialEntity.Add(parametersInitialEntity);
-                        
 
-                    }
-                }
+                               // _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);//EF
+                               //  await _dataBaseService.SaveAsync();
+                    //_dataBaseService.BulkInsertParametersArpInitialEntity(listParametersInitialEntity);//EF BI
+
+                    // }
+
+                }//end for
+                #endregion
+
+                #endregion
+                _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);//EF
                 await _dataBaseService.SaveAsync();
+
+                //_dataBaseService.BulkInsert(listParametersInitialEntity.ToList());
+                //await _dataBaseService.SaveAsync();
+
+
+
+
+
+
+
                 return true;
             }
             catch (Exception ex)

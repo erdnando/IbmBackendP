@@ -51,5 +51,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<UserZonaHoraria> UserZonaHoraria { get; set; }
         DbSet<Philadedata> Philadedata { get; set; }
         Task<bool> SaveAsync();
+        void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records);
+     
     }
 }

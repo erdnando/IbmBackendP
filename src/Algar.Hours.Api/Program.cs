@@ -5,6 +5,9 @@ using Algar.Hours.Persistence;
 using Algar.Hours.Application;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Algar.Hours.Application.DataBase;
+using Algar.Hours.Persistence.DataBase;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +33,14 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod();
     })
     );
+
+//builder.Services.AddDbContext<DbContext>();
+//builder.Services.AddScoped<IDataBaseService, DatabaseService>();
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = long.MaxValue;
+});
 
 
 var app = builder.Build();
