@@ -32,6 +32,7 @@ namespace Algar.Hours.Domain.Entities.Load
         public string EndHours { get; set; }
         public string HoraInicio { get; set; }
         public string HoraFin { get; set; }
+        [JsonProperty("Duration in Hours")]
         public string DurationInHours { get; set; }
         [JsonProperty("WO: Subject")]
         public string Subject { get; set; }

@@ -39,7 +39,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
 
                 foreach (var entity in entityList)
                 {
-                    entity.FechaWorking = DateTime.Now;
+                    entity.FechaWorking = entity.FechaWorking;
                     var existingEntity = await  _databaseService.workinghoursEntity
                         .FirstOrDefaultAsync(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano && e.Day == entity.Day);
 
@@ -47,7 +47,6 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                     {
                         existingEntity.HoraInicio = entity.HoraInicio;
                         existingEntity.HoraFin = entity.HoraFin;
-
                         _databaseService.workinghoursEntity.Update(existingEntity);
                     }
                     else
