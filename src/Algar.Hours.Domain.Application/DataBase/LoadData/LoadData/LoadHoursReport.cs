@@ -160,6 +160,33 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     #region evaluacion contra ARPLoadDetailEntity
 
                     var arp = entity;
+                    //add validation fecha_rep
+                    string fecha = arp.FECHA_REP;
+                    DateTimeOffset fechaRep;
+
+
+                    if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "d/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();// fechaRep.ToString("d/MM/yyyy");
+                    }
+
+
                     semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
