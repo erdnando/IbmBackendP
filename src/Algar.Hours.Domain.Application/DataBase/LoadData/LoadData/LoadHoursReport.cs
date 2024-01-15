@@ -139,13 +139,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 CultureInfo cul = CultureInfo.CurrentCulture;
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
-                var esfestivo = new FestivosEntity();
-                esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
+                //var esfestivo = new FestivosEntity();
+                List<FestivosEntity> esfestivos = new();
+                //esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
+                esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
 
-                int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                //int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
                 //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
-                var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
+                //var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
+                //var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.UserEntity.EmployeeCode != null).ToList();
 
 
 
@@ -157,9 +160,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     #region evaluacion contra ARPLoadDetailEntity
 
                     var arp = entity;
-                    
+                    semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
+                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO);
+                    //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario);
+                    var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
 
                     if (horario != null)
@@ -612,22 +618,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.TSELoadEntity.AddRangeAsync(convertModSerialize);
                 await _dataBaseService.SaveAsync();
 
-                var semanahorario = new DateTimeOffset();// arp.FECHA_REP;
+
+                var semanahorario = new DateTimeOffset();
 
                 CultureInfo cul = CultureInfo.CurrentCulture;
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
-                var esfestivo = new FestivosEntity();
-                esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
+                List<FestivosEntity> esfestivos = new();
+                esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
 
-                int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-
-                //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
-                var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
                 List<ParametersTseInitialEntity> listParametersInitialEntity = new();
 
                 foreach (var tse in convertModSerialize)
                 {
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado);
+                    semanahorario = DateTimeOffset.Parse(tse.StartTime);
+                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+
+                    //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
+                    var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
                     if (horario != null)
                     {
@@ -796,23 +804,25 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 CultureInfo cul = CultureInfo.CurrentCulture;
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
-                var esfestivo = new FestivosEntity();
-                esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
+                List<FestivosEntity> esfestivos = new();
+                esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
 
-                int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-
-                //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
-                var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
                 List<ParametersSteInitialEntity> listParametersInitialEntity = new();
 
                 foreach (var ste in convertModSerialize)
                 {
+                    semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
+                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+
+                    //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.AccountCMRNumber && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
+                    var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
                     if (string.IsNullOrEmpty(ste.StartDateTime))
                     {
                         return false;
                     }
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.AccountCMRNumber); 
+
                     if (horario != null)
                     {
                         esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault();
