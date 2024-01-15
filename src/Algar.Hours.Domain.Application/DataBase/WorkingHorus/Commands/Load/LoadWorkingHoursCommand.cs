@@ -73,7 +73,6 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
 
                 convert.pais = idPais;
                 convert.codigo_Empleado = idUser;
-                convert.fecha = fechaCovert;
 
                 diasDeLaSemana.Add(convert.dia);
 
@@ -113,6 +112,8 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 modeloHorario.HoraFin = FormatTime(convert.HoraFin);
                 modeloHorario.Day = convert.dia;
                 modeloHorario.Ano = year;
+                modeloHorario.FechaWorking = dateTime;
+
             }
             catch (Exception ex)
             {
