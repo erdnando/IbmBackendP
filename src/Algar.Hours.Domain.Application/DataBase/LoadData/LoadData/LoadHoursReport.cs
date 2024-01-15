@@ -183,7 +183,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                     else if (DateTimeOffset.TryParseExact(fecha, "d/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                     {
-                        arp.FECHA_REP = fechaRep.ToString();// fechaRep.ToString("d/MM/yyyy");
+                        arp.FECHA_REP = fechaRep.ToString();
                     }
 
 
