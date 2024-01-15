@@ -52,6 +52,8 @@ namespace Algar.Hours.Application.DataBase
         DbSet<Philadedata> Philadedata { get; set; }
         Task<bool> SaveAsync();
         void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records);
-     
+        void BulkInsertARPLoadDetailEntity(List<ARPLoadDetailEntity> records);
+        
+
     }
 }

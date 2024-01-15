@@ -69,7 +69,10 @@ namespace Algar.Hours.Persistence.DataBase
         public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
         {
             this.BulkInsert(records);
-            //throw new NotImplementedException();
+        }
+        public void BulkInsertARPLoadDetailEntity(List<ARPLoadDetailEntity> records)
+        {
+            this.BulkInsert(records);
         }
 
 
@@ -121,5 +124,7 @@ namespace Algar.Hours.Persistence.DataBase
 
 
         }
+
+     
     }
 }
