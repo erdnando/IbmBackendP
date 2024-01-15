@@ -32,7 +32,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public LoadHoursReport(IDataBaseService dataBaseService, IMapper mapper)
         {
             _dataBaseService = dataBaseService;
-            _mapper = mapper; 
+            _mapper = mapper;
         }
 
 
@@ -49,29 +49,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             try
             {
-                
-                #region Se registra la carga en ARPLoadEntity
-                    ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
-                    {
-                        Estado = 1,
-                        FechaCreacion = DateTime.Now,
-                        IdArpLoad = Guid.NewGuid(),
-                        userEntityId = Guid.Parse("3696718D-D05A-4831-96CE-ED500C5BBC97")
-                    };
 
-                    await _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
-                    await _dataBaseService.SaveAsync();
+                #region Se registra la carga en ARPLoadEntity
+                ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
+                {
+                    Estado = 1,
+                    FechaCreacion = DateTime.Now,
+                    IdArpLoad = Guid.NewGuid(),
+                    userEntityId = Guid.Parse("3696718D-D05A-4831-96CE-ED500C5BBC97")
+                };
+
+                await _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
+                await _dataBaseService.SaveAsync();
                 #endregion
 
                 Int64 counter = 0;
                 List<ParametersArpInitialEntity> listParametersInitialEntity = new();
 
 
-                
+
                 List<ARPLoadDetailEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.ToJsonString());
-                convertModSerialize.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x=>x.ESTADO= "Extracted");
+                convertModSerialize.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
                 convertModSerialize.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
-                
+
                 foreach (var itemSerialice in convertModSerialize)
                 {
                     itemSerialice.IdDetail = Guid.Empty;
@@ -132,7 +132,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.ARPLoadDetailEntity.AddRangeAsync(convertModSerialize);
                 await _dataBaseService.SaveAsync();
 
-                
+
 
 
                 var semanahorario = new DateTimeOffset();// arp.FECHA_REP;
@@ -164,7 +164,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
                     //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
-                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario);
+                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
 
@@ -339,8 +339,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 var limitsCountry = ConsultarLimities();
 
-                var horus = _dataBaseService.HorusReportEntity.Where(x => x.UserEntityId == Guid.NewGuid()).Sum(i=> double.Parse(i.CountHours));    
-               
+                var horus = _dataBaseService.HorusReportEntity.Where(x => x.UserEntityId == Guid.NewGuid()).Sum(i => double.Parse(i.CountHours));
+
 
 
 
@@ -390,7 +390,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public UsersExceptions consultUserExeptions()
         {
-           return  _dataBaseService.UsersExceptions.Where(x => x.IdUsersExceptions == Guid.NewGuid()).FirstOrDefault();
+            return _dataBaseService.UsersExceptions.Where(x => x.IdUsersExceptions == Guid.NewGuid()).FirstOrDefault();
 
         }
         public void ActualizarRegister(string horainicio, string horafin)
@@ -411,11 +411,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<TSELoadEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.ToJsonString());
                 convertModSerialize.Where(e => e.Status.Trim() == "EXTRACTED").ToList().ForEach(x => x.Status = "Extracted");
                 convertModSerialize.Where(e => e.Status.Trim() == "SUBMITTED").ToList().ForEach(x => x.Status = "Submitted");
-                convertModSerialize.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true || e.AccountCMRNumber =="N/A").ToList().ForEach(x => x.AccountCMRNumber = "1234");
+                convertModSerialize.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true || e.AccountCMRNumber == "N/A").ToList().ForEach(x => x.AccountCMRNumber = "1234");
                 int counter = 0;
                 foreach (var item in convertModSerialize)
                 {
-                    
+
                     counter++;
                     try
                     {
@@ -445,7 +445,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                 else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                                 {
                                     convert.StartHours = dt.ToString("HH:mm");
-                                }else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                                 {
                                     convert.StartHours = dt.ToString("HH:mm");
                                 }
@@ -472,7 +473,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                 else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                                 {
                                     convert.EndHours = dt.ToString("HH:mm");
-                                }else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                                 {
                                     convert.EndHours = dt.ToString("HH:mm");
                                 }
@@ -607,7 +609,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRegistro);
 
-                        convert.FechaRegistro = fechaRegistro.ToString("dd/MM/yyyy");                    
+                        convert.FechaRegistro = fechaRegistro.ToString("dd/MM/yyyy");
                     }
                     catch (Exception ex)
                     {
@@ -695,7 +697,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersTseInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
 
                     listParametersInitialEntity.Add(parametersTseInitialEntity);
-                    
+
                 }
 
                 await _dataBaseService.ParametersTseInitialEntity.AddRangeAsync(listParametersInitialEntity);
@@ -1053,7 +1055,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //    }
                 //}
-                
+
             }
             catch (Exception ex)
             {
