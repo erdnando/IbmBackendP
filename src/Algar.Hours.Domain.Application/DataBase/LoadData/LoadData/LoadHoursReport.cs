@@ -9,6 +9,7 @@ using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using EFCore.BulkExtensions;
 using Google.Protobuf.WellKnownTypes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
 using Sustainsys.Saml2.Metadata;
@@ -148,7 +149,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
                 //var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
-                //var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.UserEntity.EmployeeCode != null).ToList();
+                var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").Where(x => x.UserEntity.EmployeeCode != null).ToList();
 
 
 
@@ -163,8 +164,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
-                    //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
-                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario);
+                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario);
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
 
