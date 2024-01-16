@@ -197,7 +197,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
 
-                    if (horario != null)
+                    /*if (horario != null)
                     {
 
                         if (esfestivo == null)
@@ -224,33 +224,71 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                             }
                         }
+                    }*/
+
+                    
+
+
+                    var previosAndPos = new List<double>();
+                    if (horario != null)
+                    {
+                         previosAndPos = getPreviasAndPosHorario(arp.HORA_INICIO, arp.HORA_FIN, horario.HoraInicio, horario.HoraFin);
                     }
+                    else
+                    {
+                        previosAndPos.Add(0.0);
+                        previosAndPos.Add(0.0);
+                    }
+                    
+                        
 
                     ParametersArpInitialEntity parametersInitialEntity = new ParametersArpInitialEntity();
 
-                    parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                    parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                    parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
-                    parametersInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
-                    
+                    if (horario != null)
+                    {
+                        parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
+                        parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                        parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
+                     
+                        //agregar validacion para saber si tiene horas fuera de horario
+                        parametersInitialEntity.OutIme = "N";
 
-                    //agregar validacion para saber si tiene horas fuera de horario
-                    parametersInitialEntity.OutIme = "N";
+                        // agregar validación
+                        parametersInitialEntity.OverTime = horario.HoraInicio == null ? "N" : valOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >= 0 ? "N" : "S";
 
-                    // agregar validación
-                    parametersInitialEntity.OverTime = horario.HoraInicio == null ?"N": valOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >=0 ?"N": "S";
+                        //agregar validación para HorasInicio
+                        parametersInitialEntity.HorasInicio = (int)Math.Ceiling(previosAndPos[0]);
 
-                    //agregar validación para HorasInicio
-                    parametersInitialEntity.HorasInicio = 0;
+                        //agregar validacion para horasFin
+                        parametersInitialEntity.HorasFin = (int)Math.Ceiling(previosAndPos[1]);
+                    }
+                    else
+                    {
+                        parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
+                        parametersInitialEntity.HoraInicio = "0";
+                        parametersInitialEntity.HoraFin = "0";
+                       
 
-                    //agregar validacion para horasFin
-                    parametersInitialEntity.HorasFin = 0;
+                        //agregar validacion para saber si tiene horas fuera de horario
+                        parametersInitialEntity.OutIme = "N";
+
+                        // agregar validación
+                        parametersInitialEntity.OverTime ="N";
+
+                        //agregar validación para HorasInicio
+                        parametersInitialEntity.HorasInicio = 0;
+
+                        //agregar validacion para horasFin
+                        parametersInitialEntity.HorasFin = 0;
+                    }
 
 
                     parametersInitialEntity.Semana = Semana;
                     parametersInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersInitialEntity.ARPLoadDetailEntityId = arp.IdDetail;
                     parametersInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
+
+
 
 
                     listParametersInitialEntity.Add(parametersInitialEntity);
@@ -335,6 +373,49 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 Teamhoursfin.Fin = nuevohorariofntime.ToString();
                 Teamhoursfin.Total = hours2;
                 hours.Add(Teamhoursfin);
+            }
+            return hours;
+        }
+
+        public List<double> getPreviasAndPosHorario(string horarexcelinicio, string horarexcelfinal, string iniciohorario, string finhorario)
+        {
+            var nuevohorarioiniciotime = DateTimeOffset.Parse(horarexcelinicio);
+            var nuevohorariofntime = DateTimeOffset.Parse(horarexcelfinal);
+            var fechainicio = DateTimeOffset.Parse(iniciohorario);
+            var fechafin = DateTimeOffset.Parse(finhorario);
+            double hours1 = 0;
+            double hours2 = 0;
+            var hours = new List<double>();
+
+
+            if ((nuevohorarioiniciotime < fechainicio))
+            {
+                HorarioReturn Teamhours = new HorarioReturn();
+                TimeSpan tsinicio = nuevohorarioiniciotime.Subtract(fechainicio);
+                hours1 = tsinicio.TotalHours;
+                Teamhours.Inicio = nuevohorarioiniciotime.ToString();
+                Teamhours.Fin = nuevohorariofntime.ToString();
+                Teamhours.Total = hours1;
+                
+                hours.Add(Math.Abs(hours1));
+
+            }
+            else { hours.Add(0.0); }
+
+            if (nuevohorariofntime > fechafin)
+            {
+                HorarioReturn Teamhoursfin = new HorarioReturn();
+                TimeSpan tsfin = nuevohorariofntime.Subtract(fechafin);
+                hours2 = tsfin.TotalHours;
+                Teamhoursfin.Inicio = nuevohorarioiniciotime.ToString();
+                Teamhoursfin.Fin = nuevohorariofntime.ToString();
+                Teamhoursfin.Total = hours2;
+                if (hours1 < 0) hours1 = hours1 * -1;
+                hours.Add(Math.Abs(hours2)); ;
+            }
+            else
+            {
+                hours.Add(0.0);
             }
             return hours;
         }
