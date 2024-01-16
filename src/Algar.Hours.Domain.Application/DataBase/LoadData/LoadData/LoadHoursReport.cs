@@ -52,35 +52,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
 
-                //var rowARPGral = _dataBaseService.ARPLoadDetailEntity.Where(c=>c.ID_EMPLEADO=="1").Select(x=>x.ID_EMPLEADO).ToList();
-                
-                //var rowSTEGral = _dataBaseService.STELoadEntity.Where(x=>x.SessionEmployeeSerialNumber.Contains(rowARPGral.ToString()) ).ToList();
-                //var rowTSEGral = _dataBaseService.TSELoadEntity.Where(x => x.NumeroEmpleado.Contains(rowARPGral.ToString())).ToList();
-                //var rowARPGral1 = _dataBaseService.ARPLoadDetailEntity.ToList();
-
-                var rowselect = from roArp in _dataBaseService.ARPLoadDetailEntity
-                                join roTSE in _dataBaseService.TSELoadEntity on roArp.ID_EMPLEADO equals roTSE.NumeroEmpleado
-                                select new
-                                {
-                                    CodeUser = roArp.ID_EMPLEADO,
-                                    Nombre = roArp.NOMBRE_CLIENTE,
-                                    Categoria = roArp.CATEGORIA
-                                };
-
-                
-
-                var rowselectSTE = from roArp in _dataBaseService.ARPLoadDetailEntity
-                                join roSTE in _dataBaseService.STELoadEntity on roArp.ID_EMPLEADO equals roSTE.SessionEmployeeSerialNumber
-                                select new
-                                {
-                                    CodeUser = roArp.ID_EMPLEADO,
-                                    Nombre = roArp.NOMBRE_CLIENTE,
-                                    Categoria = roArp.CATEGORIA
-                                };
-
-                var tottARPTSE = rowselect.ToList();
-                var tottARPSTE = rowselectSTE.ToList();
-
                 #region Se registra la carga en ARPLoadEntity
                 ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
                 {
@@ -1034,8 +1005,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                     Nombre = roArp.NOMBRE_CLIENTE,
                                     Categoria = roArp.CATEGORIA
                                 };
-                
 
+                //var rowselect = from roArp in _dataBaseService.ARPLoadDetailEntity
+                //                join roTSE in _dataBaseService.TSELoadEntity on roArp.ID_EMPLEADO equals roTSE.NumeroEmpleado
+                //                select new
+                //                {
+                //                    CodeUser = roArp.ID_EMPLEADO,
+                //                    Nombre = roArp.NOMBRE_CLIENTE,
+                //                    Categoria = roArp.CATEGORIA
+                //                };
+
+
+
+                //var rowselectSTE = from roArp in _dataBaseService.ARPLoadDetailEntity
+                //                join roSTE in _dataBaseService.STELoadEntity on roArp.ID_EMPLEADO equals roSTE.SessionEmployeeSerialNumber
+                //                select new
+                //                {
+                //                    CodeUser = roArp.ID_EMPLEADO,
+                //                    Nombre = roArp.NOMBRE_CLIENTE,
+                //                    Categoria = roArp.CATEGORIA
+                //                };
+
+                //var tottARPTSE = rowselect.ToList();
+                //var tottARPSTE = rowselectSTE.ToList();
 
                 return true;
 
