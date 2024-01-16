@@ -16,6 +16,7 @@ using Sustainsys.Saml2.Metadata;
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Policy;
 using System.Text.Json.Nodes;
@@ -50,6 +51,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             try
             {
+
+                //var rowARPGral = _dataBaseService.ARPLoadDetailEntity.Where(c=>c.ID_EMPLEADO=="1").Select(x=>x.ID_EMPLEADO).ToList();
+                
+                //var rowSTEGral = _dataBaseService.STELoadEntity.Where(x=>x.SessionEmployeeSerialNumber.Contains(rowARPGral.ToString()) ).ToList();
+                //var rowTSEGral = _dataBaseService.TSELoadEntity.Where(x => x.NumeroEmpleado.Contains(rowARPGral.ToString())).ToList();
+                //var rowARPGral1 = _dataBaseService.ARPLoadDetailEntity.ToList();
+
+                var rowselect = from roArp in _dataBaseService.ARPLoadDetailEntity
+                                join roTSE in _dataBaseService.TSELoadEntity on roArp.ID_EMPLEADO equals roTSE.NumeroEmpleado
+                                select new
+                                {
+                                    CodeUser = roArp.ID_EMPLEADO,
+                                    Nombre = roArp.NOMBRE_CLIENTE,
+                                    Categoria = roArp.CATEGORIA
+                                };
+
+                
+
+                var rowselectSTE = from roArp in _dataBaseService.ARPLoadDetailEntity
+                                join roSTE in _dataBaseService.STELoadEntity on roArp.ID_EMPLEADO equals roSTE.SessionEmployeeSerialNumber
+                                select new
+                                {
+                                    CodeUser = roArp.ID_EMPLEADO,
+                                    Nombre = roArp.NOMBRE_CLIENTE,
+                                    Categoria = roArp.CATEGORIA
+                                };
+
+                var tottARPTSE = rowselect.ToList();
+                var tottARPSTE = rowselectSTE.ToList();
 
                 #region Se registra la carga en ARPLoadEntity
                 ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
@@ -134,7 +164,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
 
 
-
+                List<string> valOvertime = new() { "Vacations", "Absence", "Holiday", "Stand By" };
 
                 var semanahorario = new DateTimeOffset();// arp.FECHA_REP;
 
@@ -228,29 +258,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     ParametersArpInitialEntity parametersInitialEntity = new ParametersArpInitialEntity();
 
                     parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                    if (horario != null)
-                    {
-                        parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                        parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
-                        parametersInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
+                    parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                    parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
+                    parametersInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
+                    
 
-                    }
-                    else
-                    {
-                        //workinghoursEntity workinghoursEntity = new workinghoursEntity();
-                        //workinghoursEntity.HoraInicio = "0";
-                        //workinghoursEntity.HoraFin = "0";
+                    //agregar validacion para saber si tiene horas fuera de horario
+                    parametersInitialEntity.OutIme = "N";
 
-                        //parametersInitialEntity.HoraInicio = workinghoursEntity.HoraInicio;
-                        //parametersInitialEntity.HoraFin = workinghoursEntity.HoraFin;
-                        parametersInitialEntity.HoraInicio = "0";
-                        parametersInitialEntity.HoraFin = "0";
+                    // agregar validación
+                    parametersInitialEntity.OverTime = horario.HoraInicio == null ?"N": valOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >=0 ?"N": "S";
 
-                    }
+                    //agregar validación para HorasInicio
+                    parametersInitialEntity.HorasInicio = 0;
+
+                    //agregar validacion para horasFin
+                    parametersInitialEntity.HorasFin = 0;
 
 
-                    parametersInitialEntity.OutIme = fueraH.Count > 0 ? "Y" : "N";
-                    parametersInitialEntity.OverTime = fueraH.Count > 0 ? "Y" : "N";
                     parametersInitialEntity.Semana = Semana;
                     parametersInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersInitialEntity.ARPLoadDetailEntityId = arp.IdDetail;
@@ -265,6 +290,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 #endregion
                 _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);//EF
                 await _dataBaseService.SaveAsync();
+                
 
                 //_dataBaseService.BulkInsert(listParametersInitialEntity.ToList());
                 //await _dataBaseService.SaveAsync();
@@ -474,7 +500,51 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                 {
                                     convert.StartHours = dt.ToString("HH:mm");
                                 }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
                                 else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.StartHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                                 {
                                     convert.StartHours = dt.ToString("HH:mm");
                                 }
@@ -502,7 +572,39 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                 {
                                     convert.EndHours = dt.ToString("HH:mm");
                                 }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
                                 else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                                {
+                                    convert.EndHours = dt.ToString("HH:mm");
+                                }
+                                else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                                 {
                                     convert.EndHours = dt.ToString("HH:mm");
                                 }
@@ -655,6 +757,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
                 List<FestivosEntity> esfestivos = new();
                 esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
+                var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").Where(x => x.UserEntity.EmployeeCode != null).ToList();
 
                 List<ParametersTseInitialEntity> listParametersInitialEntity = new();
 
@@ -663,8 +766,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     semanahorario = DateTimeOffset.Parse(tse.StartTime);
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
-                    //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
-                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
+                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
                     if (horario != null)
@@ -836,6 +939,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
                 List<FestivosEntity> esfestivos = new();
                 esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
+                var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").Where(x => x.UserEntity.EmployeeCode != null).ToList();
 
                 List<ParametersSteInitialEntity> listParametersInitialEntity = new();
 
@@ -844,8 +948,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
-                    //var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
-                    var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.AccountCMRNumber && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
+                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.AccountCMRNumber && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.AccountCMRNumber && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
                     if (string.IsNullOrEmpty(ste.StartDateTime))
@@ -915,6 +1019,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 await _dataBaseService.ParametersSteInitialEntity.AddRangeAsync(listParametersInitialEntity);
                 await _dataBaseService.SaveAsync();
+
+                //proceso de validacion OverLAPI
+                var rowARPGral = _dataBaseService.ARPLoadDetailEntity.ToList();
+                var rowSTEGral = _dataBaseService.STELoadEntity.ToList();
+                var rowTSEGral = _dataBaseService.TSELoadEntity.ToList();
+
+                var rowselect = from roArp in rowARPGral
+                                join roSTE in rowSTEGral on roArp.ID_EMPLEADO equals roSTE.AccountCMRNumber
+                                join roTSE in rowTSEGral on roSTE.AccountCMRNumber equals roTSE.AccountCMRNumber
+                                select new
+                                {
+                                    CodeUser = roArp.ID_EMPLEADO,
+                                    Nombre = roArp.NOMBRE_CLIENTE,
+                                    Categoria = roArp.CATEGORIA
+                                };
+                
+
+
                 return true;
 
                 //foreach (var entity in model)
