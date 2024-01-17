@@ -6,6 +6,7 @@ using Algar.Hours.Application.DataBase.UserException.Commands.Create;
 using Algar.Hours.Application.DataBase.UserException.Commands.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -17,6 +18,7 @@ namespace Algar.Hours.Api.Controllers
     {
 
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
            [FromBody] UsersExceptionsModelC model, [FromServices] ICreateUsersExceptionCommand createUsersException)
         {
@@ -25,6 +27,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("List")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> List(
           [FromServices] IConsultUserExceptionCommand consultUserExceptionCommand)
         {
@@ -32,6 +35,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpPost("Update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update([FromBody] UsersExceptionsModelC model, [FromServices] IUpdateUsersExceptionCommand updateUsersException)
         {
             var data = await updateUsersException.Update(model);

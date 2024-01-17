@@ -4,6 +4,7 @@ using Algar.Hours.Application.DataBase.Menu.Commands.GetList;
 using Algar.Hours.Application.DataBase.Menu.Commands.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -15,6 +16,7 @@ namespace Algar.Hours.Api.Controllers
     public class MenuController : ControllerBase
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
           [FromBody] MenuModel model, [FromServices] ICreateMenuCommand createMenuCommand)
         {
@@ -23,6 +25,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("Consult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
        [FromQuery] Guid id, [FromServices] IConsultMenuCommand consultMenuCommand)
         {
@@ -30,6 +33,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpPost("Update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
           [FromBody] MenuModel model, [FromServices] IUpdateMenuCommand updateClientCommand)
         {
@@ -39,6 +43,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("ListConsult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetConsult(
        [FromServices] IGetListMenuCommand GetListMenuCommand)
         {

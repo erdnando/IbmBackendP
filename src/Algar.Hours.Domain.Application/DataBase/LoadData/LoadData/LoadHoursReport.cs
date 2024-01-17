@@ -55,6 +55,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                  _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadDetailEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadEntity.ExecuteDelete();
+                await _dataBaseService.SaveAsync();
 
             }
             catch(Exception ex)
@@ -528,6 +529,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             try
             {
+                //deleting loads previous processing..
+                _dataBaseService.TSELoadEntity.ExecuteDelete();
+                _dataBaseService.ParametersTseInitialEntity.ExecuteDelete();
+                await _dataBaseService.SaveAsync();
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            try
+            {
                 List<TSELoadEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.ToJsonString());
                 convertModSerialize.Where(e => e.Status.Trim() == "EXTRACTED").ToList().ForEach(x => x.Status = "Extracted");
                 convertModSerialize.Where(e => e.Status.Trim() == "SUBMITTED").ToList().ForEach(x => x.Status = "Submitted");
@@ -916,6 +929,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             if (model == null || model.Count == 0)
             {
                 return false;
+            }
+
+            try
+            {
+                //deleting loads previous processing..
+                _dataBaseService.STELoadEntity.ExecuteDelete();
+                _dataBaseService.ParametersSteInitialEntity.ExecuteDelete();
+                await _dataBaseService.SaveAsync();
+
+            }
+            catch (Exception ex)
+            {
+
             }
 
             try

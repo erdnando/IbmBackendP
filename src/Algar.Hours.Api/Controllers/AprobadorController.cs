@@ -3,6 +3,7 @@ using Algar.Hours.Application.DataBase.Aprobador.Commands.Create;
 using Algar.Hours.Application.DataBase.Aprobador.Commands.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -13,6 +14,7 @@ namespace Algar.Hours.Api.Controllers
     public class AprobadorController : Controller
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
            [FromBody] AprobadorModel model, [FromServices] ICreateAprobadorCommand createAprobador)
         {
@@ -21,6 +23,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpPost("update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
            [FromBody] AprobadorModel model, [FromServices] IUpdateAprobadorCommand updateAprobador)
         {
@@ -29,6 +32,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("ListConsult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ListAll([FromServices] IConsultAprobadorCommand consultAprobadorCommand)
         {
             var data = await consultAprobadorCommand.ListAll();
@@ -36,6 +40,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("ConsultById")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ConsultById([FromQuery] Guid Id, [FromServices] IConsultAprobadorCommand consultAprobador)
         {
             var data = await consultAprobador.ConsultById(Id);

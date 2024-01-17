@@ -11,6 +11,7 @@ using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Application.DataBase.User.Commands.ListHoursUser;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -30,7 +31,8 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("create")]
-		public async Task<IActionResult> Create(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Create(
 		[FromBody] CreateHorusReportModel model, [FromServices] ICreateHorusReportCommand createHorusReportCommand)
 		{
 			var data = await createHorusReportCommand.Execute(model);
@@ -60,7 +62,8 @@ namespace Algar.Hours.Api.Controllers
 
 		}
 		[HttpGet("Consult")]
-		public async Task<IActionResult> Consult(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Consult(
 		 [FromQuery] Guid id, [FromServices] IConsultHorusReportCommand consultHorusReportCommand)
 		{
 			var data = await consultHorusReportCommand.Consult(id);
@@ -68,14 +71,16 @@ namespace Algar.Hours.Api.Controllers
 		}
 
 		[HttpGet("List")]
-		public async Task<IActionResult> List(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> List(
 		 [FromServices] IConsultHorusReportCommand listHorusReportCommand)
 		{
 			var data = await listHorusReportCommand.List();
 			return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 		}
 		[HttpPost("Update")]
-		public async Task<IActionResult> Update(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Update(
 		  [FromBody] HorusReportModel model, [FromServices] IUpdateHorusReportCommand updateHorusReportCommand)
 		{
 
@@ -85,6 +90,7 @@ namespace Algar.Hours.Api.Controllers
 		}
 
         [HttpGet("ListHoursUser")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ListHoursUser([FromQuery] Guid User,
          [FromServices] IListHoursUserCommand listHorusReportCommand)
         {
@@ -93,6 +99,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("DetailAssigmentHoursUser")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> DetailAssigmentHoursUser([FromQuery] Guid IdReportHours,
          [FromServices] IConsultDetailAssigmentCommand listDetailAssigmentHoursUser)
         {

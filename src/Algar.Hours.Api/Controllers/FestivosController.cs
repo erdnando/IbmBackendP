@@ -4,6 +4,7 @@ using Algar.Hours.Application.DataBase.Festivos.Delete;
 using Algar.Hours.Application.DataBase.Festivos.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -14,6 +15,7 @@ namespace Algar.Hours.Api.Controllers
     public class FestivosController : Controller
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
            [FromBody] List<CreateFestivoModel> model, [FromServices] ICreateFestivoCommand createFestivoCommand)
         {
@@ -22,6 +24,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpPost("update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
            [FromBody] CreateFestivoModel model, [FromServices] IUpdateFestivoCommand updateFestivoCommand)
         {
@@ -31,6 +34,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("delete")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Delete(
           [FromBody] CreateFestivoModel model, [FromServices] IDeleteFestivoCommand deleteFestivoCommand)
         {
@@ -40,6 +44,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("ListAllFestivo")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ListAll(
         [FromQuery] Guid CountryId,[FromServices] IConsultFestivosCommand consultFestivosCommand)
         {
