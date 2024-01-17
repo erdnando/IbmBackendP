@@ -4,6 +4,7 @@ using Algar.Hours.Application.DataBase.Country.Commands.Create;
 using Algar.Hours.Application.DataBase.Country.Commands.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -32,7 +33,8 @@ namespace Algar.Hours.Api.Controllers
 		}
 
 		[HttpGet("List")]
-		public async Task<IActionResult> List(
+        //[Authorize(Roles = "standard")]
+        public async Task<IActionResult> List(
 		 [FromServices] IConsultCountryCommand listCountryCommand)
 		{
 			var data = await listCountryCommand.List();

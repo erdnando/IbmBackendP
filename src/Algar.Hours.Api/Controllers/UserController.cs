@@ -17,6 +17,11 @@ using Algar.Hours.Application.DataBase.Country.Commands.Consult;
 using Algar.Hours.Domain.Entities.User;
 using System.Net.Mail;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Algar.Hours.Domain.Entities.Rol;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Algar.Hours.Api.Controllers
@@ -30,11 +35,14 @@ namespace Algar.Hours.Api.Controllers
         private IGetListUsuarioCommand _getListUsuarioCommand;
         private ICreateUserCommand _createUserCommand;
         private IConsultCountryCommand _consultCountryCommand;
-        public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand)
+        private readonly IConfiguration _config;
+
+        public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand, IConfiguration config)
         {
             _getListUsuarioCommand = getListUsuarioCommand;
             _createUserCommand = createUserCommand;
             _consultCountryCommand = consultCountryCommand;
+            _config = config;
         }
 
         [HttpPost("create")]
@@ -55,11 +63,28 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(
          [FromBody] LoginUserModel model, [FromServices] ILoginUserCommand loginuserCommand)
         {
             var data = await loginuserCommand.Execute(model);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+            
+            var token = GenerateToken(model);
+            var responseLogin = new
+            {
+               Email= data.Email,
+                Password = data.Password,
+                RoleEntity =  data.RoleEntity,
+                RoleEntityId=data.RoleEntityId,
+                CountryEntityId=data.CountryEntityId,
+                CountryEntity=data.CountryEntity,
+                EmployeeCode=data.EmployeeCode,
+                IdUser=data.IdUser,
+                NameUser= data.NameUser,
+                surnameUser=data.surnameUser,
+                token= token
+            };
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, responseLogin));
 
         }
 
@@ -230,6 +255,34 @@ AB7XkC7atqVVYhLhRXClgxt45wme
         {
             var data = await getListUsuarioCommand.GetByEmail(EmailUser);
             return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
+        }
+
+        private string GenerateToken(LoginUserModel user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier,user.UserName),
+                new Claim(ClaimTypes.Role,"standard")
+            };
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+                _config["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(15),
+                signingCredentials: credentials);
+            try
+            {
+                var t = new JwtSecurityTokenHandler().WriteToken(token);
+
+                return t;
+            }
+            catch(Exception ex)
+            {
+                return "xxxx";
+            }
+           
+
         }
     }
 }
