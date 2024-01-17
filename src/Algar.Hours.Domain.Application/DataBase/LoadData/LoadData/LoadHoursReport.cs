@@ -51,6 +51,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             try
             {
+                //deleting loads previous processing..
                  _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadDetailEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadEntity.ExecuteDelete();
