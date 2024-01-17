@@ -51,6 +51,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             try
             {
+                 _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
+                _dataBaseService.ARPLoadDetailEntity.ExecuteDelete();
+                _dataBaseService.ARPLoadEntity.ExecuteDelete();
+
+            }
+            catch(Exception ex)
+            {
+
+            }
+
+
+            try
+            {
 
                 #region Se registra la carga en ARPLoadEntity
                 ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
