@@ -117,7 +117,7 @@ namespace Algar.Hours.Api.Controllers
 
         [HttpPost("Callback")]
         [Produces("application/json")]
-        [Authorize(Roles = "standard")]
+       // [Authorize(Roles = "standard")]
         public async Task<IActionResult> Callback()
         {
 
@@ -197,13 +197,14 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                     countryEntityId = dataCountry.IdCounty,
                     nameCountry= dataCountry.NameCountry,
                     employeeCode = samlResponse.GetCustomAttribute("uid"),
+                    code = "123456789",
                 };
 
 
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
                 
 
-            // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
+           //  return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
              return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
            // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
