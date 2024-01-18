@@ -4,6 +4,7 @@ using Algar.Hours.Application.DataBase.Parameters.Commands.CreateParameters;
 using Algar.Hours.Application.DataBase.Parameters.Commands.UpdateParameters;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -14,6 +15,7 @@ namespace Algar.Hours.Api.Controllers
     public class ParametersController : ControllerBase
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
         [FromBody] CreateParametersModel model, [FromServices] ICreateParametersCommand createParametersCommand)
         {
@@ -23,6 +25,7 @@ namespace Algar.Hours.Api.Controllers
         
         }
         [HttpGet("Consult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
        [FromQuery] Guid IdCountry, [FromServices] IConsultParametersCommand createClientCommand)
         {
@@ -31,6 +34,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpPost("Update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
           [FromBody] UpdateParametersModel model, [FromServices] IUpdtaeParametersCommand updateParametersCommand)
         {

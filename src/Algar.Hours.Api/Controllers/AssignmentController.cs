@@ -5,6 +5,7 @@ using Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAproveedN
 using Algar.Hours.Application.DataBase.RolMenu.Commands.CreateRolMenu;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -15,6 +16,7 @@ namespace Algar.Hours.Api.Controllers
     public class AssignmentController : ControllerBase
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
         [FromBody] CreateAssignmentReportModel model, [FromServices] ICreateAssignmentReportCommand createAssigmentReportCommand)
         {
@@ -23,6 +25,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("GetListUserAproveed")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetListUserAproveed(
          Guid IdUser, [FromServices] IListUserAproveedCommand createAssigmentReportCommand)
         {
@@ -31,6 +34,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpPost("UpdateAproveedNivel1")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> UpdateAproveedNivel2(
          [FromBody] ModelAproveed modelaprrove, [FromServices] IUpdateAproveedCommand UpdateAproveedReportCommand)
         {

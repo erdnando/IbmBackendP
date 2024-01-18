@@ -46,6 +46,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
            [FromBody] CreateUserModelc model, [FromServices] ICreateUserCommand createUserCommand)
         {
@@ -54,6 +55,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("Consult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
           [FromQuery] Guid id, [FromServices] IGetListUsuarioCommand createUserCommand)
         {
@@ -91,6 +93,7 @@ namespace Algar.Hours.Api.Controllers
 
 
         [HttpPost("SendEmail")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> SendEmail(
         [FromBody] EmailModel model, [FromServices] IEmailCommand emailCommand)
         {
@@ -114,6 +117,7 @@ namespace Algar.Hours.Api.Controllers
 
         [HttpPost("Callback")]
         [Produces("application/json")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Callback()
         {
 
@@ -219,6 +223,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
         }
 
         [HttpGet("Aproved")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Aproved(
        [FromQuery] int nivel, [FromServices] IConsultAprobadorCommand ConsultAprobadorCommand)
         {
@@ -227,30 +232,35 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
         }
         [HttpGet("ListConsult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetConsult([FromServices] IGetListUsuarioCommand getListUsuarioCommand)
         {
             var data = await getListUsuarioCommand.List();
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpPost("UpdateAll")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> UpdateAll([FromBody] CreateUserModelc model, [FromServices] IUpdateUsuarioCommand updateUsuarioCommand)
         {
             var data = await updateUsuarioCommand.Update(model);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpGet("GetByRolList")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ListByRolId([FromQuery] Guid Id, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
         {
             var data = await getListUsuarioCommand.ConsultUsersByRoleId(Id);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpGet("GetByEmployeCode")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetByEmployeCode([FromQuery] string EmployeeCode, [FromQuery] Guid PaisId, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
         {
             var data = await getListUsuarioCommand.GetUserIdByEmployeeCode(EmployeeCode, PaisId);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpGet("GetByEmail")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetByEmail([FromQuery] string EmailUser, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
         {
             var data = await getListUsuarioCommand.GetByEmail(EmailUser);
@@ -269,7 +279,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
                 _config["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(60),
                 signingCredentials: credentials);
             try
             {

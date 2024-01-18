@@ -12,6 +12,7 @@ using Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserAprovee
 using Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAproveedNivel1;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Algar.Hours.Application.DataBase.Dashboard.Commands.Consult;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Algar.Hours.Api.Controllers
 {
@@ -22,6 +23,7 @@ namespace Algar.Hours.Api.Controllers
     {
 
         [HttpGet("Reporte1/{semana}/{usuario}/{anio}")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Reporte1(int semana, string usuario,int anio, [FromServices] IReporte1Command reporte)
         {
             var data = await reporte.Reporte1(semana, usuario, anio);
@@ -29,6 +31,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("ReporteGraficas/{anio}/{usuario}")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ReporteGraficas(int anio, string usuario, [FromServices] IReporte1Command reporte)
         {
             var data = await reporte.ReporteGraficas(anio, usuario);

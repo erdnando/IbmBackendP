@@ -6,6 +6,7 @@ using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ServiceModel.Channels;
 using System.Text.Json.Nodes;
@@ -18,6 +19,7 @@ namespace Algar.Hours.Api.Controllers
     public class HorarioController : ControllerBase
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
                 [FromBody] List<CreateWorkingHoursModel> model, [FromServices] ICreateWorkingHoursCommand CreateWorkingHoursCommand)
         {
@@ -25,6 +27,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpPost("update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
            [FromBody] CreateFestivoModel model, [FromServices] IUpdateFestivoCommand updateFestivoCommand)
         {
@@ -32,6 +35,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpGet("Consul")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consul(
          [FromBody] CreateFestivoModel model, [FromServices] IUpdateFestivoCommand updateFestivoCommand)
         {
@@ -40,6 +44,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("ConsultIdUserW")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> ConsultByIdUserW(
          [FromQuery] Guid IdUser, string week, string ano,[FromServices] IConsultWorkingHoursCommand consultWorkingHours)
         {
@@ -60,6 +65,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("LoadExcel")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> LoadExcel(
                 [FromBody] JsonArray model, [FromServices] ILoadWorkingHoursCommand loadWorkingHoursCommand)
         {
@@ -68,6 +74,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("LoadExcelMan")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> LoadExcelMan(
                 [FromBody] JsonArray model, [FromServices] ILoadHorusReportManagerCommand loadHorusReportManagerCommand)
         {

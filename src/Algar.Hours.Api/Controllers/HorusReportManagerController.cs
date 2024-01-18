@@ -3,6 +3,7 @@ using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Create;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ namespace Algar.Hours.Api.Controllers
     {
 
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
         [FromBody] CreateHorusReportManagerModel model, [FromServices] ICreateHorusReportManagerCommand createHorusReportManagerCommand)
         {

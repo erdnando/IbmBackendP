@@ -6,6 +6,7 @@ using Algar.Hours.Application.DataBase.Rol.Commands.Update;
 using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -16,6 +17,7 @@ namespace Algar.Hours.Api.Controllers
     public class RolController : ControllerBase
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
            [FromBody] CreateRolModel model, [FromServices] ICreateRolCommand createRolCommand)
         {
@@ -24,6 +26,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("Consult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
         [FromBody] CreateRolModel model, [FromServices] ICreateRolCommand createClientCommand)
         {
@@ -33,6 +36,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpPost("Update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
           [FromBody] RolModel model, [FromServices] IUpdateRolCommand updateRolCommand)
         {
@@ -42,6 +46,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("ListConsult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetConsult([FromServices] IGetListRolCommand GetListRolCommand)
         {
             var data = await GetListRolCommand.List();

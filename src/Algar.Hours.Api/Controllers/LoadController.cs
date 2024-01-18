@@ -2,6 +2,7 @@
 using Algar.Hours.Application.DataBase.Menu.Commands;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
 
@@ -13,6 +14,7 @@ namespace Algar.Hours.Api.Controllers
     public class LoadController : ControllerBase
     {
         [HttpPost("createARP")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> CreateARP(
         [FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
         {
@@ -21,12 +23,14 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("createTSE")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> CreateTSE([FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
         {
             var data = await createLoadReportCommand.LoadTSE(model);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpPost("createSTE")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> CreateSTE([FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
         {
             var data = await createLoadReportCommand.LoadSTE(model);
@@ -34,6 +38,7 @@ namespace Algar.Hours.Api.Controllers
         }      
 
         [HttpPost("CreateFinal")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> CreateFinal([FromBody] LoadDTO requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
            
@@ -47,6 +52,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("UploadARP")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> UploadARP([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.LoadARP(requestData);
@@ -54,6 +60,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
         [HttpPost("UploadTSE")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> UploadTSE([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.LoadTSE(requestData);
@@ -61,6 +68,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
         [HttpPost("UploadSTE")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> UploadSTE([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.LoadSTE(requestData);

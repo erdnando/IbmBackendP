@@ -4,6 +4,7 @@ using Algar.Hours.Application.DataBase.Client.Commands.Create;
 using Algar.Hours.Application.DataBase.Client.Commands.Update;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
@@ -14,6 +15,7 @@ namespace Algar.Hours.Api.Controllers
     public class ClientController : ControllerBase
     {
         [HttpPost("create")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
         [FromBody] ClientModel model, [FromServices] ICreateClientCommand createClientCommand)
         {
@@ -22,6 +24,7 @@ namespace Algar.Hours.Api.Controllers
 
         }
         [HttpGet("Consult")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
          [FromQuery] Guid id, [FromServices] IConsultClientCommand consultClientCommand)
         {
@@ -32,7 +35,8 @@ namespace Algar.Hours.Api.Controllers
         }
 
 		[HttpGet("List")]
-		public async Task<IActionResult> List(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> List(
 		 [FromServices] IConsultClientCommand listClientCommand)
 		{
 			var data = await listClientCommand.List();
@@ -40,6 +44,7 @@ namespace Algar.Hours.Api.Controllers
 		}
 
         [HttpPost("Update")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> Update(
           [FromBody] ClientModel model, [FromServices] IUpdateClientCommand updateClientCommand)
         {

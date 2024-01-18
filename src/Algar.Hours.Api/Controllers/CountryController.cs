@@ -15,7 +15,8 @@ namespace Algar.Hours.Api.Controllers
 	public class CountryController : ControllerBase
 	{
 		[HttpPost("create")]
-		public async Task<IActionResult> Create(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Create(
 		[FromBody] CountryModel model, [FromServices] ICreateCountryCommand createCountryCommand)
 		{
 			var data = await createCountryCommand.Execute(model);
@@ -23,7 +24,8 @@ namespace Algar.Hours.Api.Controllers
 
 		}
 		[HttpGet("Consult")]
-		public async Task<IActionResult> Consult(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Consult(
 		 [FromQuery] Guid id, [FromServices] IConsultCountryCommand consultCountryCommand)
 		{
 
@@ -33,7 +35,7 @@ namespace Algar.Hours.Api.Controllers
 		}
 
 		[HttpGet("List")]
-        //[Authorize(Roles = "standard")]
+        [Authorize(Roles = "standard")]
         public async Task<IActionResult> List(
 		 [FromServices] IConsultCountryCommand listCountryCommand)
 		{
@@ -41,7 +43,8 @@ namespace Algar.Hours.Api.Controllers
 			return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 		}
 		[HttpPost("Update")]
-		public async Task<IActionResult> Update(
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Update(
 		  [FromBody] CountryModel model, [FromServices] IUpdateCountryCommand updateCountryCommand)
 		{
 
