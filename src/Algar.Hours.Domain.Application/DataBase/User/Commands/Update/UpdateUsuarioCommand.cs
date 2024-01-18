@@ -1,4 +1,7 @@
-﻿using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+﻿using Algar.Hours.Application.DataBase.Aprobador.Commands.Consult;
+using Algar.Hours.Application.DataBase.Aprobador.Commands.Create;
+using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+using Algar.Hours.Domain.Entities.AprobadorUsuario;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Models;
 using AutoMapper;
@@ -39,7 +42,37 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Update
             usuario.CountryEntityId = createUserModel.CountryEntityId;
 
             _dataBaseService.UserEntity.Update(usuario);
-            _dataBaseService.SaveAsync();
+            await _dataBaseService.SaveAsync();
+
+            //Validate if is necesary to delete this record, bacause it was appover before updating
+            var aprobadorUsuariox = await _dataBaseService.AprobadorUsuario.FirstOrDefaultAsync(r => r.UserEntityId == createUserModel.IdUser);
+            if (aprobadorUsuariox != null)
+            {
+                var entity = _mapper.Map<Domain.Entities.AprobadorUsuario.AprobadorUsuario>(aprobadorUsuariox);
+                _dataBaseService.AprobadorUsuario.Remove(entity);
+                await _dataBaseService.SaveAsync();
+            }
+
+
+
+
+            //validate if createUserModel.RoleEntityId; is an approver
+            var rolUsuario = await _dataBaseService.RoleEntity.FirstOrDefaultAsync(r => r.IdRole == createUserModel.RoleEntityId);
+            if(rolUsuario.NameRole == "Usuario Aprobador N1" || rolUsuario.NameRole == "Usuario Aprobador N2")
+            {
+                    //insert relation
+                    AprobadorUsuarioModel au =new AprobadorUsuarioModel();
+
+                    au.IdAprobadorUsuario= Guid.NewGuid();
+                    au.UserEntityId= createUserModel.IdUser;
+                    au.AprobadorId = rolUsuario.NameRole == "Usuario Aprobador N1" ? Guid.Parse("4666494f-60d3-42da-89fd-998b20fb40bf") : Guid.Parse("bdb101ed-5e37-4c74-86c8-112961948d7e");
+
+                    var entity = _mapper.Map<Domain.Entities.AprobadorUsuario.AprobadorUsuario>(au);
+
+                    _dataBaseService.AprobadorUsuario.Add(entity);
+                    await _dataBaseService.SaveAsync();
+            }
+
 
             return true;
         }

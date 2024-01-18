@@ -9,7 +9,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 {
     public interface IUpdateAproveedCommand
     {
-        ModelAproveed Execute(ModelAproveed modelAprobador);
+        Task<ModelAproveed> Execute(ModelAproveed modelAprobador);
         CreateAssignmentReportModel CrearNivel2(CreateAssignmentReportModel model);
     }
 }

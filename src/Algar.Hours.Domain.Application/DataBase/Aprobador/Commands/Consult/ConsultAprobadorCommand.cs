@@ -21,7 +21,7 @@ namespace Algar.Hours.Application.DataBase.Aprobador.Commands.Consult
            var entity =  _dataBaseService.AprobadorUsuario
                .Include(e=> e.UserEntity)
                .Include(e=> e.Aprobador)
-               .Where(x=> x.Aprobador.Nivel == nivel).ToList();
+               .Where(x=> x.Aprobador.Nivel == nivel   ).ToList();
 
             var moldeuser = _mapper.Map<List<AprobadorUsuarioModel>>(entity);
             return moldeuser;

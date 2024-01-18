@@ -55,6 +55,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                  _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadDetailEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadEntity.ExecuteDelete();
+                
 
             }
             catch(Exception ex)

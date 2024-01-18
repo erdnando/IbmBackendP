@@ -34,7 +34,7 @@ namespace Algar.Hours.Api.Controllers
         public async Task<IActionResult> UpdateAproveedNivel2(
          [FromBody] ModelAproveed modelaprrove, [FromServices] IUpdateAproveedCommand UpdateAproveedReportCommand)
         {
-            var data = UpdateAproveedReportCommand.Execute(modelaprrove);
+            var data = await UpdateAproveedReportCommand.Execute(modelaprrove);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }

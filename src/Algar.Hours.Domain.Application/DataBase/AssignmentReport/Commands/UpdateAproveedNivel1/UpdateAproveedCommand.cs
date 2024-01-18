@@ -27,7 +27,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
             _emailCommand = emailCommand;
             _usuarioCommand = usuarioCommand;
         }
-        public  ModelAproveed Execute(ModelAproveed modelAprobador)
+        public async Task<ModelAproveed> Execute(ModelAproveed modelAprobador)
         {
 
             var ReportUpdate = _dataBaseService.assignmentReports.
@@ -43,19 +43,25 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 ReportUpdate.DateApprovalCancellation = DateTime.Now;
                 var entityreport = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(ReportUpdate);
 
-                _dataBaseService.assignmentReports.Update(ReportUpdate);
-                _dataBaseService.SaveAsync();
+                 _dataBaseService.assignmentReports.Update(ReportUpdate);
+                await _dataBaseService.SaveAsync();
 
 
+
+
+                //nivel 2
                 CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
-
                 assignmentReport.UserEntityId = modelAprobador.UserId;
                 assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
                 assignmentReport.State = (byte)Enums.Enums.Aprobacion.Pendiente;
                 assignmentReport.Description = "";
                 assignmentReport.DateApprovalCancellation = DateTime.Now;
 
-                var response = CrearNivel2(assignmentReport);
+                //var response = CrearNivel2(assignmentReport);
+                assignmentReport.IdAssignmentReport = Guid.NewGuid();
+                var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
+                await _dataBaseService.assignmentReports.AddAsync(entity);
+               await _dataBaseService.SaveAsync();
 
             }
             else
@@ -107,7 +113,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
             model.IdAssignmentReport = Guid.NewGuid();
             var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(model);
 
-            _dataBaseService.assignmentReports.AddAsync(entity);
+            _dataBaseService.assignmentReports.Add(entity);
             _dataBaseService.SaveAsync();
 
 
