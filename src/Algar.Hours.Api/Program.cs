@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,14 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
     serverOptions.Limits.MaxRequestBodySize = long.MaxValue;
 });
 
+builder.WebHost.ConfigureKestrel(opc =>
+{
+    opc.Limits.MaxRequestBodySize = 512*1024*1024;
+});
+
+builder.Services.Configure<FormOptions>(opc => {
+    opc.MultipartBodyLengthLimit = 512*1024*1024;
+});
 
 var app = builder.Build();
 app.UseSwagger();
