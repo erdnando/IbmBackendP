@@ -67,6 +67,10 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 }
 
             }
+            else
+            {
+                canSendAgainHours = true;
+            }
 
 
 
