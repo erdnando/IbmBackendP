@@ -9,5 +9,7 @@ namespace Algar.Hours.Domain.Entities.Country
         public Guid IdCounty { get; set; }
         public string NameCountry { get; set; }
         public string CodigoPais { get; set; }
+        public int ZonaHoraria { get; set; }
+        public string Descripcion { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+using Algar.Hours.Application.DataBase.User.Commands.GetManager;
 using Algar.Hours.Domain.Entities.User;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,19 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
             var entity = _mapper.Map<CreateUserModelc>(data);
             return entity;
         }
+
+        public async Task<ManagerEmployeeModel> GetManagerByEmployeeCode(string _employeeCode)
+        {
+            var data =  _dataBaseService.UserManagerEntity.Where(u => u.EmployeeCode.Contains(_employeeCode)).FirstOrDefault();
+            ManagerEmployeeModel newRow = new() { 
+                ManagerName=data.ManagerName,
+                ManagerEmail=data.ManagerEmail
+            };
+
+            var entity = _mapper.Map<ManagerEmployeeModel>(newRow);
+            return entity;
+        }
+        
 
         public async Task<Guid> GetUserIdByEmployeeCode(string employeeCode, Guid countryId)
         {

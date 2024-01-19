@@ -1,5 +1,7 @@
-﻿using Algar.Hours.Application.DataBase.Menu.Commands;
+﻿using Algar.Hours.Application.DataBase.Aprobador.Commands.Create;
+using Algar.Hours.Application.DataBase.Menu.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+using Algar.Hours.Application.DataBase.User.Commands.GetManager;
 using Algar.Hours.Domain.Entities.User;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
     {
         Task<List<CreateUserModel>> List();
         Task<CreateUserModelc> Consult(Guid Id);
+        Task<ManagerEmployeeModel> GetManagerByEmployeeCode(string _employeeCode);
         Task<List<CreateUserModel>> ConsultUsersByRoleId(Guid roleId);
         Task<Guid> GetUserIdByEmployeeCode(string employeeCode, Guid countryId);
         Task<Guid> GetUserIdByID(string employeeId, Guid countryId);

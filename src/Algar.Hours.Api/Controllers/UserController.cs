@@ -64,6 +64,17 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }
+
+        [HttpGet("GetManagerByEmployeeCode")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> GetManagerByEmployeeCode(
+       [FromQuery] string employeeCode, [FromServices] IGetListUsuarioCommand createUserCommand)
+        {
+            var data = createUserCommand.GetManagerByEmployeeCode(employeeCode);
+            return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
+
+        }
+
         [HttpPost("Login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(
@@ -232,6 +243,8 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }
+
+        
         [HttpGet("ListConsult")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetConsult([FromServices] IGetListUsuarioCommand getListUsuarioCommand)
