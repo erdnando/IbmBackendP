@@ -22,9 +22,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
         public async Task<HorusReportModel> Execute(CreateHorusReportModel model)
         {
             var horusModel = _mapper.Map<HorusReportModel>(model);
+            //horusModel.IdHorusReport
             horusModel.IdHorusReport = Guid.NewGuid();
             horusModel.CreationDate = DateTime.Now;
             horusModel.DateApprovalSystem = DateTime.Now;
+            Boolean canSendAgainHours = false;
 
             var startTime = DateTime.Parse(model.StartTime);
             var endTime = DateTime.Parse(model.EndTime);
@@ -32,8 +34,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             //2023-12-14T00:00:00.0000000
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+           // string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd HH:mm");
 
-           ////// DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            ////// DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             //string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-ddTHH:mm:ss");
 
             var data = _dataBaseService.HorusReportEntity
@@ -44,15 +47,37 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                  TimeInRange(h.EndTime, startTime, endTime)))
                 .ToList();
 
-
+            // data.idHorusReport
             if (data.Count != 0)
+            {
+                var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                var assignmentRef = _dataBaseService.assignmentReports.
+                     Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                     .FirstOrDefault();
+
+                if (assignmentRef!.State == 3)
+                {
+                    //is pending
+                    canSendAgainHours = false;
+                }
+                else
+                {
+                    // it has been approved or rejected
+                    canSendAgainHours = true;
+                }
+
+            }
+
+
+
+            if (!canSendAgainHours)
             {
                 return null;
             }
 
             if (horusModel.ClientEntityId == Guid.Empty || string.IsNullOrEmpty(horusModel.ClientEntityId.ToString()))
             {
-                horusModel.ClientEntityId = Guid.Parse("DC606C5A-149E-4F9B-80B3-BA555C7689B9");
+                horusModel.ClientEntityId =Guid.Parse("DC606C5A-149E-4F9B-80B3-BA555C7689B9");
             }
 
             var entity = _mapper.Map<HorusReportEntity>(horusModel);
@@ -72,7 +97,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             entity.NumberReport = Maxen + 1;
             entity.StartDate = DateTime.Parse(nuevaFechaHoraFormato).Date;
-            await _dataBaseService.HorusReportEntity.AddAsync(entity);
+            _dataBaseService.HorusReportEntity.AddAsync(entity);
+            await _dataBaseService.SaveAsync();
 
             CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
             assignmentReport.IdAssignmentReport = Guid.NewGuid();

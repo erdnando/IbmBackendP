@@ -34,8 +34,15 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
             try
             {
                 var entityList = _mapper.Map<List<workinghoursEntity>>(model);
-               
-               
+
+
+                //delete this week
+                var week2Delete = _databaseService.workinghoursEntity.
+                       Where(e => e.UserEntityId == model[0].UserEntityId && e.week == model[0].week && e.Ano == model[0].Ano)
+                       .ToList();
+                _databaseService.workinghoursEntity.RemoveRange(week2Delete);
+                await _databaseService.SaveAsync();
+
 
                 foreach (var entity in entityList)
                 {
@@ -51,8 +58,10 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                     }
                     else
                     {
+                        //lo recrea
                         entity.IdworkinghoursEntity = Guid.NewGuid();
                         entity.FechaCreacion = DateTime.Now;
+
 
                         _databaseService.workinghoursEntity.Add(entity);
                     }
