@@ -3,6 +3,7 @@ using Algar.Hours.Domain.Entities.AprobadorUsuario;
 using Algar.Hours.Domain.Entities.Client;
 using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Domain.Entities.Festivos;
+using Algar.Hours.Domain.Entities.Gerentes;
 using Algar.Hours.Domain.Entities.Horario;
 using Algar.Hours.Domain.Entities.HorusReport;
 using Algar.Hours.Domain.Entities.HorusReportManagerEntity;
@@ -50,6 +51,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<ParametersSteInitialEntity> ParametersSteInitialEntity { get; set; }
         DbSet<UserZonaHoraria> UserZonaHoraria { get; set; }
         DbSet<Philadedata> Philadedata { get; set; }
+        DbSet<UserManagerEntity> UserManagerEntity { get; set; }
         Task<bool> SaveAsync();
         void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records);
         void BulkInsertARPLoadDetailEntity(List<ARPLoadDetailEntity> records);

@@ -26,7 +26,7 @@ namespace Algar.Hours.Application.DataBase.Aprobador.Commands.Consult
             var moldeuser = _mapper.Map<List<AprobadorUsuarioModel>>(entity);
             return moldeuser;
 
-        }
+        }       
 
         public async Task<List<AprobadorModel>> ListAll()
         {
