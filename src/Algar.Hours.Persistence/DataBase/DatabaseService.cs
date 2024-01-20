@@ -13,6 +13,7 @@ using Algar.Hours.Domain.Entities.HorusReportManagerEntity;
 using Algar.Hours.Domain.Entities.Load;
 using Algar.Hours.Domain.Entities.Load.Philadedata;
 using Algar.Hours.Domain.Entities.Menu;
+using Algar.Hours.Domain.Entities.PaisRelacionGMT;
 using Algar.Hours.Domain.Entities.Parameters;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
@@ -67,6 +68,7 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<Philadedata> Philadedata { get; set; }
         public DbSet<HorusReportManagerEntity> HorusReportManagerEntity { get; set; }
         public DbSet<UserManagerEntity> UserManagerEntity { get; set; }
+        public DbSet<PaisRelacionGMTEntity> PaisRelacionGMTEntity { get; set; }
 
         public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
         {
@@ -124,6 +126,7 @@ namespace Algar.Hours.Persistence.DataBase
             new UserZonaHorariaConfiguration(modelBuilder.Entity<UserZonaHoraria>());
             new HorusReportManagerEntityConfiguration(modelBuilder.Entity<HorusReportManagerEntity>());
             new UserManagerEntityConfiguration(modelBuilder.Entity<UserManagerEntity>());
+            new PaisRelacionGMTEntityConfiguration(modelBuilder.Entity<PaisRelacionGMTEntity>());
 
 
         }
