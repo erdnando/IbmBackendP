@@ -272,10 +272,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersInitialEntity.OverTime = horario.HoraInicio == null ? "N" : valOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >= 0 ? "N" : "S";
 
                         //agregar validación para HorasInicio
-                        parametersInitialEntity.HorasInicio = (int)Math.Ceiling(previosAndPos[0]);
+                        parametersInitialEntity.HorasInicio = previosAndPos[0];
 
                         //agregar validacion para horasFin
-                        parametersInitialEntity.HorasFin = (int)Math.Ceiling(previosAndPos[1]);
+                        parametersInitialEntity.HorasFin = previosAndPos[1];
                     }
                     else
                     {
@@ -877,6 +877,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
                     }
 
+
+                    var previosAndPos = new List<double>();
+                    if (horario != null)
+                    {
+                        previosAndPos = getPreviasAndPosHorario(tse.HoraInicio, tse.HoraFin, horario.HoraInicio, horario.HoraFin);
+                    }
+                    else
+                    {
+                        previosAndPos.Add(0.0);
+                        previosAndPos.Add(0.0);
+                    }
+
+
                     ParametersTseInitialEntity parametersTseInitialEntity = new ParametersTseInitialEntity();
 
                     parametersTseInitialEntity.IdParamTSEInitialId = Guid.NewGuid();
@@ -1076,6 +1089,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                             }
                         }
+                    }
+
+                    var previosAndPos = new List<double>();
+                    if (horario != null)
+                    {
+                        previosAndPos = getPreviasAndPosHorario(ste.StartHours, ste.EndHours, horario.HoraInicio, horario.HoraFin);
+                    }
+                    else
+                    {
+                        previosAndPos.Add(0.0);
+                        previosAndPos.Add(0.0);
                     }
 
                     ParametersSteInitialEntity parametersTseInitialEntity = new ParametersSteInitialEntity();
