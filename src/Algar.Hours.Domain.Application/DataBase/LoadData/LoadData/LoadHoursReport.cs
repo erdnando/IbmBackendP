@@ -85,38 +85,41 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                List<ARPLoadDetailEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.ToJsonString());
-                convertModSerialize.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
-                convertModSerialize.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
+                List<ARPLoadDetailEntity> datosARPExcel = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.ToJsonString());
 
-                foreach (var itemSerialice in convertModSerialize)
+                datosARPExcel.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
+                datosARPExcel.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
+
+
+                //Se formatean los elementos de la carga en terminos de formatos de fecha
+                foreach (var registroARP in datosARPExcel)
                 {
-                    itemSerialice.IdDetail = Guid.Empty;
-                    itemSerialice.IdDetail = Guid.NewGuid();
-                    itemSerialice.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;
-                    if (!string.IsNullOrEmpty(itemSerialice.FECHA_REP))
+                    registroARP.IdDetail = Guid.Empty;
+                    registroARP.IdDetail = Guid.NewGuid();
+                    registroARP.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;
+                    if (!string.IsNullOrEmpty(registroARP.FECHA_REP))
                     {
                         try
                         {
-                            string fecha = itemSerialice.FECHA_REP;
+                            string fecha = registroARP.FECHA_REP;
                             DateTimeOffset fechaRep;
 
 
                             if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                             {
-                                itemSerialice.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
                             }
                             else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                             {
-                                itemSerialice.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
                             }
                             else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                             {
-                                itemSerialice.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
                             }
                             else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                             {
-                                itemSerialice.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                                registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
                             }
                             else
                             {
@@ -128,10 +131,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
                         catch (FormatException)
                         {
-                            if (DateTime.TryParseExact(itemSerialice.FECHA_REP, "MM/dd/yy", null, DateTimeStyles.None, out DateTime fechaConvertida) ||
-                                DateTime.TryParseExact(itemSerialice.FECHA_REP, "M/d/yy", null, DateTimeStyles.None, out fechaConvertida))
+                            if (DateTime.TryParseExact(registroARP.FECHA_REP, "MM/dd/yy", null, DateTimeStyles.None, out DateTime fechaConvertida) ||
+                                DateTime.TryParseExact(registroARP.FECHA_REP, "M/d/yy", null, DateTimeStyles.None, out fechaConvertida))
                             {
-                                itemSerialice.FECHA_REP = fechaConvertida.ToString("dd/MM/yyyy");
+                                registroARP.FECHA_REP = fechaConvertida.ToString("dd/MM/yyyy");
                             }
                             else
                             {
@@ -140,28 +143,33 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(itemSerialice.FECHA_EXTRATED))
+                    if (!string.IsNullOrEmpty(registroARP.FECHA_EXTRATED))
                     {
-                        itemSerialice.FECHA_EXTRATED = itemSerialice.FECHA_REP;
+                        registroARP.FECHA_EXTRATED = registroARP.FECHA_REP;
                     }
                 }
 
-                await _dataBaseService.ARPLoadDetailEntity.AddRangeAsync(convertModSerialize);
+                await _dataBaseService.ARPLoadDetailEntity.AddRangeAsync(datosARPExcel);
                 await _dataBaseService.SaveAsync();
 
 
-                List<string> valOvertime = new() { "Vacations", "Absence", "Holiday", "Stand By" };
 
-                var semanahorario = new DateTimeOffset();// arp.FECHA_REP;
+
+
+
+
+
+                List<string> politicaOvertime = new() { "Vacations", "Absence", "Holiday", "Stand By" };
+
+                var semanahorario = new DateTimeOffset();
 
                 CultureInfo cul = CultureInfo.CurrentCulture;
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
-                //var esfestivo = new FestivosEntity();
+                
                 List<FestivosEntity> esfestivos = new();
 
                 //Para ARP, busca festivos de Colombia solamente
                 esfestivos = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario && x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
-                //esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
 
 
 
@@ -169,13 +177,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
                 //var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
-                var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").Where(x => x.UserEntity.EmployeeCode != null).ToList();
+               // var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").Where(x => x.UserEntity.EmployeeCode != null).ToList();
+                var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
 
 
 
 
                 #region por cada registro obtenido en el excel, se evalua
-                foreach (var entity in convertModSerialize)
+                foreach (var entity in datosARPExcel)
                 {
 
                     #region evaluacion contra ARPLoadDetailEntity
@@ -273,7 +282,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (horario != null)
                     {
-                        
+                        parametersInitialEntity.EstatusProceso = "EN_PROCESO";
                         parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
                         parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
                         parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
@@ -282,8 +291,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersInitialEntity.OutIme = "N";
 
                         // agregar validación
-                        parametersInitialEntity.OverTime = horario.HoraInicio == null ? "N" : valOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >= 0 ? "N" : "S";
-
+                        parametersInitialEntity.OverTime = horario.HoraInicio == null ? "N" : politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >= 0 ? "N" : "S";
+                        parametersInitialEntity.EstatusProceso = parametersInitialEntity.OverTime == "N" ? "NO_APLICA_X_OVERTIME" : "";
                         //agregar validación para HorasInicio
                         parametersInitialEntity.HorasInicio = previosAndPos[0];
 
@@ -292,6 +301,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                     else
                     {
+                        parametersInitialEntity.EstatusProceso = "NO_APLICA_X_HORARIO";
                         parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
                         parametersInitialEntity.HoraInicio = "0";
                         parametersInitialEntity.HoraFin = "0";
@@ -308,6 +318,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         //agregar validacion para horasFin
                         parametersInitialEntity.HorasFin = 0;
+                    }
+
+                    if (arp.ESTADO == "Extracted")
+                    {
+                        parametersInitialEntity.EstatusProceso = "NO_APLICA_X_EXTRACTED";
                     }
 
 
