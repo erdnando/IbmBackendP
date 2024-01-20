@@ -14,4 +14,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public JsonArray Data3 { get; set; }
 
     }
+
+    public class LoadJsonPais
+    {
+        public JsonArray Data { get; set; }
+        public string PaisSel { get; set; }
+
+    }
 }

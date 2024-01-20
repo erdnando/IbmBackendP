@@ -38,16 +38,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         }
 
 
-        public async Task<bool> Load(JsonArray model1, JsonArray model2, JsonArray model3)
-        {
-            var resultadoARP = await LoadARP(model1);
-            var resultadoTSE = await LoadTSE(model2);
-            var resultadoSTE = await LoadSTE(model3);
+        //public async Task<bool> Load(JsonArray model1, JsonArray model2, JsonArray model3)
+        //{
+        //    var resultadoARP = await LoadARP(model1);
+        //    var resultadoTSE = await LoadTSE(model2);
+        //    var resultadoSTE = await LoadSTE(model3);
 
-            return resultadoARP && resultadoTSE && resultadoSTE;
-        }
+        //    return resultadoARP && resultadoTSE && resultadoSTE;
+        //}
 
-        public async Task<bool> LoadARP(JsonArray model)
+        public async Task<bool> LoadARP(LoadJsonPais model)
         {
             try
             {
@@ -85,7 +85,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                List<ARPLoadDetailEntity> datosARPExcel = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.ToJsonString());
+                List<ARPLoadDetailEntity> datosARPExcel = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
 
                 datosARPExcel.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
                 datosARPExcel.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
@@ -553,7 +553,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             return Limites;
         }
 
-        public async Task<bool> LoadTSE(JsonArray model)
+        public async Task<bool> LoadTSE(LoadJsonPais model)
         {
             try
             {
@@ -569,7 +569,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
             try
             {
-                List<TSELoadEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.ToJsonString());
+                List<TSELoadEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.Data.ToJsonString());
                 convertModSerialize.Where(e => e.Status.Trim() == "EXTRACTED").ToList().ForEach(x => x.Status = "Extracted");
                 convertModSerialize.Where(e => e.Status.Trim() == "SUBMITTED").ToList().ForEach(x => x.Status = "Submitted");
                 convertModSerialize.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true || e.AccountCMRNumber == "N/A").ToList().ForEach(x => x.AccountCMRNumber = "1234");
@@ -965,9 +965,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-        public async Task<bool> LoadSTE(JsonArray model)
+        public async Task<bool> LoadSTE(LoadJsonPais model)
         {
-            if (model == null || model.Count == 0)
+            if (model == null || model.Data.Count == 0)
             {
                 return false;
             }
@@ -987,7 +987,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
             try
             {
-                List<STELoadEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.ToJsonString());
+                List<STELoadEntity> convertModSerialize = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
                 convertModSerialize.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
 
                 foreach (var entity in convertModSerialize)

@@ -10,10 +10,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 {
     public interface ILoadHoursReport
     {
-        Task<bool> LoadARP(JsonArray model);
-        Task<bool> LoadTSE(JsonArray model);
-        Task<bool> LoadSTE(JsonArray model);
-        Task<bool> Load(JsonArray model1, JsonArray model2, JsonArray model3);
+        //Task<bool> LoadARP(JsonArray model);
+        //Task<bool> LoadTSE(JsonArray model);
+        //Task<bool> LoadSTE(JsonArray model);
+        //Task<bool> Load(JsonArray model1, JsonArray model2, JsonArray model3);
+
+        Task<bool> LoadARP(LoadJsonPais model);
+        Task<bool> LoadTSE(LoadJsonPais model);
+        Task<bool> LoadSTE(LoadJsonPais model);
     }
 
 

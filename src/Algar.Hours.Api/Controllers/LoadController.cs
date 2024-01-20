@@ -13,48 +13,48 @@ namespace Algar.Hours.Api.Controllers
     [TypeFilter(typeof(ExceptionManager))]
     public class LoadController : ControllerBase
     {
-        [HttpPost("createARP")]
-        [Authorize(Roles = "standard")]
-        public async Task<IActionResult> CreateARP(
-        [FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
-        {
-            var data = await createLoadReportCommand.LoadARP(model);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
-        }
+        //[HttpPost("createARP")]
+        //[Authorize(Roles = "standard")]
+        //public async Task<IActionResult> CreateARP(
+        //[FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
+        //{
+        //    var data = await createLoadReportCommand.LoadARP(model);
+        //    return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        //}
 
-        [HttpPost("createTSE")]
-        [Authorize(Roles = "standard")]
-        public async Task<IActionResult> CreateTSE([FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
-        {
-            var data = await createLoadReportCommand.LoadTSE(model);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
-        }
-        [HttpPost("createSTE")]
-        [Authorize(Roles = "standard")]
-        public async Task<IActionResult> CreateSTE([FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
-        {
-            var data = await createLoadReportCommand.LoadSTE(model);
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
-        }      
+        //[HttpPost("createTSE")]
+        //[Authorize(Roles = "standard")]
+        //public async Task<IActionResult> CreateTSE([FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
+        //{
+        //    var data = await createLoadReportCommand.LoadTSE(model);
+        //    return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        //}
+        //[HttpPost("createSTE")]
+        //[Authorize(Roles = "standard")]
+        //public async Task<IActionResult> CreateSTE([FromBody] JsonArray model, [FromServices] ILoadHoursReport createLoadReportCommand)
+        //{
+        //    var data = await createLoadReportCommand.LoadSTE(model);
+        //    return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        //}      
 
-        [HttpPost("CreateFinal")]
-        [Authorize(Roles = "standard")]
-        public async Task<IActionResult> CreateFinal([FromBody] LoadDTO requestData, [FromServices] ILoadHoursReport loadHoursReport)
-        {
+        //[HttpPost("CreateFinal")]
+        //[Authorize(Roles = "standard")]
+        //public async Task<IActionResult> CreateFinal([FromBody] LoadDTO requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        //{
            
-            var data = requestData.Data;
-            var data2 = requestData.Data2;
-            var data3 = requestData.Data3;
+        //    var data = requestData.Data;
+        //    var data2 = requestData.Data2;
+        //    var data3 = requestData.Data3;
 
-            var dataFinal = await loadHoursReport.Load(data, data2, data3);
+        //    var dataFinal = await loadHoursReport.Load(data, data2, data3);
 
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
-        }
+        //    return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        //}
 
         [HttpPost("UploadARP")]
         //[Authorize(Roles = "standard")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadARP([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        public async Task<IActionResult> UploadARP([FromBody] LoadJsonPais requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.LoadARP(requestData);
 
@@ -63,7 +63,7 @@ namespace Algar.Hours.Api.Controllers
         [HttpPost("UploadTSE")]
         //[Authorize(Roles = "standard")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadTSE([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        public async Task<IActionResult> UploadTSE([FromBody] LoadJsonPais requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.LoadTSE(requestData);
 
@@ -72,7 +72,7 @@ namespace Algar.Hours.Api.Controllers
         [HttpPost("UploadSTE")]
         //[Authorize(Roles = "standard")]
         [AllowAnonymous]
-        public async Task<IActionResult> UploadSTE([FromBody] JsonArray requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        public async Task<IActionResult> UploadSTE([FromBody] LoadJsonPais requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.LoadSTE(requestData);
 
