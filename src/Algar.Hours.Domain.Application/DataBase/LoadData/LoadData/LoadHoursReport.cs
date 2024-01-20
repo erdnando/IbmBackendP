@@ -40,15 +40,92 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             _consultCountryCommand = consultCountryCommand;
         }
 
+        ARPLoadDetailEntity validaFormatosFecha(ARPLoadDetailEntity arp)
+        {
+            arp.IdDetail = Guid.Empty;
+            arp.IdDetail = Guid.NewGuid();
+           // registroARP.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;
 
-        //public async Task<bool> Load(JsonArray model1, JsonArray model2, JsonArray model3)
-        //{
-        //    var resultadoARP = await LoadARP(model1);
-        //    var resultadoTSE = await LoadTSE(model2);
-        //    var resultadoSTE = await LoadSTE(model3);
+            if (!string.IsNullOrEmpty(arp.FECHA_REP))
+            {
+                try
+                {
+                    string fecha = arp.FECHA_REP;
+                    DateTimeOffset fechaRep;
 
-        //    return resultadoARP && resultadoTSE && resultadoSTE;
-        //}
+
+                    if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "d/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        arp.FECHA_REP = fechaRep.ToString();
+                    }
+                    else
+                    {
+                        return arp;
+                    }
+
+
+
+                    /*if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                    }
+                    else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
+                    {
+                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
+                    }
+                    else
+                    {
+                        return registroARP;
+                    }*/
+
+
+
+                }
+                catch (FormatException)
+                {
+                    if (DateTime.TryParseExact(arp.FECHA_REP, "MM/dd/yy", null, DateTimeStyles.None, out DateTime fechaConvertida) ||
+                        DateTime.TryParseExact(arp.FECHA_REP, "M/d/yy", null, DateTimeStyles.None, out fechaConvertida))
+                    {
+                        arp.FECHA_REP = fechaConvertida.ToString("dd/MM/yyyy");
+                    }
+                    else
+                    {
+                        Console.WriteLine("No se pudo convertir la cadena de fecha");
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(arp.FECHA_EXTRATED))
+            {
+                arp.FECHA_EXTRATED = arp.FECHA_REP;
+            }
+
+            return arp;
+        }
 
         public async Task<bool> LoadARP(LoadJsonPais model)
         {
@@ -87,13 +164,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<ParametersArpInitialEntity> listParametersInitialEntity = new();
 
 
-
+                //Serializa la carga excel en un obj
                 List<ARPLoadDetailEntity> datosARPExcel = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
 
                 datosARPExcel.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
                 datosARPExcel.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
 
-
+                /*
                 //Se formatean los elementos de la carga en terminos de formatos de fecha
                 foreach (var registroARP in datosARPExcel)
                 {
@@ -155,7 +232,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.ARPLoadDetailEntity.AddRangeAsync(datosARPExcel);
                 await _dataBaseService.SaveAsync();
 
-
+                */
 
 
 
@@ -185,15 +262,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 #region por cada registro obtenido en el excel, se evalua
                 foreach (var entity in datosARPExcel)
                 {
+                    var arp = validaFormatosFecha(entity);
+
+                    arp.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;//check it!!!
 
                     #region evaluacion contra ARPLoadDetailEntity
 
-                    var arp = entity;
+                    // var arp = entity;
                     //add validation fecha_rep
-                    string fecha = arp.FECHA_REP;
-                    DateTimeOffset fechaRep;
+                   // string fecha = arp.FECHA_REP;
+                   // DateTimeOffset fechaRep;
 
-
+/*
                     if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                     {
                         arp.FECHA_REP = fechaRep.ToString();
@@ -213,7 +293,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     else if (DateTimeOffset.TryParseExact(fecha, "d/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
                     {
                         arp.FECHA_REP = fechaRep.ToString();
-                    }
+                    }*/
 
 
                     semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
