@@ -17,6 +17,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
         public Guid Aprobador1UserEntityId { get; set; }
         public Guid Aprobador2UserEntityId { get; set; }
         public Guid EmpleadoUserEntityId { get; set; }
+        public string roleAprobador { get; set; }
 
 
     }

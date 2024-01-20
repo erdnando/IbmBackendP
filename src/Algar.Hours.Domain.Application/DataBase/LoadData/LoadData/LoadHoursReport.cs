@@ -172,11 +172,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 esfestivos = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario && x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
 
 
-
-                //int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
-
                 //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
-                //var Lsthorario = _dataBaseService.workinghoursEntity.Where(x => x.week == Semana.ToString() && x.FechaWorking == semanahorario).ToList();
                // var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").Where(x => x.UserEntity.EmployeeCode != null).ToList();
                 var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
 
@@ -224,7 +220,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //Obtiene horario para este empleado en la fecha del evento
                     var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
                     
-                    //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario);
 
                     //Valida si el dia del evento es un festivo del pais Colombia
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
@@ -320,7 +315,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersInitialEntity.HorasFin = 0;
                     }
 
-                    if (arp.ESTADO == "Extracted")
+                    if (arp.ESTADO == "Extracted" || arp.ESTADO== "EXTRACTED")
                     {
                         parametersInitialEntity.EstatusProceso = "NO_APLICA_X_EXTRACTED";
                     }
@@ -343,9 +338,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);//EF
                 await _dataBaseService.SaveAsync();
                 
-
-                //_dataBaseService.BulkInsert(listParametersInitialEntity.ToList());
-                //await _dataBaseService.SaveAsync();
 
                 return true;
             }

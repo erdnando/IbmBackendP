@@ -48,20 +48,23 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
 
 
+                if (modelAprobador.roleAprobador != "Usuario Aprobador N2")
+                {
+                    //nivel 2
+                    CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
+                    assignmentReport.UserEntityId = modelAprobador.UserId;
+                    assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
+                    assignmentReport.State = (byte)Enums.Enums.Aprobacion.Pendiente;
+                    assignmentReport.Description = "";
+                    assignmentReport.DateApprovalCancellation = DateTime.Now;
 
-                //nivel 2
-                CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
-                assignmentReport.UserEntityId = modelAprobador.UserId;
-                assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                assignmentReport.State = (byte)Enums.Enums.Aprobacion.Pendiente;
-                assignmentReport.Description = "";
-                assignmentReport.DateApprovalCancellation = DateTime.Now;
-
-                //var response = CrearNivel2(assignmentReport);
-                assignmentReport.IdAssignmentReport = Guid.NewGuid();
-                var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
-                await _dataBaseService.assignmentReports.AddAsync(entity);
-               await _dataBaseService.SaveAsync();
+                    //var response = CrearNivel2(assignmentReport);
+                    assignmentReport.IdAssignmentReport = Guid.NewGuid();
+                    var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
+                    await _dataBaseService.assignmentReports.AddAsync(entity);
+                    await _dataBaseService.SaveAsync();
+                }
+                
 
             }
             else
@@ -84,7 +87,11 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 {
                     //aprovado
                     _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador1UserEntityId).Result).Email, Plantilla = "5" });
-                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
+                    if (modelAprobador.roleAprobador != "Usuario Aprobador N2")
+                    {
+                        _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
+                    }
+                        
                     _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "5" });
                 }
                 else
