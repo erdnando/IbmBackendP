@@ -158,8 +158,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
                 //var esfestivo = new FestivosEntity();
                 List<FestivosEntity> esfestivos = new();
-                //esfestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario).FirstOrDefault(); //&& x.CountryId == "");
-                esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
+
+                //Para ARP, busca festivos de Colombia solamente
+                esfestivos = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == semanahorario && x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
+                //esfestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
+
+
 
                 //int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
 
@@ -206,9 +210,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                    bool bValidacionHorario = false;
 
+                    //Obtiene horario para este empleado en la fecha del evento
                     var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    
                     //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking== semanahorario);
+
+                    //Valida si el dia del evento es un festivo del pais Colombia
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
 
@@ -248,11 +257,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if (horario != null)
                     {
                          previosAndPos = getPreviasAndPosHorario(arp.HORA_INICIO, arp.HORA_FIN, horario.HoraInicio, horario.HoraFin);
+                        bValidacionHorario = true;
                     }
                     else
                     {
                         previosAndPos.Add(0.0);
                         previosAndPos.Add(0.0);
+                        //Validacion horario NO Aplica este registro por que no tiene horario
+                        bValidacionHorario = false;
                     }
                     
                         
@@ -261,6 +273,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (horario != null)
                     {
+                        
                         parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
                         parametersInitialEntity.HoraInicio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
                         parametersInitialEntity.HoraFin = horario.HoraFin == null ? "0" : horario.HoraFin;
