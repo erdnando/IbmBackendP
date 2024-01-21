@@ -6,6 +6,10 @@ namespace Algar.Hours.Domain.Entities.ParametrosInicial
     {
         public Guid IdParametersInitialEntity { get; set; }
         public string EmployeeCode { get; set; }
+        public string Anio { get; set; }
+        public string FECHA_REP { get; set; }
+        public string TOTAL_MINUTOS { get; set; }
+        public string totalHoras { get; set; }
         public string HoraInicio { get; set; }
         public string HoraFin { get; set; }
         public string OutIme { get; set; }
@@ -16,8 +20,8 @@ namespace Algar.Hours.Domain.Entities.ParametrosInicial
         public double HorasFin { get; set; }
         public string Estado { get; set; }
         public string EstatusProceso { get; set; }
-        public Guid ARPLoadDetailEntityId { get; set; }
-        public ARPLoadDetailEntity ARPLoadDetailEntity { get; set;}
+        //public Guid ARPLoadDetailEntityId { get; set; }
+        //public ARPLoadDetailEntity ARPLoadDetailEntity { get; set;}
 
     }
 }

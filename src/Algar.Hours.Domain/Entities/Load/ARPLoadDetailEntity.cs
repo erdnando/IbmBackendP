@@ -21,6 +21,7 @@ namespace Algar.Hours.Domain.Entities.Load
         public string HORA_INICIO { get; set; }
         public string HORA_FIN { get; set; }
         public string TOTAL_MINUTOS { get; set; }
+        public string TOTALHORAS { get; set; }
         public string CATEGORIA { get; set; }
         public string ACTIVIDAD { get; set; }
         public string COMENTARIO { get; set; }

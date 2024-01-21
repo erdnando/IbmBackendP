@@ -44,13 +44,13 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
             var arp = await (from p in _dataBaseService.ParametersArpInitialEntity
-                             join a in _dataBaseService.ARPLoadDetailEntity
-                             on p.ARPLoadDetailEntityId equals a.IdDetail
-                             where (p.Semana == semana && a.ID_EMPLEADO == usuario)
+                            // join a in _dataBaseService.ARPLoadDetailEntity
+                            // on p.ARPLoadDetailEntityId equals a.IdDetail
+                             where (p.Semana == semana && p.EmployeeCode == usuario)
                              select new
                              {
-                                 fechaRep = a.FECHA_REP,
-                                 totalMinutos = a.TOTAL_MINUTOS
+                                 fechaRep = p.FECHA_REP,
+                                 totalMinutos = p.TOTAL_MINUTOS
                              }).Distinct().ToListAsync();
 
             var StandByRep = await (from us in _dataBaseService.UserEntity
@@ -95,23 +95,23 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                               ).Distinct().ToListAsync();
 
             var tse = await (from p in _dataBaseService.ParametersTseInitialEntity
-                             join a in _dataBaseService.TSELoadEntity
-                             on p.TSELoadEntityIdTSELoad equals a.IdTSELoad
-                             where (p.Semana == semana && a.NumeroEmpleado == usuario)
+                            // join a in _dataBaseService.TSELoadEntity
+                            // on p.TSELoadEntityIdTSELoad equals a.IdTSELoad
+                             where (p.Semana == semana && p.EmployeeCode == usuario)
                              select new
                              {
-                                 fechaRep = a.FechaRegistro,
-                                 totalMinutos = a.DurationInHours
+                                 fechaRep = p.FECHA_REP,
+                                 totalMinutos = p.TOTAL_MINUTOS
                              }).Distinct().ToListAsync();
 
             var ste = await (from p in _dataBaseService.ParametersSteInitialEntity
-                             join a in _dataBaseService.STELoadEntity
-                             on p.STELoadEntityId equals a.IdSTELoad
-                             where (p.Semana == semana && a.SessionEmployeeSerialNumber == usuario)
+                            // join a in _dataBaseService.STELoadEntity
+                            // on p.STELoadEntityId equals a.IdSTELoad
+                             where (p.Semana == semana && p.EmployeeCode == usuario)
                              select new
                              {
-                                 fechaRep = a.FechaRegistro,
-                                 totalMinutos = a.TotalDuration
+                                 fechaRep = p.FECHA_REP,
+                                 totalMinutos = p.TOTAL_MINUTOS
                              }).Distinct().ToListAsync();
 
 

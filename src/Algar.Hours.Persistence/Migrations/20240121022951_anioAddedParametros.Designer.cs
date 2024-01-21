@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240121022951_anioAddedParametros")]
+    partial class anioAddedParametros
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -413,10 +416,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("TOTALHORAS")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("TOTAL_MINUTOS")
                         .IsRequired()
                         .HasColumnType("text");
@@ -705,6 +704,9 @@ namespace Algar.Hours.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("ARPLoadDetailEntityId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Anio")
                         .IsRequired()
                         .HasColumnType("text");
@@ -718,10 +720,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("EstatusProceso")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FECHA_REP")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -754,15 +752,9 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<int>("Semana")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TOTAL_MINUTOS")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("totalHoras")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("IdParametersInitialEntity");
+
+                    b.HasIndex("ARPLoadDetailEntityId");
 
                     b.ToTable("ParametersArpInitialEntity");
                 });
@@ -789,10 +781,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FECHA_REP")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Festivo")
                         .IsRequired()
                         .HasColumnType("text");
@@ -819,18 +807,15 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("STELoadEntityId")
+                        .HasColumnType("uuid");
+
                     b.Property<int>("Semana")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TOTAL_MINUTOS")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("totalHoras")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("IdParamSTEInitialId");
+
+                    b.HasIndex("STELoadEntityId");
 
                     b.ToTable("ParametersSteInitialEntity");
                 });
@@ -857,10 +842,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("FECHA_REP")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Festivo")
                         .IsRequired()
                         .HasColumnType("text");
@@ -890,15 +871,12 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<int>("Semana")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TOTAL_MINUTOS")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("totalHoras")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("TSELoadEntityIdTSELoad")
+                        .HasColumnType("uuid");
 
                     b.HasKey("IdParamTSEInitialId");
+
+                    b.HasIndex("TSELoadEntityIdTSELoad");
 
                     b.ToTable("ParametersTseInitialEntity");
                 });
@@ -1282,6 +1260,39 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("CountryEntity");
+                });
+
+            modelBuilder.Entity("Algar.Hours.Domain.Entities.ParametrosInicial.ParametersArpInitialEntity", b =>
+                {
+                    b.HasOne("Algar.Hours.Domain.Entities.Load.ARPLoadDetailEntity", "ARPLoadDetailEntity")
+                        .WithMany()
+                        .HasForeignKey("ARPLoadDetailEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ARPLoadDetailEntity");
+                });
+
+            modelBuilder.Entity("Algar.Hours.Domain.Entities.ParametrosInicial.ParametersSteInitialEntity", b =>
+                {
+                    b.HasOne("Algar.Hours.Domain.Entities.Load.STELoadEntity", "STELoadEntity")
+                        .WithMany()
+                        .HasForeignKey("STELoadEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("STELoadEntity");
+                });
+
+            modelBuilder.Entity("Algar.Hours.Domain.Entities.ParametrosInicial.ParametersTseInitialEntity", b =>
+                {
+                    b.HasOne("Algar.Hours.Domain.Entities.Load.TSELoadEntity", "TSELoadEntity")
+                        .WithMany()
+                        .HasForeignKey("TSELoadEntityIdTSELoad")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TSELoadEntity");
                 });
 
             modelBuilder.Entity("Algar.Hours.Domain.Entities.QueuesAcceptance.QueuesAcceptanceEntity", b =>
