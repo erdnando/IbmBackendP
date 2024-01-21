@@ -10,6 +10,7 @@ namespace Algar.Hours.Domain.Entities.ParametrosInicial
     public class ParametersSteInitialEntity
     {
         public Guid IdParamSTEInitialId { get; set; }
+        public string EmployeeCode { get; set; }
         public string HoraInicio { get; set; }
         public string HoraFin { get; set; }
         public string OutIme { get; set; }

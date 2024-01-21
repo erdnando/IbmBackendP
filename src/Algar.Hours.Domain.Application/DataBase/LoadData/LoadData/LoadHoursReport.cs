@@ -133,7 +133,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 //deleting loads previous processing..
-                 _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
+                _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadDetailEntity.ExecuteDelete();
                 _dataBaseService.ARPLoadEntity.ExecuteDelete();
                 await _dataBaseService.SaveAsync();
@@ -316,6 +316,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                     parametersInitialEntity.Semana = Semana;
+                    parametersInitialEntity.EmployeeCode = arp.ID_EMPLEADO;
                     parametersInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersInitialEntity.ARPLoadDetailEntityId = arp.IdDetail;
                     parametersInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
@@ -963,6 +964,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
 
                     parametersTseInitialEntity.Semana = Semana;
+                    parametersTseInitialEntity.EmployeeCode = tse.NumeroEmpleado;
                     parametersTseInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersTseInitialEntity.TSELoadEntityIdTSELoad = tse.IdTSELoad;
                     parametersTseInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
@@ -1481,6 +1483,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }*/
 
                     parametersTseInitialEntity.Semana = Semana;
+                    parametersTseInitialEntity.EmployeeCode = ste.SessionEmployeeSerialNumber;
                     parametersTseInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersTseInitialEntity.STELoadEntityId = ste.IdSTELoad;
                     parametersTseInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
@@ -1504,17 +1507,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.ToList();
                 var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.ToList();
 
-                /*var registrosOverlaped = from arp in rowARPGral
-                                join ste in rowSTEGral on arp.codigoEmpleado equals ste.codigoEmpleado
-                                         join tse in rowTSEGral on ste.codigoEmpleado equals tse.codigoEmpleado
+                var registrosOverlaped = from arp in rowARPGral
+                                         join ste in rowSTEGral on arp.EmployeeCode equals ste.EmployeeCode
+                                         join tse in rowTSEGral on ste.EmployeeCode equals tse.EmployeeCode
                                          select new
-                                {
-                                    CodeUser = roArp.ID_EMPLEADO,
-                                    Nombre = roArp.NOMBRE_CLIENTE,
-                                    Categoria = roArp.CATEGORIA
-                                };*/
+                                         {
+                                             CodeUser = arp.IdParametersInitialEntity,
+                                             Categoria = arp.Estado,
+                                             EstatusProceso= "NO_APLICA_POR_OVCERLAPING",
+                                             EmployeCode = arp.EmployeeCode
 
-               // registrosOverlaped.ToList().ForEach(x => x. = "Submitted");
+                                         };
+
+                //registrosOverlaped.AsEnumerable();
+
+                foreach (var item in registrosOverlaped)
+                {
+                    var itemARP = _dataBaseService.ParametersArpInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeCode);
+                    itemARP.EstatusProceso = "NO_APLICA_POR_OVCERLAPING";
+                    var itemTSE = _dataBaseService.ParametersSteInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeCode);
+                    itemTSE.EstatusProceso = "NO_APLICA_POR_OVCERLAPING";
+                    var itemSTE = _dataBaseService.ParametersTseInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeCode);
+                    itemSTE.EstatusProceso = "NO_APLICA_POR_OVCERLAPING";
+                }
 
                 return true;
 
