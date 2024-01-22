@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.Country.Commands.Consult;
 using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Create;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load;
 using AutoMapper;
@@ -20,13 +21,15 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
         private readonly IMapper _mapper;
         private readonly ICreateHorusReportManagerCommand _ICreateHorusReportManagerCommand;
         
+        private IGetListUsuarioCommand _usuarioCommand;
+
         public LoadHoursReportManagerCommand
             (IDataBaseService dataBaseService, IMapper mapper , ICreateHorusReportManagerCommand iCreateHorusReportManagerCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
             _ICreateHorusReportManagerCommand = iCreateHorusReportManagerCommand;
-
+            
 
         }
 

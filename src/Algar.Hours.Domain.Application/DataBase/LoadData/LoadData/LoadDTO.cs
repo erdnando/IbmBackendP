@@ -19,6 +19,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
     {
         public JsonArray Data { get; set; }
         public string PaisSel { get; set; }
+        public string IdCarga { get; set; }
 
     }
 
@@ -39,7 +40,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public string NO_APLICA_X_OVERTIME_STE { get; set; }
         public string NO_APLICA_X_OVERLAPING_STE { get; set; }
         public string EN_PROCESO_STE { get; set; }
-
+        public string IdCarga { get; set; }
 
 
     }

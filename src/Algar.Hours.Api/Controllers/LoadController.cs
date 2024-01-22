@@ -78,5 +78,16 @@ namespace Algar.Hours.Api.Controllers
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
+
+        [HttpPost("Notificaciones")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> NotificacionesProceso1([FromBody] LoadJsonPais requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            loadHoursReport.NotificacionesProceso1(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, true));
+        }
+
     }
 }

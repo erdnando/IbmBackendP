@@ -15,9 +15,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         //Task<bool> LoadSTE(JsonArray model);
         //Task<bool> Load(JsonArray model1, JsonArray model2, JsonArray model3);
 
-        Task<bool> LoadARP(LoadJsonPais model);
-        Task<bool> LoadTSE(LoadJsonPais model);
+        Task<string> LoadARP(LoadJsonPais model);
+        Task<string> LoadTSE(LoadJsonPais model);
         Task<SummaryLoad> LoadSTE(LoadJsonPais model);
+        void NotificacionesProceso1(LoadJsonPais model);
     }
 
 

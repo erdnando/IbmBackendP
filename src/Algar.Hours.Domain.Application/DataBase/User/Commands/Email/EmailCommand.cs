@@ -56,6 +56,12 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     body = "Su reporte ha sido aprobado, por favor comuniquese con su aprobador para tener más información"; break;
                 case "7":
                     body = "Sus limites legales han sido modificados"; break;
+                case "8":
+                    body = "Su reporte de horas no puede ser procesado, debido a que no se ha registrado un horario, por favor comuniquese con su aprobador para tener más información"; break;
+                case "9":
+                    body = "Su reporte de horas no puede ser procesado, debido a que los ocnceptos:  \"Vacations\", \"Absence\", \"Holiday\", \"Stand By\" no aplican, por favor comuniquese con su aprobador para tener más información"; break;
+                case "10":
+                    body = "Su reporte de horas no puede ser procesado, debido a que se han encontrado duplicidades de reporte de horas en diferens areas de negocio (ARP, TSE o STE), por favor comuniquese con su aprobador para tener más información"; break;
                 default:
                     break;
             }
@@ -82,6 +88,12 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     subject = "ALERTA \"PORTAL TLS \" Su horario ha sido modificado"; break;
                 case "7":
                     subject = "ALERTA \"PORTAL TLS \" Sus limites legales han sido modificados"; break;
+                case "8":
+                    subject = "ALERTA \"PORTAL TLS \" NO APLICA POR HORARIO"; break;
+                case "9":
+                    subject = "ALERTA \"PORTAL TLS \" NO APLICA POR OVERTIME"; break;
+                case "10":
+                    subject = "ALERTA \"PORTAL TLS \" NO APLICA POR OVERLAPING"; break;
                 default:
                     break;
             }

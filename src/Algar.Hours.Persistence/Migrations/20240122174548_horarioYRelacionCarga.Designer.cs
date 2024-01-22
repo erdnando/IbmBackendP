@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240122174548_horarioYRelacionCarga")]
+    partial class horarioYRelacionCarga
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -745,6 +748,14 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("HorarioExistenteFin")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HorarioExistenteInicio")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<double>("HorasFin")
                         .HasColumnType("double precision");
 
@@ -824,6 +835,14 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("HorarioExistenteFin")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HorarioExistenteInicio")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<double>("HorasFin")
                         .HasColumnType("double precision");
 
@@ -900,6 +919,14 @@ namespace Algar.Hours.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("HoraInicioHoraio")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HorarioExistenteFin")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HorarioExistenteInicio")
                         .IsRequired()
                         .HasColumnType("text");
 
