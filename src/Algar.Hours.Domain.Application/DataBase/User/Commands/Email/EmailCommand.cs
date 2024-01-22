@@ -62,6 +62,8 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     body = "Su reporte de horas no puede ser procesado, debido a que los ocnceptos:  \"Vacations\", \"Absence\", \"Holiday\", \"Stand By\" no aplican, por favor comuniquese con su aprobador para tener más información"; break;
                 case "10":
                     body = "Su reporte de horas no puede ser procesado, debido a que se han encontrado duplicidades de reporte de horas en diferens areas de negocio (ARP, TSE o STE), por favor comuniquese con su aprobador para tener más información"; break;
+                case "11": 
+                    body="Se han detectado usuarios sin correo registrado en el portal TLS. Favor de solicitar su alta antes d eprocesarlos";break;
                 default:
                     break;
             }
@@ -94,6 +96,8 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     subject = "ALERTA \"PORTAL TLS \" NO APLICA POR OVERTIME"; break;
                 case "10":
                     subject = "ALERTA \"PORTAL TLS \" NO APLICA POR OVERLAPING"; break;
+                case "11":
+                    subject = "ALERTA \"PORTAL TLS \" USUARIOS SIN EMAIL EN SISTEMA TLS DURANTE EL PROCESO DE CARGA (ARP, TSE O STE"; break;
                 default:
                     break;
             }

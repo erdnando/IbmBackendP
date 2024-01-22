@@ -44,4 +44,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
     }
+
+    public class Loadnotificaciones
+    {
+
+        public string IdCarga { get; set; }
+
+    }
 }

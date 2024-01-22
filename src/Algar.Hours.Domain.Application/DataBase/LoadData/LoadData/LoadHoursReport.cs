@@ -1356,7 +1356,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //return summary
                
                 SummaryLoad summary = new SummaryLoad();
-                summary.Mensaje = "Carga ejecutada";
+                summary.Mensaje = "Carga procesada";
                 summary.NO_APLICA_X_HORARIO_ARP = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO").ToList().Count.ToString();
                 summary.NO_APLICA_X_OVERTIME_ARP = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME").ToList().Count.ToString();
                 summary.NO_APLICA_X_OVERLAPING_ARP = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING").ToList().Count.ToString();
@@ -1527,14 +1527,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             return convert;
         }
 
-        public void NotificacionesProceso1(LoadJsonPais model)
+        public async Task<bool> NotificacionesProceso1(string idCarga)
         {
 
             var usersTLS = _dataBaseService.UserEntity.ToList();
 
-            var ARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso != "EN_PROCESO").ToList();
-            var STEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso != "EN_PROCESO").ToList();
-            var TSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso != "EN_PROCESO").ToList();
+            var ARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso != "EN_PROCESO" && e.IdCarga == new Guid(idCarga)).ToList();
+            var STEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso != "EN_PROCESO" && e.IdCarga == new Guid(idCarga)).ToList();
+            var TSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso != "EN_PROCESO" && e.IdCarga == new Guid(idCarga)).ToList();
 
             var eventosNotificables = from arp in ARPGral
                                      join ste in STEGral on arp.IdCarga equals ste.IdCarga
@@ -1558,6 +1558,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 if (userData == null)
                 {
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
+
+                    //notificar al admin
+                    _emailCommand.SendEmail(new EmailModel { To = "santiagoael@algartech.com", Plantilla = "11" });
+                    Thread.Sleep(300);
                     continue;
                 }
                 
@@ -1579,10 +1583,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
             }
 
+
+            return true;
         }
 
        
-
-
     }
 }
