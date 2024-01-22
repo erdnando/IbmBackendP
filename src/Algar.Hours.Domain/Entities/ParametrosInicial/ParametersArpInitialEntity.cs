@@ -11,7 +11,9 @@ namespace Algar.Hours.Domain.Entities.ParametrosInicial
         public string TOTAL_MINUTOS { get; set; }
         public string totalHoras { get; set; }
         public string HoraInicio { get; set; }
+        public string HoraInicioHoraio { get; set; }
         public string HoraFin { get; set; }
+        public string HoraFinHorario { get; set; }
         public string OutIme { get; set; }
         public string OverTime { get; set; }
         public int Semana { get; set; }

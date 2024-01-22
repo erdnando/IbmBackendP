@@ -10,6 +10,7 @@ using Algar.Hours.Domain.Entities.HorusReportManagerEntity;
 using Algar.Hours.Domain.Entities.Load;
 using Algar.Hours.Domain.Entities.Load.Philadedata;
 using Algar.Hours.Domain.Entities.Menu;
+using Algar.Hours.Domain.Entities.PaisRelacionGMT;
 using Algar.Hours.Domain.Entities.Parameters;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
@@ -52,6 +53,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<UserZonaHoraria> UserZonaHoraria { get; set; }
         DbSet<Philadedata> Philadedata { get; set; }
         DbSet<UserManagerEntity> UserManagerEntity { get; set; }
+        DbSet<PaisRelacionGMTEntity> PaisRelacionGMTEntity { get; set; }
         Task<bool> SaveAsync();
         void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records);
         void BulkInsertARPLoadDetailEntity(List<ARPLoadDetailEntity> records);
