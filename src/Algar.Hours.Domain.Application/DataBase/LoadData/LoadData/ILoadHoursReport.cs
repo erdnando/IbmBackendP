@@ -17,7 +17,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         Task<bool> LoadARP(LoadJsonPais model);
         Task<bool> LoadTSE(LoadJsonPais model);
-        Task<bool> LoadSTE(LoadJsonPais model);
+        Task<SummaryLoad> LoadSTE(LoadJsonPais model);
     }
 
 
