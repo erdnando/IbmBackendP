@@ -21,8 +21,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
         public async Task<HorusReportModel> Execute(CreateHorusReportModel model)
         {
+            //AQUI!!!!!
             var horusModel = _mapper.Map<HorusReportModel>(model);
-            //horusModel.IdHorusReport
+         
             horusModel.IdHorusReport = Guid.NewGuid();
             horusModel.CreationDate = DateTime.Now;
             horusModel.DateApprovalSystem = DateTime.Now;
@@ -31,14 +32,17 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var startTime = DateTime.Parse(model.StartTime);
             var endTime = DateTime.Parse(model.EndTime);
 
-            //2023-12-14T00:00:00.0000000
+         
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-           // string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd HH:mm");
+           
 
-            ////// DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-            //string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-ddTHH:mm:ss");
+            //TODO
+            //Validar que el usuario tenga un horario existente
+            // Si no tiene horario, generar notificacion y se cancela el registro d ehoras
 
+            
+            //obtine datos para validar si existe un registro previo (OVERLAPPING)
             var data = _dataBaseService.HorusReportEntity
                 .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId== model.UserEntityId)
                 .AsEnumerable()
@@ -47,7 +51,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                  TimeInRange(h.EndTime, startTime, endTime)))
                 .ToList();
 
-            // data.idHorusReport
+
             if (data.Count != 0)
             {
                 var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
@@ -55,6 +59,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                      Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
                      .FirstOrDefault();
 
+                //si hay datos, valida si esta en estado Pendiente (3)
+                //OVERLAPING permitido, por q ya esta APROBADO o RECHAZADO
                 if (assignmentRef!.State == 3)
                 {
                     //is pending
@@ -65,6 +71,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     // it has been approved or rejected
                     canSendAgainHours = true;
                 }
+                //Si el OVERLAPPING es sobre un caso PENDIENTE, se cancela y/o actualiza y se genera uno nuevo
 
             }
             else
