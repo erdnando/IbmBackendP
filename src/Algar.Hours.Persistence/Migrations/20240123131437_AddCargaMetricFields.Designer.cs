@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240123131437_AddCargaMetricFields")]
+    partial class AddCargaMetricFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -454,10 +457,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ARPXProceso")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("Estado")
                         .HasColumnType("integer");
 
@@ -484,10 +483,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("STEXProceso")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("TSECarga")
                         .IsRequired()
                         .HasColumnType("text");
@@ -505,10 +500,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TSEXOvertime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEXProceso")
                         .IsRequired()
                         .HasColumnType("text");
 

@@ -30,17 +30,27 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public string NO_APLICA_X_OVERTIME_ARP { get; set; }
         public string NO_APLICA_X_OVERLAPING_ARP { get; set; }
         public string EN_PROCESO_ARP { get; set; }
+        public string ARP_OMITIDOS { get; set; }
+        
 
         public string NO_APLICA_X_HORARIO_TSE { get; set; }
         public string NO_APLICA_X_OVERTIME_TSE { get; set; }
         public string NO_APLICA_X_OVERLAPING_TSE { get; set; }
         public string EN_PROCESO_TSE { get; set; }
+        public string TSE_OMITIDOS { get; set; }
 
         public string NO_APLICA_X_HORARIO_STE { get; set; }
         public string NO_APLICA_X_OVERTIME_STE { get; set; }
         public string NO_APLICA_X_OVERLAPING_STE { get; set; }
         public string EN_PROCESO_STE { get; set; }
+        public string STE_OMITIDOS { get; set; }
         public string IdCarga { get; set; }
+
+        public string ARP_CARGA { get; set; }
+        public string TSE_CARGA { get; set; }
+        public string STE_CARGA { get; set; }
+
+
 
 
     }

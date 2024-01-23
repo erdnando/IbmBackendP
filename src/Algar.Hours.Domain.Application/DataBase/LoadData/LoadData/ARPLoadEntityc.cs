@@ -16,5 +16,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public Guid userEntityId { get; set; }
 
         public int Estado { get; set; }
+        
     }
 }
