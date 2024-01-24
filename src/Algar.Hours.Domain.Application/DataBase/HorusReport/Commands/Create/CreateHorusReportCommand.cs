@@ -1,5 +1,6 @@
 ﻿using Algar.Hours.Application.DataBase.AssignmentReport.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
+using Algar.Hours.Domain.Entities.Festivos;
 using Algar.Hours.Domain.Entities.HorusReport;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -31,17 +32,21 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             var startTime = DateTime.Parse(model.StartTime);
             var endTime = DateTime.Parse(model.EndTime);
+            var semanahorario = new DateTimeOffset();
+            CultureInfo cul = CultureInfo.CurrentCulture;
 
-         
+
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate, "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-           
+
 
             //TODO
             //Validar que el usuario tenga un horario existente
-            // Si no tiene horario, generar notificacion y se cancela el registro d ehoras
+            //-----------------------------------------------------------------------------------------------------------------
+           
+            //-----------------------------------------------------------------------------------------------------------------
 
-            
+
             //obtine datos para validar si existe un registro previo (OVERLAPPING)
             var data = _dataBaseService.HorusReportEntity
                 .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId== model.UserEntityId)

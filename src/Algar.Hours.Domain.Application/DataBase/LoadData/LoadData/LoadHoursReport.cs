@@ -256,7 +256,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersInitialEntity.FECHA_REP = arp.FECHA_REP;
                     parametersInitialEntity.TOTAL_MINUTOS = arp.TOTAL_MINUTOS;
                     parametersInitialEntity.totalHoras = getHoras(arp.TOTAL_MINUTOS);
-                    parametersInitialEntity.EstatusProceso = "EN_PROCESO";
+                    parametersInitialEntity.EstatusProceso = "EN_OVERTIME";
                     parametersInitialEntity.HorasInicio = 0;
                     parametersInitialEntity.HorasFin = 0;
                     parametersInitialEntity.EmployeeCode = arp.ID_EMPLEADO;
@@ -721,7 +721,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     ParametersTseInitialEntity parametersTseInitialEntity = new ParametersTseInitialEntity();
 
                     parametersTseInitialEntity.IdParamTSEInitialId = Guid.NewGuid();
-                    parametersTseInitialEntity.EstatusProceso = "EN_PROCESO";
+                    parametersTseInitialEntity.EstatusProceso = "EN_OVERTIME";
 
                     parametersTseInitialEntity.FECHA_REP = tse.StartTime;
                     parametersTseInitialEntity.TOTAL_MINUTOS = getMins(tse.DurationInHours);
@@ -1281,7 +1281,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     ParametersSteInitialEntity parametersSTEInitialEntity = new ParametersSteInitialEntity();
 
                     parametersSTEInitialEntity.IdParamSTEInitialId = Guid.NewGuid();
-                    parametersSTEInitialEntity.EstatusProceso = "EN_PROCESO";
+                    parametersSTEInitialEntity.EstatusProceso = "EN_OVERTIME";
 
                     parametersSTEInitialEntity.FECHA_REP = ste.StartDateTime;
                     parametersSTEInitialEntity.TOTAL_MINUTOS = getMins(ste.TotalDuration);
@@ -1376,9 +1376,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 
                 //PROCESO DE VALIDACION OVER-LAPING!!!!
-                var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_PROCESO" && e.IdCarga == new Guid(model.IdCarga)).ToList();
-                var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_PROCESO" && e.IdCarga == new Guid(model.IdCarga)).ToList();
-                var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_PROCESO" && e.IdCarga == new Guid(model.IdCarga)).ToList();
+                var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
+                var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
+                var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
 
                 var registrosOverlaped = from arp in rowARPGral
                                          join ste in rowSTEGral on arp.EmployeeCode equals ste.EmployeeCode
@@ -1420,7 +1420,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int arpNoAplicaXHorario = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXOverttime = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
-                int arpEnProceso = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_PROCESO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int arpEnProceso = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 
                 var cargaRegistro = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).FirstOrDefault();
                 
@@ -1428,7 +1428,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int tseNoAplicaXHorario = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXOverttime = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
-                int tseEnProceso = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_PROCESO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int tseEnProceso = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 
                 //string tseOmitidos = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).FirstOrDefault().TSEOmitidos;
                 //string arpCarga = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).FirstOrDefault().TSEOmitidos;
@@ -1436,7 +1436,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int steNoAplicaXHorario = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXOverttime = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
-                int steEnProceso = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_PROCESO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int steEnProceso = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 string steOmitidos = "0";
 
 
@@ -1706,6 +1706,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             return true;
         }
 
-       
+        public async Task<bool> ValidaLimitesExcepcionesOverlapping(string idCarga)
+        {
+
+            //aqui
+
+            return true;
+        }
     }
 }
