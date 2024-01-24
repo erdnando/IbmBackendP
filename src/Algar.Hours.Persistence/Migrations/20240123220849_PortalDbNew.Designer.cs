@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240123220849_PortalDbNew")]
+    partial class PortalDbNew
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -434,83 +437,11 @@ namespace Algar.Hours.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ARPCarga")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ARPOmitidos")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ARPXHorario")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ARPXOverlaping")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ARPXOvertime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("ARPXProceso")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("Estado")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("STECarga")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("STEEXOvertime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("STEOmitidos")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("STEXHorario")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("STEXOverlaping")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("STEXProceso")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSECarga")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEOmitidos")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEXHorario")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEXOverlaping")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEXOvertime")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEXProceso")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<Guid>("userEntityId")
                         .HasColumnType("uuid");
@@ -823,9 +754,6 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<double>("HorasInicio")
                         .HasColumnType("double precision");
 
-                    b.Property<Guid>("IdCarga")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("OutIme")
                         .IsRequired()
                         .HasColumnType("text");
@@ -902,9 +830,6 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<double>("HorasInicio")
                         .HasColumnType("double precision");
 
-                    b.Property<Guid>("IdCarga")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("OutIme")
                         .IsRequired()
                         .HasColumnType("text");
@@ -980,9 +905,6 @@ namespace Algar.Hours.Persistence.Migrations
 
                     b.Property<double>("HorasInicio")
                         .HasColumnType("double precision");
-
-                    b.Property<Guid>("IdCarga")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("OutIme")
                         .IsRequired()

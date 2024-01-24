@@ -13,6 +13,7 @@ using Algar.Hours.Domain.Entities.Menu;
 using Algar.Hours.Domain.Entities.PaisRelacionGMT;
 using Algar.Hours.Domain.Entities.Parameters;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
+using Algar.Hours.Domain.Entities.PortalDB;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
 using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
@@ -54,6 +55,9 @@ namespace Algar.Hours.Application.DataBase
         DbSet<Philadedata> Philadedata { get; set; }
         DbSet<UserManagerEntity> UserManagerEntity { get; set; }
         DbSet<PaisRelacionGMTEntity> PaisRelacionGMTEntity { get; set; }
+        DbSet<PortalDBEntity> PortalDBEntity { get; set; }
+        DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
+
         Task<bool> SaveAsync();
         void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records);
         void BulkInsertARPLoadDetailEntity(List<ARPLoadDetailEntity> records);

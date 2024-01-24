@@ -1,5 +1,6 @@
 ﻿using Algar.Hours.Application.DataBase.Country.Commands;
 using Algar.Hours.Application.DataBase.Country.Commands.Consult;
+using Algar.Hours.Application.DataBase.PortalDB.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Domain.Entities.Aprobador;
 using Algar.Hours.Domain.Entities.Country;
@@ -1710,6 +1711,87 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
 
             //aqui
+            var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso== "EN_OVERTIME").ToList();
+            var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+            var rowSTEParameter = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+
+            var limitesCountryARP = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == Guid.Parse("908465f1-4848-4c86-9e30-471982c01a2d"));
+            var HorasLimiteDia = limitesCountryARP.TargetTimeDay;
+            var listaCountries = await _consultCountryCommand.List();
+            
+
+            foreach (var itemARP in rowARPParameter)
+            {
+                TimeSpan tsReportado = DateTimeOffset.Parse(itemARP.HorasFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemARP.HoraInicio).TimeOfDay;
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
+                if (UserRow != null)
+                {
+                    var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == UserRow.IdUser && x.StartDate == DateTimeOffset.Parse(itemARP.FECHA_REP));
+                    var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                    var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP)== DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
+                    var HorasARPGral = HorasARP.Select(x => double.Parse(x.totalHoras)).Sum();
+                    if ((tsReportado.TotalHours + HorasARPGral) > (HorasLimiteDia + horasExceptuada))
+                    {
+                        itemARP.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
+                    }
+                }
+                else
+                {
+                    itemARP.EstatusProceso = "NO_APLICA_NO_USUARIO";
+                }
+            }
+
+            foreach (var itemTSE in rowTSEParameter)
+            {
+                var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemTSE.EmployeeCode.Substring(itemTSE.EmployeeCode.Length - 3));
+                var limitesCountryTSE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
+                var HorasLimiteDiaTSE = limitesCountryTSE.TargetTimeDay;
+                TimeSpan tsReportadoTSE = DateTimeOffset.Parse(itemTSE.HorasFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemTSE.HoraInicio).TimeOfDay;
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
+                if (UserRow != null)
+                {
+                    var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == UserRow.IdUser && x.StartDate == DateTimeOffset.Parse(itemTSE.FECHA_REP));
+                    var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                    var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
+                    var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.totalHoras)).Sum();
+                    if ((tsReportadoTSE.TotalHours + HorasTSEGral) > (HorasLimiteDia + horasExceptuada))
+                    {
+                        itemTSE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
+                    }
+                }
+                else
+                {
+                    itemTSE.EstatusProceso = "NO_APLICA_NO_USUARIO";
+                }
+            }
+
+            foreach (var itemSTE in rowSTEParameter)
+            {
+                var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemSTE.EmployeeCode.Substring(itemSTE.EmployeeCode.Length - 3));
+                var limitesCountrySTE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
+                var HorasLimiteDiaSTE = limitesCountrySTE.TargetTimeDay;
+                TimeSpan tsReportadoSTE = DateTimeOffset.Parse(itemSTE.HorasFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemSTE.HoraInicio).TimeOfDay;
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
+                if (UserRow != null)
+                {
+                    var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == UserRow.IdUser && x.StartDate == DateTimeOffset.Parse(itemSTE.FECHA_REP));
+                    var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                    var HorasSTE = rowSTEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemSTE.FECHA_REP)).ToList();
+                    var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
+                    if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
+                    {
+                        itemSTE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
+                    }
+                }
+                else
+                {
+                    itemSTE.EstatusProceso = "NO_APLICA_NO_USUARIO";
+                }
+            }
+
+
+
+            await _dataBaseService.SaveAsync();
 
             return true;
         }

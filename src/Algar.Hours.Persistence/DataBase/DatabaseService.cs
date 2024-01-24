@@ -16,6 +16,7 @@ using Algar.Hours.Domain.Entities.Menu;
 using Algar.Hours.Domain.Entities.PaisRelacionGMT;
 using Algar.Hours.Domain.Entities.Parameters;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
+using Algar.Hours.Domain.Entities.PortalDB;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
 using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
@@ -69,6 +70,8 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<HorusReportManagerEntity> HorusReportManagerEntity { get; set; }
         public DbSet<UserManagerEntity> UserManagerEntity { get; set; }
         public DbSet<PaisRelacionGMTEntity> PaisRelacionGMTEntity { get; set; }
+        public DbSet<PortalDBEntity> PortalDBEntity { get; set; }
+        public DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
 
         public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
         {
@@ -127,6 +130,8 @@ namespace Algar.Hours.Persistence.DataBase
             new HorusReportManagerEntityConfiguration(modelBuilder.Entity<HorusReportManagerEntity>());
             new UserManagerEntityConfiguration(modelBuilder.Entity<UserManagerEntity>());
             new PaisRelacionGMTEntityConfiguration(modelBuilder.Entity<PaisRelacionGMTEntity>());
+            new PortalDBEntityConfiguration(modelBuilder.Entity<PortalDBEntity>());
+            new PortalDBAproveHistoryEntityConfiguration(modelBuilder.Entity<PortalDBAproveHistoryEntity>());
 
 
         }

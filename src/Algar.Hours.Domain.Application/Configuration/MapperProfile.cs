@@ -47,6 +47,10 @@ using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using System.Text.Json.Nodes;
+using Algar.Hours.Domain.Entities.PortalDB;
+using Algar.Hours.Application.DataBase.PortalDB.Commands.Create;
+using Algar.Hours.Application.DataBase.PortalDB.Commands;
+using Algar.Hours.Application.DataBase.PortalDBAproveHistory.Commands.Create;
 
 namespace Algar.Hours.Application.Configuration
 {
@@ -91,6 +95,11 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<UsersExceptions, UsersExceptionsModelC>().ReverseMap();
             CreateMap<ParametersTseInitialEntity, ParametersTseInitialEntityC>().ReverseMap();
             CreateMap<HorusReportManagerEntity, CreateHorusReportManagerModel>().ReverseMap();
+            CreateMap<PortalDBEntity, CreatePortalDBModel>().ReverseMap();
+            CreateMap<PortalDBModel, CreatePortalDBModel>().ReverseMap();
+            CreateMap<PortalDBEntity, PortalDBModel>().ReverseMap();
+            CreateMap<PortalDBAproveHistoryEntity, CreatePortalDBAproveHistoryModel>().ReverseMap();
+
 
             CreateMap<CreateHorusReportModel,HorusReportModel>()
                 .ForMember(x=> x.StartDate , 

@@ -5,6 +5,7 @@ using Algar.Hours.Application.DataBase.HorusReport.Commands.Create;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment;
 using Algar.Hours.Application.DataBase.HorusReport.Commands.Update;
 using Algar.Hours.Application.DataBase.HoursReport.Commands.Consult;
+using Algar.Hours.Application.DataBase.PortalDB.Commands.Create;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
@@ -16,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Algar.Hours.Api.Controllers
 {
-	[Route("api/v1/[controller]")]
+    [Route("api/v1/[controller]")]
 	[ApiController]
 	[TypeFilter(typeof(ExceptionManager))]
 	public class HorusReportController : ControllerBase
@@ -61,7 +62,40 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
 		}
-		[HttpGet("Consult")]
+
+        [HttpPost("createPortal")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> CreatePortal(
+        [FromBody] CreatePortalDBModel model, [FromServices] ICreateHorusReportCommand createHorusReportCommand)
+        {
+            var data = await createHorusReportCommand.ExecutePortal(model);
+            try
+            {
+
+                _emailCommand.SendEmail(new EmailModel
+                {
+                    To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId))).Email,
+                    Plantilla = "2"
+                });
+
+                _emailCommand.SendEmail(new EmailModel
+                {
+                    To = (await _usuarioCommand.GetByUsuarioId(model.UserEntityId)).Email,
+                    Plantilla = "1"
+                });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+
+        }
+
+        [HttpGet("Consult")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
 		 [FromQuery] Guid id, [FromServices] IConsultHorusReportCommand consultHorusReportCommand)

@@ -4,9 +4,18 @@
     {
         public enum Aprobacion
         {
+
             Aprobado = 1,
             Rechazado = 2,
             Pendiente = 3
+        }
+        public enum AprobacionPortalDB
+        {
+            Pendiente = 0,
+            AprobadoN1 = 1,
+            AprobadoN2 = 2,
+            Rechazado = 3,
+            
         }
 
         public enum Pais
