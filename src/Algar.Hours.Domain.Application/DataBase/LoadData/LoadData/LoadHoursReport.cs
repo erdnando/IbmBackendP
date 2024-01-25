@@ -238,18 +238,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
 
                     
-                    var arpFecha = validaFormatosFecha(entity);
+                    var arp = validaFormatosFecha(entity);
                     //var arp = validaHoraGMT(arpFecha, model.PaisSel);
-                    var arp = validaHoraGMT(arpFecha, horariosGMT, paisGeneral);
+                    //var arp = validaHoraGMT(arpFecha, horariosGMT, paisGeneral);
 
 
                     arp.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;//check it!!!
                     semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
 
-                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 
                     //Obtiene horario para este empleado en la fecha del evento
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString() && x.FechaWorking == semanahorario.DateTime);
+                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == arp.ID_EMPLEADO && x.week == Semana.ToString());// && x.FechaWorking == semanahorario.DateTime);
 
 
                     //Valida si el dia del evento es un festivo del pais Colombia
@@ -305,7 +305,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersInitialEntity.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
 
                         parametersInitialEntity.OverTime = horario.HoraInicio == null ? "N" : politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) == -1 ? "N" : "S";
-                        parametersInitialEntity.EstatusProceso = parametersInitialEntity.OverTime == "N" ? "NO_APLICA_X_OVERTIME" : "";
+                        parametersInitialEntity.EstatusProceso = parametersInitialEntity.OverTime == "N" ? parametersInitialEntity.EstatusProceso : "NO_APLICA_X_OVERTIME";
                         parametersInitialEntity.HorasInicio = previosAndPos[0];
                         parametersInitialEntity.HorasFin = previosAndPos[1];
 
@@ -677,18 +677,26 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //semanahorario = DateTimeOffset.Parse(tse.StartTime);
                     try
                     {
-                        semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
                         
+                        semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+
                     }
                     catch (Exception exx)
                     {
-                        semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                        try
+                        {
+                            semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "d/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                        }catch(Exception ex)
+                        {
+                            semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                        }
+                        
                     }
 
-                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
                     bool bValidacionHorario = false;
 
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString());// && x.FechaWorking== semanahorario.DateTime);
                     //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
                     var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId== paisRegistro!.IdCounty);
 
@@ -821,25 +829,28 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
             try
             {
-                var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartTime);
+               // var HoraInicioOrigin = DateTimeOffset.ParseExact(tseRegistro.StartTime, "dd/MM/yyyy h:mm tt",);
+                var HoraInicioOrigin = DateTimeOffset.ParseExact(tseRegistro.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
+
                 var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
-                tseRegistro.StartTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");
+                tseRegistro.StartTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");// dd/MM/yyyy HH:mm:ss");
 
             }
             catch (Exception ex)
             {
-                tseRegistro.StartTime = tseRegistro.StartTime;
+               tseRegistro.StartTime= tseRegistro.StartTime;
             }
 
             try
             {
-                var HoraFinOrigin = DateTime.Parse(tseRegistro.EndTime);
+               // var HoraFinOrigin = DateTimeOffset.Parse(tseRegistro.EndTime);
+                var HoraFinOrigin = DateTimeOffset.ParseExact(tseRegistro.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
                 var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
-                tseRegistro.EndTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");
+                tseRegistro.EndTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");// dd/MM/yyyy HH:mm:ss");
             }
             catch (Exception ex)
             {
-                tseRegistro.HoraFin = "0";
+               return tseRegistro;
             }
 
             return tseRegistro;
@@ -1266,15 +1277,23 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     // semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
                     try
                     {
-                        semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                        semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "d/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     }
                     catch(Exception exx) {
-                        semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                       
+                        try
+                        {
+                            semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                        }
+                        catch (Exception ex)
+                        {
+                            semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "d/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                        }
                     }
                     
-                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
                     bool bValidacionHorario = false;
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.AccountCMRNumber && x.week == Semana.ToString() && x.FechaWorking== semanahorario.DateTime);
+                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == ste.SessionEmployeeSerialNumber && x.week == Semana.ToString());// && x.FechaWorking== semanahorario.DateTime);
                     
                     var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId == paisRegistro!.IdCounty);
 
@@ -1561,7 +1580,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
             try
             {
-                var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartDateTime);
+                //var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartDateTime);
+                var HoraInicioOrigin = DateTimeOffset.ParseExact(tseRegistro.StartDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
                 var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
                 tseRegistro.StartDateTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");
 
@@ -1573,7 +1593,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
             try
             {
-                var HoraFinOrigin = DateTime.Parse(tseRegistro.EndDateTime);
+                //var HoraFinOrigin = DateTime.Parse(tseRegistro.EndDateTime);
+                var HoraFinOrigin = DateTimeOffset.ParseExact(tseRegistro.EndDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
                 var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
                 tseRegistro.EndDateTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");
             }

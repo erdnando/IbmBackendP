@@ -184,7 +184,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var HoraInicioReportado = DateTimeOffset.Parse(model.StartTime);
             var HoraFinReportado = DateTimeOffset.Parse(model.EndTime);
 
-            int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+            int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
             var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy/MM/dd");
             var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.FechaWorking.ToString("yyy/MM/dd") == fechaformateadaReporta);
@@ -223,7 +223,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
             var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == horusModel.UserEntityId && x.StartDate == DateTimeOffset.Parse(horusModel.StartDate.ToString()));
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-            var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").Where(op => op.State == 0 || op.State == 1 && op.HorusReportEntity.StartDate == DateTime.Parse(horusModel.StartDate.ToString())).ToList();
+            var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").
+                Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StartDate == DateTime.Parse(horusModel.StartDate.ToString())   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
 
             //var HorasPortalDB = _dataBaseService.HorusReportEntity.Where(co => co.StartDate == DateTime.Parse(horusModel.StartDate.ToString() && co.State == 0 || co.State == 1).ToList();
 
