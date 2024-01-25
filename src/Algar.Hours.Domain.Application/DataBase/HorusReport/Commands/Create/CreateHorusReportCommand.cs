@@ -15,6 +15,7 @@ using System;
 using System.Globalization;
 using static Algar.Hours.Application.Enums.Enums;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 {
@@ -150,10 +151,10 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             return horusModel;
         }
 
-        public async Task<HorusReportModel> ExecutePortal(HorusReportModel model)
+        public async Task<PortalDBModel> ExecutePortal(CreateHorusReportModel model)
         {
 
-
+            PortalDBModel returnPortalDB = new();
             //---------------------------heredado----------------------------------------------------------------
             var horusModel = _mapper.Map<HorusReportModel>(model);
 
@@ -199,16 +200,16 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     // State 100 es por que trata de asignar un standby durante horario laboral
                     // agregar notificacion email
 
-                    horusModel.State = 100;
-                    return horusModel;
+                    returnPortalDB.State = 100;
+                    return returnPortalDB;
                 }
             }
             else
             {
                 // State 99 es por que no tiene horario para comparar
                 // agregar notificacion email
-                horusModel.State = 99;
-                return horusModel;
+                returnPortalDB.State = 99;
+                return returnPortalDB;
             }
 
             //Validacion de limites y excepciones
@@ -220,20 +221,21 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var HorasLimiteDia = limitesCountry.TargetTimeDay;
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
-            var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == horusModel.UserEntityId && x.StartDate == DateTimeOffset.Parse(horusModel.StartDate.ToString());
+            var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == horusModel.UserEntityId && x.StartDate == DateTimeOffset.Parse(horusModel.StartDate.ToString()));
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-            
-            var HorasPortalDB = _dataBaseService.HorusReportEntity.Where(co => co.StartDate == DateTime.Parse(horusModel.StartDate.ToString() && co.State == 0 || co.State == 1).ToList();
+            var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").Where(op => op.State == 0 || op.State == 1 && op.HorusReportEntity.StartDate == DateTime.Parse(horusModel.StartDate.ToString())).ToList();
+
+            //var HorasPortalDB = _dataBaseService.HorusReportEntity.Where(co => co.StartDate == DateTime.Parse(horusModel.StartDate.ToString() && co.State == 0 || co.State == 1).ToList();
 
             //
 
-            var HorasPortalDBT = HorasPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
+            var HorasPortalDBT = infoQuery.Select(x => double.Parse(x.HorusReportEntity.CountHours)).Sum();
             if ((tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada))
             {
                 //Se ha superado el límite de horas para StandBy
                 // agregar notificacion email
-                horusModel.State = 101;
-                return horusModel;
+                returnPortalDB.State = 101;
+                return returnPortalDB;
             }
 
 
@@ -252,36 +254,28 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 .ToList();
 
 
-            if (data.Count != 0)
+            if (data.Count > 0)
             {
                 var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
                 var assignmentRef = _dataBaseService.assignmentReports.
                      Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
                      .FirstOrDefault();
 
+                
 
-                if (assignmentRef!.State == 3)
+                if (assignmentRef!.State != 3)
                 {
                     //is pending
                     canSendAgainHours = false;
                     //se termina por overlapping!!!!!
                     //el Registro se encuentra en Overlapi StandBy
-                    // agregar notificacion email
                     horusModel.State = 102;
-                    return horusModel;
-                }
-                else
-                {
-                    // it has been approved or rejected
-                    canSendAgainHours = true;
-                    //continua
+                    return returnPortalDB;
+                    // agregar notificacion email
+
                 }
             }
-            else
-            {
-                //no hay overlapping!!!!
-                canSendAgainHours = true;
-            }
+            
 
 
 
@@ -314,7 +308,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             }
 
             entity.NumberReport = Maxen + 1;
-            entity.StartDate = DateTime.Parse(nuevaFechaHoraFormato).Date;
+            entity.StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             await _dataBaseService.SaveAsync();
 
@@ -323,7 +317,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             assignmentReport.HorusReportEntityId = entity.IdHorusReport;
             assignmentReport.UserEntityId = Guid.Parse(entity.ApproverId);
             assignmentReport.Description = horusModel.Description;
-            assignmentReport.State = (byte)Enums.Enums.Aprobacion.Pendiente;
+            assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
 
             var assigmentreportentity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
             _dataBaseService.assignmentReports.Add(assigmentreportentity);
@@ -335,7 +329,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
 
 
-            return horusModel;
+            return returnPortalDB;
 
 
         }

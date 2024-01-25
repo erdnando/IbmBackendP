@@ -6,7 +6,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
     public interface ICreateHorusReportCommand
     {
         Task<HorusReportModel> Execute(CreateHorusReportModel model);
-        Task<PortalDBModel> ExecutePortal(CreatePortalDBModel model);
+        Task<PortalDBModel> ExecutePortal(CreateHorusReportModel model);
 
     }
 }

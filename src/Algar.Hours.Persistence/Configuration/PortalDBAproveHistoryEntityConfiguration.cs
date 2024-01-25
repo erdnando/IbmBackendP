@@ -15,8 +15,6 @@ namespace Algar.Hours.Persistence.Configuration
         {
 
             entityBuilder.HasKey(x => x.IdPortalDBAproveHistory);
-            entityBuilder.Property(x => x.IdPortalDB).IsRequired();
-            entityBuilder.Property(x => x.TipoReporte).IsRequired();
 
         }
     }

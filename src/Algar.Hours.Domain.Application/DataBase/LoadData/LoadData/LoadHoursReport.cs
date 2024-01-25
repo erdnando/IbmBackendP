@@ -1,8 +1,10 @@
-﻿using Algar.Hours.Application.DataBase.Country.Commands;
+﻿using Algar.Hours.Application.DataBase.AssignmentReport.Commands;
+using Algar.Hours.Application.DataBase.Country.Commands;
 using Algar.Hours.Application.DataBase.Country.Commands.Consult;
 using Algar.Hours.Application.DataBase.PortalDB.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Domain.Entities.Aprobador;
+using Algar.Hours.Domain.Entities.AssignmentReport;
 using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Domain.Entities.Festivos;
 using Algar.Hours.Domain.Entities.Horario;
@@ -12,6 +14,7 @@ using Algar.Hours.Domain.Entities.PaisRelacionGMT;
 using Algar.Hours.Domain.Entities.Parameters;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
+using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using EFCore.BulkExtensions;
@@ -1794,6 +1797,188 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             //los sobrantes estan en overtime, insertar en portaldb y su history, como se hace en reporte de horas stand by
             //TODO
 
+            var rowARPParameterFinal = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+            var rowTSEParameterFinal = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+            var rowSTEParameterFinal = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+
+            foreach (var itemARP in rowARPParameterFinal)
+            {
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
+                var data = _dataBaseService.HorusReportEntity
+                .Where(h => h.StartDate == DateTime.Parse(itemARP.FECHA_REP) && h.UserEntityId == UserRow.IdUser)
+                .AsEnumerable()
+                .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARP.HoraInicio, itemARP.HoraFin) ||
+                (TimeInRange(h.StartTime, DateTime.Parse(itemARP.HoraInicio), DateTime.Parse(itemARP.HoraFin)) &&
+                 TimeInRange(h.EndTime, DateTime.Parse(itemARP.HoraInicio), DateTime.Parse(itemARP.HoraFin))))
+                .ToList();
+                if (data.Count > 0)
+                {
+                    var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                    var assignmentRef = _dataBaseService.assignmentReports.
+                         Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                         .FirstOrDefault();
+
+                    if (assignmentRef!.State != 3)
+                    {
+                        itemARP.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                    }
+                }
+            }
+
+            foreach (var itemTSE in rowTSEParameterFinal)
+            {
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
+                var data = _dataBaseService.HorusReportEntity
+                .Where(h => h.StartDate == DateTime.Parse(itemTSE.FECHA_REP) && h.UserEntityId == UserRow.IdUser)
+                .AsEnumerable()
+                .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
+                (TimeInRange(h.StartTime, DateTime.Parse(itemTSE.HoraInicio), DateTime.Parse(itemTSE.HoraFin)) &&
+                 TimeInRange(h.EndTime, DateTime.Parse(itemTSE.HoraInicio), DateTime.Parse(itemTSE.HoraFin))))
+                .ToList();
+                if (data.Count > 0)
+                {
+                    var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                    var assignmentRef = _dataBaseService.assignmentReports.
+                         Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                         .FirstOrDefault();
+
+                    if (assignmentRef!.State != 3)
+                    {
+                        itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                    }
+                }
+            }
+
+            foreach (var itemSTE in rowSTEParameterFinal)
+            {
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
+                var data = _dataBaseService.HorusReportEntity
+                .Where(h => h.StartDate == DateTime.Parse(itemSTE.FECHA_REP) && h.UserEntityId == UserRow.IdUser)
+                .AsEnumerable()
+                .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTE.HoraInicio, itemSTE.HoraFin) ||
+                (TimeInRange(h.StartTime, DateTime.Parse(itemSTE.HoraInicio), DateTime.Parse(itemSTE.HoraFin)) &&
+                 TimeInRange(h.EndTime, DateTime.Parse(itemSTE.HoraInicio), DateTime.Parse(itemSTE.HoraFin))))
+                .ToList();
+                if (data.Count > 0)
+                {
+                    var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                    var assignmentRef = _dataBaseService.assignmentReports.
+                         Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                         .FirstOrDefault();
+
+                    if (assignmentRef!.State != 3)
+                    {
+                        itemSTE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                    }
+                }
+            }
+
+
+            await _dataBaseService.SaveAsync();
+
+            var rowARPParameterGral = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+            var rowTSEParameterGral = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+            var rowSTEParameterGral = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+
+            List<HorusReportEntity> rowsHorusNew = new();
+            HorusReportEntity rowAdd = new();
+            List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
+            Domain.Entities.AssignmentReport.AssignmentReport rowAddAssig = new();
+
+            //ARP
+            //--------------------------------------------------------------------------
+            foreach (var itemARPNew in rowARPParameterGral)
+            {
+                var Maxen = 0;
+                Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                rowAdd = new() {
+                    IdHorusReport = Guid.NewGuid(),
+                    CreationDate = DateTime.Now,
+                    DateApprovalSystem = DateTime.Now,
+                    NumberReport = Maxen + 1,
+                    StartDate = DateTimeOffset.Parse(itemARPNew.FECHA_REP).Date
+                };
+                rowsHorusNew.Add(rowAdd);
+
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+
+                rowAddAssig = new() {
+                    IdAssignmentReport = Guid.NewGuid(),
+                    HorusReportEntityId = rowAdd.IdHorusReport,
+                    UserEntityId = UserRow.IdUser,
+                    Description = "PROCESO_OVERTIME",
+                    State= (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+
+                };
+                rowAssignments.Add(rowAddAssig);
+            }
+
+            //TSE
+            //------------------------------------------------------------------------
+            foreach (var itemTSENew in rowTSEParameterGral)
+            {
+                var Maxen = 0;
+                Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                rowAdd = new()
+                {
+                    IdHorusReport = Guid.NewGuid(),
+                    CreationDate = DateTime.Now,
+                    DateApprovalSystem = DateTime.Now,
+                    NumberReport = Maxen + 1,
+                    StartDate = DateTimeOffset.Parse(itemTSENew.FECHA_REP).Date
+                };
+                rowsHorusNew.Add(rowAdd);
+
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
+
+                rowAddAssig = new()
+                {
+                    IdAssignmentReport = Guid.NewGuid(),
+                    HorusReportEntityId = rowAdd.IdHorusReport,
+                    UserEntityId = UserRow.IdUser,
+                    Description = "PROCESO_OVERTIME",
+                    State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+
+                };
+                rowAssignments.Add(rowAddAssig);
+            }
+            //STE
+            //------------------------------------------------------------------------
+            foreach (var itemSTENew in rowSTEParameterGral)
+            {
+                var Maxen = 0;
+                Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                rowAdd = new()
+                {
+                    IdHorusReport = Guid.NewGuid(),
+                    CreationDate = DateTime.Now,
+                    DateApprovalSystem = DateTime.Now,
+                    NumberReport = Maxen + 1,
+                    StartDate = DateTimeOffset.Parse(itemSTENew.FECHA_REP).Date
+                };
+                rowsHorusNew.Add(rowAdd);
+
+                var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
+
+                rowAddAssig = new()
+                {
+                    IdAssignmentReport = Guid.NewGuid(),
+                    HorusReportEntityId = rowAdd.IdHorusReport,
+                    UserEntityId = UserRow.IdUser,
+                    Description = "PROCESO_OVERTIME",
+                    State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+
+                };
+                rowAssignments.Add(rowAddAssig);
+            }
+
+            _dataBaseService.HorusReportEntity.AddRange(rowsHorusNew);
+            await _dataBaseService.SaveAsync();
+
+            
+            _dataBaseService.assignmentReports.AddRange(rowAssignments);
+
+            await _dataBaseService.SaveAsync();
 
             return true;
         }

@@ -66,7 +66,7 @@ namespace Algar.Hours.Api.Controllers
         [HttpPost("createPortal")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> CreatePortal(
-        [FromBody] CreatePortalDBModel model, [FromServices] ICreateHorusReportCommand createHorusReportCommand)
+        [FromBody] CreateHorusReportModel model, [FromServices] ICreateHorusReportCommand createHorusReportCommand)
         {
             var data = await createHorusReportCommand.ExecutePortal(model);
             try
@@ -74,7 +74,7 @@ namespace Algar.Hours.Api.Controllers
 
                 _emailCommand.SendEmail(new EmailModel
                 {
-                    To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId))).Email,
+                    To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
                     Plantilla = "2"
                 });
 
