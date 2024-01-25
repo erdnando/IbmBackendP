@@ -23,6 +23,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands
         public Guid CountryId { get; set; }
         public CountryEntity CountryEntity { get; set; }
 
+        public number State { get; set; }
+        
+
 
     }
 }

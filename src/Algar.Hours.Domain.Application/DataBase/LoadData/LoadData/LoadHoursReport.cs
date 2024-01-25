@@ -1789,9 +1789,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
             }
 
-
-
             await _dataBaseService.SaveAsync();
+
+            //los sobrantes estan en overtime, insertar en portaldb y su history, como se hace en reporte de horas stand by
+            //TODO
+
 
             return true;
         }
