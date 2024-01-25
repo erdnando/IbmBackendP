@@ -225,7 +225,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Para ARP, busca festivos de Colombia solamente
                 esfestivos = _dataBaseService.FestivosEntity.Where(x => x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
-               // var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e=>e.NameCountrySelected==model.PaisSel).ToListAsync();
+               var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e=>e.NameCountrySelected==model.PaisSel).ToListAsync();
 
 
                 //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
@@ -239,7 +239,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     
                     var arpFecha = validaFormatosFecha(entity);
-                    var arp = validaHoraGMT(arpFecha, model.PaisSel);
+                    //var arp = validaHoraGMT(arpFecha, model.PaisSel);
+                    var arp = validaHoraGMT(arpFecha, horariosGMT, paisGeneral);
 
 
                     arp.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;//check it!!!
@@ -352,14 +353,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             
         }
 
-        private ARPLoadDetailEntity validaHoraGMT(ARPLoadDetailEntity arpRegistro, string horasDiff)
+        private ARPLoadDetailEntity validaHoraGMT(ARPLoadDetailEntity arpRegistro, List<PaisRelacionGMTEntity> paisGMT, List<CountryEntity> paisGeneral)
         {
-           // var paisByCode = paisGeneral.FirstOrDefault(x => x.CodigoPais.Trim().ToUpper() == arpRegistro.PAIS.Trim().ToUpper());
-            //var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisByCode.NameCountry);
+            var paisByCode = paisGeneral.FirstOrDefault(x => x.CodigoPais.Trim().ToUpper() == arpRegistro.PAIS.Trim().ToUpper());
+            var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisByCode.NameCountry);
             try
             {
                 var HoraInicioOrigin = DateTime.Parse(arpRegistro.HORA_INICIO);
-                var horaActualizada = HoraInicioOrigin.AddHours(Int32.Parse(horasDiff));
+                var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
                 arpRegistro.HORA_INICIO = horaActualizada.ToString("HH:mm:ss");
 
             }
@@ -371,7 +372,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 var HoraFinOrigin = DateTime.Parse(arpRegistro.HORA_FIN);
-                var horaFinActualizada = HoraFinOrigin.AddHours(Int32.Parse(horasDiff));
+                var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
                 arpRegistro.HORA_FIN = horaFinActualizada.ToString("HH:mm:ss");
             }
             catch (Exception ex)
@@ -661,8 +662,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 listFestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
                
                 var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
-               // var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
-               // var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
+                var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
+                var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
 
                 List<ParametersTseInitialEntity> listParametersInitialEntity = new();
 
@@ -670,7 +671,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     var tseFecha = validaFormatosFechaTSE(registro);
                     var paisRegistro = listaCountries.FirstOrDefault(e=>e.CodigoPais== tseFecha.NumeroEmpleado.Substring(tseFecha.NumeroEmpleado.Length - 3));
-                    var tse = validaHoraTSEGMT(tseFecha, model.PaisSel);
+                    //var tse = validaHoraTSEGMT(tseFecha, model.PaisSel);
+                    var tse = validaHoraTSEGMT(tseFecha, horariosGMT, paisRegistro);
 
                     //semanahorario = DateTimeOffset.Parse(tse.StartTime);
                     try
@@ -814,13 +816,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
         }
 
-        private TSELoadEntity validaHoraTSEGMT(TSELoadEntity tseRegistro, string horasDiff)
+        private TSELoadEntity validaHoraTSEGMT(TSELoadEntity tseRegistro, List<PaisRelacionGMTEntity> paisGMT, CountryModel paisEntidad)
         {
-            //var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
+            var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
             try
             {
                 var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartTime);
-                var horaActualizada = HoraInicioOrigin.AddHours(Int32.Parse(horasDiff));
+                var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
                 tseRegistro.StartTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");
 
             }
@@ -832,7 +834,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 var HoraFinOrigin = DateTime.Parse(tseRegistro.EndTime);
-                var horaFinActualizada = HoraFinOrigin.AddHours(Int32.Parse(horasDiff));
+                var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
                 tseRegistro.EndTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");
             }
             catch (Exception ex)
@@ -842,6 +844,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
             return tseRegistro;
         }
+
+        //private TSELoadEntity validaHoraTSEGMT(TSELoadEntity tseRegistro, string horasDiff)
+        //{
+        //    //var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
+        //    try
+        //    {
+        //        var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartTime);
+        //        var horaActualizada = HoraInicioOrigin.AddHours(Int32.Parse(horasDiff));
+        //        tseRegistro.StartTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        tseRegistro.StartTime = tseRegistro.StartTime;
+        //    }
+
+        //    try
+        //    {
+        //        var HoraFinOrigin = DateTime.Parse(tseRegistro.EndTime);
+        //        var horaFinActualizada = HoraFinOrigin.AddHours(Int32.Parse(horasDiff));
+        //        tseRegistro.EndTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        tseRegistro.HoraFin = "0";
+        //    }
+
+        //    return tseRegistro;
+        //}
 
         private TSELoadEntity validaFormatosFechaTSE(TSELoadEntity item)
         {
@@ -1220,8 +1251,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
 
-               // var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
-               // var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
+                var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
+                var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
 
                 List<ParametersSteInitialEntity> listParametersInitialEntity = new();
 
@@ -1229,7 +1260,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     var stefecha= validaFormatosFechaSTE(registro);
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == stefecha.SessionEmployeeSerialNumber.Substring(stefecha.SessionEmployeeSerialNumber.Length - 3));
-                    var ste = validaHoraSTEGMT(stefecha, model.PaisSel);
+                    //var ste = validaHoraSTEGMT(stefecha, model.PaisSel);
+                    var ste = validaHoraSTEGMT(stefecha, horariosGMT, paisRegistro);
 
                     // semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
                     try
@@ -1522,6 +1554,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 return summary;
             }
+        }
+
+        private STELoadEntity validaHoraSTEGMT(STELoadEntity tseRegistro, List<PaisRelacionGMTEntity> paisGMT, CountryModel paisEntidad)
+        {
+            var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
+            try
+            {
+                var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartDateTime);
+                var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
+                tseRegistro.StartDateTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");
+
+            }
+            catch (Exception ex)
+            {
+                tseRegistro.StartDateTime = tseRegistro.StartDateTime;
+            }
+
+            try
+            {
+                var HoraFinOrigin = DateTime.Parse(tseRegistro.EndDateTime);
+                var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
+                tseRegistro.EndDateTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");
+            }
+            catch (Exception ex)
+            {
+                tseRegistro.EndDateTime = tseRegistro.EndDateTime;
+            }
+
+            return tseRegistro;
         }
 
         private STELoadEntity validaHoraSTEGMT(STELoadEntity tseRegistro, string horasDiff)
