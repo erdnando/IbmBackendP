@@ -3,6 +3,7 @@ using Algar.Hours.Application.DataBase.Country.Commands;
 using Algar.Hours.Application.DataBase.Country.Commands.Consult;
 using Algar.Hours.Application.DataBase.PortalDB.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
+using Algar.Hours.Application.DataBase.User.Commands.GetManager;
 using Algar.Hours.Domain.Entities.Aprobador;
 using Algar.Hours.Domain.Entities.AssignmentReport;
 using Algar.Hours.Domain.Entities.Country;
@@ -27,6 +28,7 @@ using NetTopologySuite.Index.HPRtree;
 using Org.BouncyCastle.Utilities;
 using Sustainsys.Saml2.Metadata;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
@@ -143,6 +145,49 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<string> LoadARP(LoadJsonPais model)
         {
+            //var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("46437610-c47b-4ef8-9807-8535c6ad424d")).ToList();
+            //var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("46437610-c47b-4ef8-9807-8535c6ad424d")).ToList();
+            //var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("46437610-c47b-4ef8-9807-8535c6ad424d")).ToList();
+
+
+            //var RowGralARPTSE = rowARPGral.ToList().IntersectBy(
+            //    rowTSEGral.ToList().Select(r => new { EmployeeCode = r.EmployeeCode, FECHA_REP = r.FECHA_REP, HoraInicio = r.HoraInicio, HoraFin = r.HoraFin, Semana = r.Semana }), t => new { EmployeeCode = t.EmployeeCode, FECHA_REP = t.FECHA_REP, HoraInicio = t.HoraInicio, HoraFin = t.HoraFin, Semana = t.Semana }).ToList();
+
+            //var RowGralARPSTE = rowARPGral.ToList().IntersectBy(
+            //    rowSTEGral.ToList().Select(o => new { EmployeeCode = o.EmployeeCode, FECHA_REP = o.FECHA_REP, HoraInicio = o.HoraInicio, HoraFin = o.HoraFin, Semana = o.Semana }),
+            //    x => new { EmployeeCode = x.EmployeeCode, FECHA_REP = x.FECHA_REP, HoraInicio = x.HoraInicio, HoraFin = x.HoraFin, Semana = x.Semana }).ToList();
+
+            //var RowGralTSESTE = rowTSEGral.ToList().IntersectBy(
+            //    rowSTEGral.ToList().Select(o => new { EmployeeCode = o.EmployeeCode, FECHA_REP = o.FECHA_REP, HoraInicio = o.HoraInicio, HoraFin = o.HoraFin, Semana = o.Semana }),
+            //    x => new { EmployeeCode = x.EmployeeCode, FECHA_REP = x.FECHA_REP, HoraInicio = x.HoraInicio, HoraFin = x.HoraFin, Semana = x.Semana }).ToList();
+
+            //var RowGralTSEARP = rowTSEGral.ToList().IntersectBy(
+            //    rowARPGral.ToList().Select(r => new { EmployeeCode = r.EmployeeCode, FECHA_REP = r.FECHA_REP, HoraInicio = r.HoraInicio, HoraFin = r.HoraFin, Semana = r.Semana }), t => new { EmployeeCode = t.EmployeeCode, FECHA_REP = t.FECHA_REP, HoraInicio = t.HoraInicio, HoraFin = t.HoraFin, Semana = t.Semana }).ToList();
+
+            //var RowGralSTEARP = rowSTEGral.ToList().IntersectBy(
+            //    rowARPGral.ToList().Select(o => new { EmployeeCode = o.EmployeeCode, FECHA_REP = o.FECHA_REP, HoraInicio = o.HoraInicio, HoraFin = o.HoraFin, Semana = o.Semana }),
+            //    x => new { EmployeeCode = x.EmployeeCode, FECHA_REP = x.FECHA_REP, HoraInicio = x.HoraInicio, HoraFin = x.HoraFin, Semana = x.Semana }).ToList();
+
+            //var RowGralSTETSE = rowSTEGral.ToList().IntersectBy(
+            //    rowTSEGral.ToList().Select(o => new { EmployeeCode = o.EmployeeCode, FECHA_REP = o.FECHA_REP, HoraInicio = o.HoraInicio, HoraFin = o.HoraFin, Semana = o.Semana }),
+            //    x => new { EmployeeCode = x.EmployeeCode, FECHA_REP = x.FECHA_REP, HoraInicio = x.HoraInicio, HoraFin = x.HoraFin, Semana = x.Semana }).ToList();
+
+            //var RowGralARPTSESTE = rowARPGral.ToList().IntersectBy(
+            //    rowSTEGral.ToList().Select(o => new { EmployeeCode = o.EmployeeCode, FECHA_REP = o.FECHA_REP, HoraInicio = o.HoraInicio, HoraFin = o.HoraFin, Semana = o.Semana }),
+            //    x => new { EmployeeCode = x.EmployeeCode, FECHA_REP = x.FECHA_REP, HoraInicio = x.HoraInicio, HoraFin = x.HoraFin, Semana = x.Semana }).IntersectBy(rowTSEGral.ToList().Select(r => new { EmployeeCode = r.EmployeeCode, FECHA_REP = r.FECHA_REP, HoraInicio = r.HoraInicio, HoraFin = r.HoraFin, Semana = r.Semana }), t => new { EmployeeCode = t.EmployeeCode, FECHA_REP = t.FECHA_REP, HoraInicio = t.HoraInicio, HoraFin = t.HoraFin, Semana = t.Semana }).ToList();
+
+            //RowGralARPTSE.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralTSEARP.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralARPSTE.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralSTEARP.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralTSESTE.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralSTETSE.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralARPTSESTE.ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING");
+            //RowGralARPTSE.ToList().ForEach(x => x.EstatusProceso = "EN_OVERTIME");
+
+            //await _dataBaseService.SaveAsync();
+
+
             try
             {
                 //deleting loads previous processing..
@@ -197,17 +242,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Serializa la carga excel en un obj
                 List<ARPLoadDetailEntity> datosARPExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
-
-
                
-                
                 // datosARPExcel.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
                 //datosARPExcel.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
 
                 List<ARPLoadDetailEntity> datosARPExcel = datosARPExcelFull!.Where(x => x.ESTADO != "EXTRACTED" && x.ESTADO != "FINAL").ToList();
 
 
-                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == aRPLoadEntity.IdArpLoad).ToList().
+                var rowDuplicados = datosARPExcel.GroupBy(x => x.ID_EMPLEADO).Select(g => new ARPLoadDetailEntity  { ID_EMPLEADO=g.Key }).OrderBy(e=>e.ID_EMPLEADO).ToList();
+                rowDuplicados.ToList().ForEach(x => x.ESTADO = "NO_APLICA_X_OVERLAPING");
+
+
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == aRPLoadEntity.IdArpLoad).ToList().
                                               ForEach(x => x.ARPCarga = datosARPExcelFull.Count.ToString());
 
                  _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == aRPLoadEntity.IdArpLoad).ToList().
@@ -2239,38 +2285,46 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
 
-                var registrosOverlaped = from arp in rowARPGral
-                                         join ste in rowSTEGral on arp.EmployeeCode equals ste.EmployeeCode
-                                         join tse in rowTSEGral on ste.EmployeeCode equals tse.EmployeeCode
-                                         where (arp.Anio == ste.Anio || arp.Anio == tse.Anio || ste.Anio==tse.Anio)
-                                         where (arp.Semana == ste.Semana || arp.Semana == tse.Semana || ste.Semana==tse.Semana)
-                                         where (arp.HoraInicio == ste.HoraInicio || arp.HoraInicio == tse.HoraInicio || ste.HoraInicio==tse.HoraInicio)
-                                         where (arp.HoraFin == ste.HoraFin || arp.HoraFin == tse.HoraFin || ste.HoraFin == tse.HoraFin)
-                                         where (arp.EmployeeCode == ste.EmployeeCode || arp.EmployeeCode == tse.EmployeeCode || ste.EmployeeCode==tse.EmployeeCode)
-                                         select new
-                                         {
-                                             CodeUser = arp.IdParametersInitialEntity,
-                                             Categoria = arp.Estado,
-                                             EstatusProceso=arp.EstatusProceso,
-                                             EmployeCode = arp.EmployeeCode,
-                                             Anio = arp.Anio,
-                                             Semana = arp.Semana,
-                                             HoraInicio = arp.HoraInicio,
-                                             HoraFin=arp.HoraFin,
-                                         };
-                var listGral = registrosOverlaped.ToList();
-                foreach (var item in listGral)
+                var garlARP = rowARPGral.Select(op=> new { EmployeeCode= op.EmployeeCode, FECHA_REP=op.FECHA_REP, HoraInicio= op.HoraInicio, HoraFin = op.HoraFin, Semana = op.Semana }).ToList();
+                var garlTSE = rowTSEGral.Select(op=> new { EmployeeCode= op.EmployeeCode, FECHA_REP=op.FECHA_REP, HoraInicio= op.HoraInicio, HoraFin = op.HoraFin, Semana = op.Semana }).ToList();
+                var garlSTE = rowSTEGral.Select(op=> new { EmployeeCode= op.EmployeeCode, FECHA_REP=op.FECHA_REP, HoraInicio= op.HoraInicio, HoraFin = op.HoraFin, Semana = op.Semana }).ToList();
+
+                var RowGralOverLaping = garlARP.Intersect(garlTSE).Intersect(garlSTE).ToList();
+                //var registrosOverlaped = from arp in rowARPGral.Intersect(rowSTEGral)
+                //                         join ste in rowSTEGral on arp.EmployeeCode equals ste.EmployeeCode
+                //                         join tse in rowTSEGral on ste.EmployeeCode equals tse.EmployeeCode
+                //                         where (arp.Anio == ste.Anio || arp.Anio == tse.Anio || ste.Anio==tse.Anio)
+                //                         where (arp.Semana == ste.Semana || arp.Semana == tse.Semana || ste.Semana==tse.Semana)
+                //                         where (arp.HoraInicio == ste.HoraInicio || arp.HoraInicio == tse.HoraInicio || ste.HoraInicio==tse.HoraInicio)
+                //                         where (arp.HoraFin == ste.HoraFin || arp.HoraFin == tse.HoraFin || ste.HoraFin == tse.HoraFin)
+                //                         where (arp.EmployeeCode == ste.EmployeeCode || arp.EmployeeCode == tse.EmployeeCode || ste.EmployeeCode==tse.EmployeeCode)
+                //                         select new
+                //                         {
+                //                             CodeUser = arp.IdParametersInitialEntity,
+                //                             Categoria = arp.Estado,
+                //                             EstatusProceso=arp.EstatusProceso,
+                //                             EmployeCode = arp.EmployeeCode,
+                //                             Anio = arp.Anio,
+                //                             Semana = arp.Semana,
+                //                             HoraInicio = arp.HoraInicio,
+                //                             HoraFin=arp.HoraFin,
+                //                         };
+                //var listGral = registrosOverlaped.ToList();
+                foreach (var item in RowGralOverLaping)
                 {
-                    var itemARP = _dataBaseService.ParametersArpInitialEntity.FirstOrDefault(e => (e.EmployeeCode == item.EmployeCode && e.Semana== item.Semana && e.HoraInicio== item.HoraInicio && e.HoraFin== item.HoraFin && e.IdCarga==new Guid(model.IdCarga)));
+                    var itemARP = _dataBaseService.ParametersArpInitialEntity.FirstOrDefault(e => (e.EmployeeCode == item.EmployeeCode && e.Semana== item.Semana && e.HoraInicio== item.HoraInicio && e.HoraFin== item.HoraFin && e.IdCarga==new Guid(model.IdCarga)));
 
-                    var itemTSE = _dataBaseService.ParametersSteInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeCode && e.Semana == item.Semana && e.HoraInicio == item.HoraInicio && e.HoraFin == item.HoraFin && e.IdCarga == new Guid(model.IdCarga));
+                    var itemTSE = _dataBaseService.ParametersTseInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeeCode && e.Semana == item.Semana && e.HoraInicio == item.HoraInicio && e.HoraFin == item.HoraFin && e.IdCarga == new Guid(model.IdCarga));
 
-                    var itemSTE = _dataBaseService.ParametersTseInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeCode && e.Semana == item.Semana && e.HoraInicio == item.HoraInicio && e.HoraFin == item.HoraFin && e.IdCarga == new Guid(model.IdCarga));
+                    var itemSTE = _dataBaseService.ParametersSteInitialEntity.FirstOrDefault(e => e.EmployeeCode == item.EmployeeCode && e.Semana == item.Semana && e.HoraInicio == item.HoraInicio && e.HoraFin == item.HoraFin && e.IdCarga == new Guid(model.IdCarga));
 
 
                     if (itemARP != null) { itemARP.EstatusProceso = "NO_APLICA_X_OVERLAPING"; _dataBaseService.ParametersArpInitialEntity.Update(itemARP); }
-                    if (itemTSE != null) { itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING"; _dataBaseService.ParametersSteInitialEntity.Update(itemTSE); }
-                    if (itemSTE != null) { itemSTE.EstatusProceso = "NO_APLICA_X_OVERLAPING"; _dataBaseService.ParametersTseInitialEntity.Update(itemSTE); }
+                    if (itemTSE != null) { itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING"; _dataBaseService.ParametersTseInitialEntity.Update(itemTSE); }
+                    if (itemSTE != null) { itemSTE.EstatusProceso = "NO_APLICA_X_OVERLAPING"; _dataBaseService.ParametersSteInitialEntity.Update(itemSTE); }
+
+                    itemARP.EstatusProceso = "EN_OVERTIME"; _dataBaseService.ParametersArpInitialEntity.Update(itemARP);
+
                     await _dataBaseService.SaveAsync();
                 }
 
@@ -2601,13 +2655,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 //aqui
-                var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                var rowSTEParameter = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                var rowSTEParameter = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
                 var limitesCountryARP = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == Guid.Parse("908465f1-4848-4c86-9e30-471982c01a2d"));
                 var HorasLimiteDia = limitesCountryARP.TargetTimeDay;
-                var listaCountries = await _consultCountryCommand.List();
+                //var listaCountries = await _consultCountryCommand.List();
+                var listaCountries = await _dataBaseService.CountryEntity.AsNoTracking().ToListAsync();
 
 
                 foreach (var itemARP in rowARPParameter)
