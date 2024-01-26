@@ -22,6 +22,7 @@ using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.Win32;
 using NetTopologySuite.Index.HPRtree;
 using Org.BouncyCastle.Utilities;
 using Sustainsys.Saml2.Metadata;
@@ -221,6 +222,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 CultureInfo cul = CultureInfo.CurrentCulture;
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
 
+                var listaCountries = await _consultCountryCommand.List();
                 List<FestivosEntity> esfestivos = new();
 
                 //Para ARP, busca festivos de Colombia solamente
@@ -236,15 +238,53 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 foreach (var entity in datosARPExcel)
                 {
+                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
+                    var arpx = fHomologaARP(entity, horariosGMT, paisRegistro!);
 
-                    
-                    var arp = validaFormatosFecha(entity);
+                   // var arp = fHomologaARP(entity);
+                    if (arpx == null)
+                    {
+                        ParametersArpInitialEntity parametersARPInitialEntity = new ParametersArpInitialEntity();
+
+                        parametersARPInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
+                        parametersARPInitialEntity.EstatusProceso = "NO_APLICA_X_FALTA_DATOS";
+                        parametersARPInitialEntity.FECHA_REP = entity.FECHA_REP;
+                        parametersARPInitialEntity.TOTAL_MINUTOS = entity.TOTAL_MINUTOS;
+                        parametersARPInitialEntity.totalHoras = getHoras(entity.TOTAL_MINUTOS);
+                        parametersARPInitialEntity.HorasInicio = 0;
+                        parametersARPInitialEntity.HorasFin = 0;
+                        parametersARPInitialEntity.EmployeeCode = entity.ID_EMPLEADO;
+                        parametersARPInitialEntity.IdCarga = new Guid(model.IdCarga);
+
+                        
+                        parametersARPInitialEntity.HoraInicio = "0";
+                        parametersARPInitialEntity.HoraFin = "0";
+                        
+                        parametersARPInitialEntity.OutIme = "N";
+                        parametersARPInitialEntity.Semana = 0;
+                        parametersARPInitialEntity.HoraInicioHoraio = "0";
+                        parametersARPInitialEntity.HoraFinHorario = "0";
+                        parametersARPInitialEntity.OverTime = "N";
+                        parametersARPInitialEntity.Anio = semanahorario.Year.ToString();
+                        parametersARPInitialEntity.Festivo = "N";
+                        parametersARPInitialEntity.Estado = "E204 NO TIENE HORARIO ASIGNADO";
+
+
+                        listParametersInitialEntity.Add(parametersARPInitialEntity);
+                        continue;
+
+                    }
+
+
+
+                    //var arp = validaFormatosFecha(entity);
                     //var arp = validaHoraGMT(arpFecha, model.PaisSel);
-                    //var arp = validaHoraGMT(arpFecha, horariosGMT, paisGeneral);
+                    var arp = validaHoraGMT(arpx, horariosGMT, paisGeneral);
 
 
                     arp.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;//check it!!!
-                    semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);
+                    //semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);;
+                    semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
 
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 
@@ -360,8 +400,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 var HoraInicioOrigin = DateTime.Parse(arpRegistro.HORA_INICIO);
-                var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
-                arpRegistro.HORA_INICIO = horaActualizada.ToString("HH:mm:ss");
+               // var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
+                var horaActualizada = HoraInicioOrigin.AddHours(0);
+                arpRegistro.HORA_INICIO = horaActualizada.ToString("HH:mm");
 
             }
             catch (Exception ex)
@@ -372,8 +413,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 var HoraFinOrigin = DateTime.Parse(arpRegistro.HORA_FIN);
-                var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
-                arpRegistro.HORA_FIN = horaFinActualizada.ToString("HH:mm:ss");
+                //var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
+                var horaFinActualizada = HoraFinOrigin.AddHours(0);
+                arpRegistro.HORA_FIN = horaFinActualizada.ToString("HH:mm");
             }
             catch (Exception ex)
             {
@@ -667,41 +709,54 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 List<ParametersTseInitialEntity> listParametersInitialEntity = new();
 
-                foreach (var registro in datosTSEExcel)
+                try
                 {
-                    if (string.IsNullOrEmpty(registro.StartTime))
-                    {
-                        continue;
-                    }
-                    if (string.IsNullOrEmpty(registro.EndTime))
-                    {
-                        continue;
-                    }
-                    var tseFecha = validaFormatosFechaTSE(registro);
-                    var paisRegistro = listaCountries.FirstOrDefault(e=>e.CodigoPais== tseFecha.NumeroEmpleado.Substring(tseFecha.NumeroEmpleado.Length - 3));
-                    //var tse = validaHoraTSEGMT(tseFecha, model.PaisSel);
-                    var tse = validaHoraTSEGMT(tseFecha, horariosGMT, paisRegistro);
 
-                    //semanahorario = DateTimeOffset.Parse(tse.StartTime);
-                    try
-                    {
-                        
-                        semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+               
+                foreach (var registrox in datosTSEExcel)
+                {
 
-                    }
-                    catch (Exception exx)
-                    {
-                        try
+                        var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.NumeroEmpleado.Substring(registrox.NumeroEmpleado.Length - 3));
+                        var tse = fHomologaTSE(registrox, horariosGMT, paisRegistro!);
+                        if (tse == null)
                         {
-                            semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "d/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
-                        }catch(Exception ex)
-                        {
-                            semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
+                            ParametersTseInitialEntity parametersTseInitialEntityaux = new ParametersTseInitialEntity();
+
+                            parametersTseInitialEntityaux.IdParamTSEInitialId = Guid.NewGuid();
+                            parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                            parametersTseInitialEntityaux.FECHA_REP = registrox.StartTime;
+                            parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.DurationInHours);
+                            parametersTseInitialEntityaux.totalHoras = registrox.DurationInHours;
+                            parametersTseInitialEntityaux.HorasInicio = 0;
+                            parametersTseInitialEntityaux.HorasFin = 0;
+                            parametersTseInitialEntityaux.EmployeeCode = registrox.NumeroEmpleado;
+                            parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
+                            parametersTseInitialEntityaux.HoraInicio = "0";
+                            parametersTseInitialEntityaux.HoraFin = "0";
+
+                            parametersTseInitialEntityaux.OutIme = "N";
+                            parametersTseInitialEntityaux.Semana = 0;
+                            parametersTseInitialEntityaux.HoraInicioHoraio = "0";
+                            parametersTseInitialEntityaux.HoraFinHorario = "0";
+                            parametersTseInitialEntityaux.OverTime = "N";
+                            parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
+                            parametersTseInitialEntityaux.Festivo = "N";
+                            parametersTseInitialEntityaux.Estado ="E204 NO TIENE HORARIO ASIGNADO";
+                         
+
+                            listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                            continue;
+                           
                         }
-                        
-                    }
+                    
+                   // var paisRegistro = listaCountries.FirstOrDefault(e=>e.CodigoPais== registro.NumeroEmpleado.Substring(registro.NumeroEmpleado.Length - 3));
 
-                    int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
+                   // var tse = validaHoraTSEGMT(registro, horariosGMT, paisRegistro);
+
+                        semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                       
+
+                        int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
                     bool bValidacionHorario = false;
 
                     var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString());// && x.FechaWorking== semanahorario.DateTime);
@@ -753,8 +808,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersTseInitialEntity.HorasFin = 0;
                     parametersTseInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersTseInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
-                    parametersTseInitialEntity.HoraInicio = DateTimeOffset.Parse(tse.StartTime).TimeOfDay.ToString();
-                    parametersTseInitialEntity.HoraFin = DateTimeOffset.Parse(tse.EndTime).TimeOfDay.ToString();
+                    parametersTseInitialEntity.HoraInicio = tse.StartHours;// DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();
+                                                                              //DateTimeOffset.Parse(tse.StartTime).TimeOfDay.ToString();
+                    parametersTseInitialEntity.HoraFin = tse.EndHours;// DateTimeOffset.ParseExact(tse.EndTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();
+                        //DateTimeOffset.Parse(tse.EndTime).TimeOfDay.ToString();
                     parametersTseInitialEntity.OverTime = "N";
                     parametersTseInitialEntity.OutIme = "N";
                     parametersTseInitialEntity.Semana = Semana;
@@ -778,7 +835,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var previosAndPos = new List<double>();
                     if (horario != null)
                     {
-                        previosAndPos = getPreviasAndPosHorario(tse.HoraInicio, tse.HoraFin, horario.HoraInicio, horario.HoraFin);
+                        previosAndPos = getPreviasAndPosHorario(tse.StartHours, tse.EndHours, horario.HoraInicio, horario.HoraFin);
                         //bValidacionHorario = true;
                     }
                     else
@@ -818,7 +875,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     listParametersInitialEntity.Add(parametersTseInitialEntity);
 
                 }
-
+                }
+                catch (Exception ex)
+                {
+                    string error = ex.Message;
+                }
                 await _dataBaseService.ParametersTseInitialEntity.AddRangeAsync(listParametersInitialEntity);
                 await _dataBaseService.SaveAsync();
 
@@ -832,38 +893,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
         }
 
-        private TSELoadEntity validaHoraTSEGMT(TSELoadEntity tseRegistro, List<PaisRelacionGMTEntity> paisGMT, CountryModel paisEntidad)
-        {
-            var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
-            try
-            {
-               // var HoraInicioOrigin = DateTimeOffset.ParseExact(tseRegistro.StartTime, "dd/MM/yyyy h:mm tt",);
-                var HoraInicioOrigin = DateTimeOffset.ParseExact(tseRegistro.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
-
-                var horaActualizada = HoraInicioOrigin.AddHours(paisComparacion.TimeDifference);
-                tseRegistro.StartTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");// dd/MM/yyyy HH:mm:ss");
-
-            }
-            catch (Exception ex)
-            {
-               tseRegistro.StartTime= tseRegistro.StartTime;
-            }
-
-            try
-            {
-               // var HoraFinOrigin = DateTimeOffset.Parse(tseRegistro.EndTime);
-                var HoraFinOrigin = DateTimeOffset.ParseExact(tseRegistro.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture);
-                var horaFinActualizada = HoraFinOrigin.AddHours(paisComparacion.TimeDifference);
-                tseRegistro.EndTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");// dd/MM/yyyy HH:mm:ss");
-            }
-            catch (Exception ex)
-            {
-               return tseRegistro;
-            }
-
-            return tseRegistro;
-        }
-
+      
         //private TSELoadEntity validaHoraTSEGMT(TSELoadEntity tseRegistro, string horasDiff)
         //{
         //    //var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
@@ -1227,6 +1257,751 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
         }
 
+        
+        private ARPLoadDetailEntity fHomologaARP(ARPLoadDetailEntity item, List<PaisRelacionGMTEntity> horariosGMT, CountryModel paisRegistro)
+        {
+            try
+            {
+                var convert = item;
+
+
+                DateTimeOffset dateTimeOffset = new DateTimeOffset();
+
+                if (convert.FECHA_REP == null)
+                {
+                    return null;
+
+                }
+                
+
+                try
+                {
+                    var dt = new DateTimeOffset();
+                    var paisComparacion = horariosGMT.FirstOrDefault(e => e.NameCountryCompare == paisRegistro.NameCountry);
+                    try
+                    {
+
+                        if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            //convert.FECHA_REP = dt.ToString("dd/MM/yyyy HH:mm:ss");
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+
+                    }
+                    catch (Exception exx)
+                    {
+
+
+                    }
+
+                   
+
+
+
+
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+
+
+                return convert;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        private TSELoadEntity fHomologaTSE(TSELoadEntity item, List<PaisRelacionGMTEntity> horariosGMT, CountryModel paisRegistro)
+        {
+            try
+            {
+                var convert = item;
+                DateTimeOffset dateTimeOffset = new DateTimeOffset();
+
+                
+                if (convert.EndTime == null)
+                {
+                    return null;
+
+                }
+                if (convert.StartTime == null)
+                {
+                    return null;
+                }
+            
+                
+
+
+                try
+                {
+                    var paisComparacion = horariosGMT.FirstOrDefault(e => e.NameCountryCompare == paisRegistro.NameCountry);
+
+                    var dt = new DateTimeOffset();
+                    if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+
+                       dt= dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+
+
+
+                    if(DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+
+
+
+
+
+
+
+                    try
+                    {
+                       
+
+                        if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                          //  convert.StartTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+
+                    }
+                    catch (Exception exx)
+                    {
+                       
+
+                    }
+
+
+
+                    try
+                    {
+
+
+                        if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+
+                    }
+                    catch (Exception exx)
+                    {
+
+
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+
+
+                return convert;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private STELoadEntity fHomologaSTE(STELoadEntity item, List<PaisRelacionGMTEntity> horariosGMT, CountryModel paisRegistro)
+        {
+            try
+            {
+                var convert = item;
+
+
+                DateTimeOffset dateTimeOffset = new DateTimeOffset();
+
+
+                if (convert.EndDateTime == null)
+                {
+                    return null;
+
+                }
+                if (convert.StartDateTime == null)
+                {
+                    return null;
+                }
+
+
+
+
+                try
+                {
+                    var paisComparacion = horariosGMT.FirstOrDefault(e => e.NameCountryCompare == paisRegistro.NameCountry);
+                    var dt = new DateTimeOffset();
+                    if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
+
+
+
+                    if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+                        dt = dt.AddHours(paisComparacion!.TimeDifference);
+                        convert.EndHours = dt.ToString("HH:mm");
+                    }
+
+
+
+
+
+
+
+                    try
+                    {
+
+
+                        if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                           // convert.StartDateTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+
+                    }
+                    catch (Exception exx)
+                    {
+
+
+                    }
+
+
+
+                    try
+                    {
+
+
+                        if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                            //convert.EndDateTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+
+                    }
+                    catch (Exception exx)
+                    {
+
+
+                    }
+
+
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
+
+
+                return convert;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
 
 
         public async Task<SummaryLoad> LoadSTE(LoadJsonPais model)
@@ -1275,29 +2050,50 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 List<ParametersSteInitialEntity> listParametersInitialEntity = new();
 
-                foreach (var registro in datosSTEExcel)
+                foreach (var registrox in datosSTEExcel)
                 {
-                    var stefecha= validaFormatosFechaSTE(registro);
-                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == stefecha.SessionEmployeeSerialNumber.Substring(stefecha.SessionEmployeeSerialNumber.Length - 3));
-                    //var ste = validaHoraSTEGMT(stefecha, model.PaisSel);
-                    var ste = validaHoraSTEGMT(stefecha, horariosGMT, paisRegistro);
+                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.SessionEmployeeSerialNumber.Substring(registrox.SessionEmployeeSerialNumber.Length - 3));
+                    var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
 
-                    // semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
-                    try
+                    if (ste == null)
                     {
-                        semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "d/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                        ParametersSteInitialEntity parametersTseInitialEntityaux = new ParametersSteInitialEntity();
+
+                        parametersTseInitialEntityaux.IdParamSTEInitialId = Guid.NewGuid();
+                        parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                        parametersTseInitialEntityaux.FECHA_REP = registrox.StartDateTime;
+                        parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
+                        parametersTseInitialEntityaux.totalHoras = registrox.TotalDuration;
+                        parametersTseInitialEntityaux.HorasInicio = 0;
+                        parametersTseInitialEntityaux.HorasFin = 0;
+                        parametersTseInitialEntityaux.EmployeeCode = registrox.SessionEmployeeSerialNumber;
+                        parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
+                        parametersTseInitialEntityaux.HoraInicio = "0";
+                        parametersTseInitialEntityaux.HoraFin = "0";
+
+                        parametersTseInitialEntityaux.OutIme = "N";
+                        parametersTseInitialEntityaux.Semana = 0;
+                        parametersTseInitialEntityaux.HoraInicioHoraio = "0";
+                        parametersTseInitialEntityaux.HoraFinHorario = "0";
+                        parametersTseInitialEntityaux.OverTime = "N";
+                        parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
+                        parametersTseInitialEntityaux.Festivo = "N";
+                        parametersTseInitialEntityaux.Estado = "E204 NO TIENE HORARIO ASIGNADO";
+
+
+                        listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                        continue;
+
                     }
-                    catch(Exception exx) {
-                       
-                        try
-                        {
-                            semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
-                        }
-                        catch (Exception ex)
-                        {
-                            semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "d/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture);
-                        }
-                    }
+
+                    //var stefecha= validaFormatosFechaSTE(registro);
+                    //var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registro.SessionEmployeeSerialNumber.Substring(registro.SessionEmployeeSerialNumber.Length - 3));
+                    //var ste = validaHoraSTEGMT(stefecha, model.PaisSel);
+                   // var ste = validaHoraSTEGMT(registro, horariosGMT, paisRegistro);
+
+                     //semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
+                   semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                   
                     
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
                     bool bValidacionHorario = false;
@@ -1355,8 +2151,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSTEInitialEntity.Anio = semanahorario.Year.ToString();
                     parametersSTEInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
                     parametersSTEInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
-                    parametersSTEInitialEntity.HoraInicio = DateTimeOffset.Parse(ste.StartDateTime).TimeOfDay.ToString();
-                    parametersSTEInitialEntity.HoraFin = DateTimeOffset.Parse(ste.EndDateTime).TimeOfDay.ToString();
+                    parametersSTEInitialEntity.HoraInicio = ste.StartHours;// DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();//DateTimeOffset.Parse(ste.StartDateTime).TimeOfDay.ToString();
+                    parametersSTEInitialEntity.HoraFin = ste.EndHours;// DateTimeOffset.ParseExact(ste.EndDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();//DateTimeOffset.Parse(ste.EndDateTime).TimeOfDay.ToString();
                     parametersSTEInitialEntity.OverTime = "N";
                     parametersSTEInitialEntity.OutIme = "N";
                     parametersSTEInitialEntity.Semana = Semana;
