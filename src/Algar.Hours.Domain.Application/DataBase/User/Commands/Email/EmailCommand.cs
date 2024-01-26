@@ -118,7 +118,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             try
             {
                 
-                smtpClient.Send("notifications@cognos.ibm.com", model.To, GetSubject(model), GetBody(model));
+                //smtpClient.Send("notifications@cognos.ibm.com", model.To, GetSubject(model), GetBody(model));
                 
                 return true;
             }
