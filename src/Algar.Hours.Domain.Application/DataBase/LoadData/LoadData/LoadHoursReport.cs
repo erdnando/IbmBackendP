@@ -2260,6 +2260,26 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 //limites, excepciones y carga portalDB
                 //-------------------------------------------------------------------------------------------------------------------------------------------
                 try
@@ -2409,14 +2429,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
 
-                        /*var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
-                        .AsEnumerable()
-                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
-                        (TimeInRange(h.StartTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin)) &&
-                         TimeInRange(h.EndTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin))))
-                        .ToList();*/
-
                         var startTime = DateTime.Parse(itemTSEp.HoraInicio);
                         var endTime = DateTime.Parse(itemTSEp.HoraFin);
 
@@ -2453,13 +2465,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
 
-                        /*var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
-                        .AsEnumerable()
-                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
-                        (TimeInRange(h.StartTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin)) &&
-                         TimeInRange(h.EndTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin))))
-                        .ToList();*/
+                      
 
                         var startTime = DateTime.Parse(itemSTEp.HoraInicio);
                         var endTime = DateTime.Parse(itemSTEp.HoraFin);
