@@ -12,11 +12,11 @@ namespace Algar.Hours.External
         public static IServiceCollection AddExternal(this IServiceCollection services, IConfiguration configuration)
         {
 
-           // services.AddDbContext<DatabaseService>(options =>
-           // options.UseSqlServer(configuration["sqlconnectionstrings"]));
+            // services.AddDbContext<DatabaseService>(options =>
+            // options.UseSqlServer(configuration["sqlconnectionstrings"]));
 
-            services.AddDbContext<DatabaseService>(options => 
-            options.UseNpgsql(configuration["SQLConnectionStringsPost"]));
+            services.AddDbContext<DatabaseService>(options => options.UseNpgsql(configuration["SQLConnectionStringsPost"],providerOptions => providerOptions.EnableRetryOnFailure()));
+            services.AddTransient<DatabaseService>();
 
             services.AddScoped<IDataBaseService, DatabaseService>();
 

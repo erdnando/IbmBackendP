@@ -2665,7 +2665,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var limitesCountryARP = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == Guid.Parse("908465f1-4848-4c86-9e30-471982c01a2d"));
                 var HorasLimiteDia = limitesCountryARP.TargetTimeDay;
                 //var listaCountries = await _consultCountryCommand.List();
-                var listaCountries = await _dataBaseService.CountryEntity.ToListAsync();
+                var listaCountries = _dataBaseService.CountryEntity.ToList();
+                var listExeptios = _dataBaseService.UsersExceptions.ToList();
 
 
                 foreach (var itemARP in rowARPParameter)
@@ -2674,7 +2675,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
                     if (UserRow != null)
                     {
-                        var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == UserRow.IdUser && x.StartDate == DateTimeOffset.Parse(itemARP.FECHA_REP));
+                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemARP.FECHA_REP).ToString("dd/MM/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
                         var HorasARPGral = HorasARP.Select(x => double.Parse(x.totalHoras)).Sum();
@@ -2698,7 +2699,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
                     if (UserRow != null)
                     {
-                        var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == UserRow.IdUser && x.StartDate == DateTimeOffset.Parse(itemTSE.FECHA_REP));
+                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemTSE.FECHA_REP).ToString("dd/MM/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
                         var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.totalHoras)).Sum();
@@ -2722,7 +2723,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
                     if (UserRow != null)
                     {
-                        var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == UserRow.IdUser && x.StartDate == DateTimeOffset.Parse(itemSTE.FECHA_REP));
+                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemSTE.FECHA_REP).ToString("dd/MM/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         var HorasSTE = rowSTEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemSTE.FECHA_REP)).ToList();
                         var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
@@ -2821,9 +2822,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 await _dataBaseService.SaveAsync();
 
-                var rowARPParameterGral = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                var rowTSEParameterGral = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                var rowSTEParameterGral = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                var rowARPParameterGral = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                var rowTSEParameterGral = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                var rowSTEParameterGral = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
                 List<HorusReportEntity> rowsHorusNew = new();
                 HorusReportEntity rowAdd = new();
@@ -2832,16 +2833,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //ARP
                 //--------------------------------------------------------------------------
+                var Maxen = 0;
+                Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
                 foreach (var itemARPNew in rowARPParameterGral)
                 {
-                    var Maxen = 0;
-                    Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                    Maxen++;
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen + 1,
+                        NumberReport = Maxen,
                         StartDate = DateTimeOffset.Parse(itemARPNew.FECHA_REP).Date
                     };
                     rowsHorusNew.Add(rowAdd);
@@ -2862,16 +2864,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //TSE
                 //------------------------------------------------------------------------
+                
                 foreach (var itemTSENew in rowTSEParameterGral)
                 {
-                    var Maxen = 0;
-                    Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                    Maxen ++;
+                    
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen + 1,
+                        NumberReport = Maxen,
                         StartDate = DateTimeOffset.Parse(itemTSENew.FECHA_REP).Date
                     };
                     rowsHorusNew.Add(rowAdd);
@@ -2893,14 +2896,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //------------------------------------------------------------------------
                 foreach (var itemSTENew in rowSTEParameterGral)
                 {
-                    var Maxen = 0;
-                    Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                    Maxen++;
+                    
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen + 1,
+                        NumberReport = Maxen,
                         StartDate = DateTimeOffset.Parse(itemSTENew.FECHA_REP).Date
                     };
                     rowsHorusNew.Add(rowAdd);
