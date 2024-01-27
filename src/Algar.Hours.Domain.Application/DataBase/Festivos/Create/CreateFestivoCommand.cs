@@ -24,6 +24,7 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
 
         public async Task<Boolean> Execute(List<CreateFestivoModel> model)
         {
+            bool existe = false;
             if (model != null && model.Count > 0)
             {
                 foreach (var item in model)
@@ -41,8 +42,8 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                         .FirstOrDefaultAsync(e => e.DiaFestivo == item.DiaFestivo && e.CountryId == entity.CountryId);
 
                     if (existingEntity != null)
-                    {  
-                        return false;
+                    {
+                        existe = false;
                     }
 
                     if (entity.IdFestivo == Guid.Empty)
@@ -54,6 +55,10 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                 }
            
                 await _dataBaseService.SaveAsync();
+                if(existe)
+                {
+                    return false;
+                }
                 return true;
             }
 
