@@ -15,22 +15,23 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserApr
         }
         public List<ListAproveedModel> Execute(Guid UserId)
         {
-
             var listAssigment = _dataBaseService.assignmentReports
-                 .Include(a => a.UserEntity)
-                 .Include(b => b.HorusReportEntity)
-                 .Where(x => x.UserEntityId == UserId).ToList();
+                  .Include(a => a.UserEntity)
+                  .Include(b => b.HorusReportEntity)
+                  .Where(x => x.UserEntityId == UserId).ToList();
 
-            foreach (var item in listAssigment) 
+            foreach (var item in listAssigment)
             {
                 var userentity = _dataBaseService.UserEntity.Where(x => x.IdUser == item.HorusReportEntity.UserEntityId).FirstOrDefault();
                 item.HorusReportEntity.UserEntity = userentity;
-            
+
             }
 
             var model = _mapper.Map<List<ListAproveedModel>>(listAssigment);
 
             return model;
+
+
 
         }
     }

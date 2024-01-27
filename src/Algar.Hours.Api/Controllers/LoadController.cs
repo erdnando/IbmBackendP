@@ -91,7 +91,7 @@ namespace Algar.Hours.Api.Controllers
 
         
         [HttpPost("ValidaLimitesExcepcionesOverlapping")]
-        [Authorize(Roles = "standard")]
+       // [Authorize(Roles = "standard")]
         [AllowAnonymous]
         public async Task<IActionResult> ValidaLimitesExcepcionesOverlapping([FromBody] Loadnotificaciones requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
