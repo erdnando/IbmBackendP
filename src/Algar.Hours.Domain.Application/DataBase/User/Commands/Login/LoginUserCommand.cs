@@ -31,7 +31,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Login
             var entity = _databaseService.UserEntity
                 .Include(e => e.CountryEntity)
                 .Include(e => e.RoleEntity)
-                .Where(x => x.Email == model.UserName && x.Password == model.Password).FirstOrDefault();
+                .Where(x => x.Email.ToLower().Trim() == model.UserName.ToLower().Trim() && x.Password == model.Password).FirstOrDefault();
             var ModelUser = _mapper.Map<CreateUserModel>(entity);
 
            

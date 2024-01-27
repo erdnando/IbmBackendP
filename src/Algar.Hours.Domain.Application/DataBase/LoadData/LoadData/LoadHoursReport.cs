@@ -141,15 +141,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
 
             return arp;
+
         }
+
+       
 
         public async Task<string> LoadARP(LoadJsonPais model)
         {
-            //var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("46437610-c47b-4ef8-9807-8535c6ad424d")).ToList();
-            //var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("46437610-c47b-4ef8-9807-8535c6ad424d")).ToList();
-            //var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("46437610-c47b-4ef8-9807-8535c6ad424d")).ToList();
 
 
+
+            var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("94fdc217-a695-4d42-90ad-ced542cc8e27")).ToList();
+            var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("43e65bca-91b8-4671-91b5-39651a77d8d4")).ToList();
+            var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid("43e65bca-91b8-4671-91b5-39651a77d8d4")).ToList();
+
+
+            var allManagers = rowARPGral.Select(m => m.EmployeeCode).Union(rowSTEGral.Select(m => m.EmployeeCode))
+                                                      .Union(rowTSEGral.Select(m => m.EmployeeCode));
+            //rowARPGral = rowARPGral.DistinctBy(m => new { m.EmployeeCode, m.StartTime, m.EndTime }).ToList();
             //var RowGralARPTSE = rowARPGral.ToList().IntersectBy(
             //    rowTSEGral.ToList().Select(r => new { EmployeeCode = r.EmployeeCode, FECHA_REP = r.FECHA_REP, HoraInicio = r.HoraInicio, HoraFin = r.HoraFin, Semana = r.Semana }), t => new { EmployeeCode = t.EmployeeCode, FECHA_REP = t.FECHA_REP, HoraInicio = t.HoraInicio, HoraFin = t.HoraFin, Semana = t.Semana }).ToList();
 
@@ -246,11 +255,15 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 // datosARPExcel.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
                 //datosARPExcel.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
 
+                //Omite registros Extracted y final
                 List<ARPLoadDetailEntity> datosARPExcel = datosARPExcelFull!.Where(x => x.ESTADO != "EXTRACTED" && x.ESTADO != "FINAL").ToList();
 
 
-                var rowDuplicados = datosARPExcel.GroupBy(x => x.ID_EMPLEADO).Select(g => new ARPLoadDetailEntity  { ID_EMPLEADO=g.Key }).OrderBy(e=>e.ID_EMPLEADO).ToList();
-                rowDuplicados.ToList().ForEach(x => x.ESTADO = "NO_APLICA_X_OVERLAPING");
+
+                //Remueve duplicados 
+                datosARPExcel = datosARPExcel.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO,m.HORA_FIN }).ToList();
+
+
 
 
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == aRPLoadEntity.IdArpLoad).ToList().
@@ -711,8 +724,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<TSELoadEntity> datosTSEExcel = datosTSEExcelFull!.Where(x => x.Status != "Extracted" && x.Status != "Final" && x.Status != "Submitted").ToList();
 
 
-
-
+                //Remueve duplicados 
+                datosTSEExcel = datosTSEExcel.DistinctBy(m => new { m.NumeroEmpleado, m.StartTime, m.EndTime }).ToList();
 
 
                 try
@@ -2095,6 +2108,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
 
                 List<ParametersSteInitialEntity> listParametersInitialEntity = new();
+
+                //Remueve duplicados 
+                datosSTEExcel = datosSTEExcel.DistinctBy(m => new { m.SessionEmployeeSerialNumber, m.StartDateTime, m.EndDateTime }).ToList();
+
+
 
                 foreach (var registrox in datosSTEExcel)
                 {
