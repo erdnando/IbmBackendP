@@ -16,18 +16,23 @@ using System.Globalization;
 using static Algar.Hours.Application.Enums.Enums;
 using System.Diagnostics;
 using System.Linq;
+using Algar.Hours.Application.DataBase.User.Commands.Consult;
 
 namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 {
     public class CreateHorusReportCommand : ICreateHorusReportCommand
     {
         private readonly IDataBaseService _dataBaseService;
+        private IEmailCommand _emailCommand;
+        private IGetListUsuarioCommand _usuarioCommand;
         private readonly IMapper _mapper;
 
-        public CreateHorusReportCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateHorusReportCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _emailCommand = emailCommand;
+            _usuarioCommand = usuarioCommand;
         }
 
         public async Task<HorusReportModel> Execute(CreateHorusReportModel model)
@@ -201,6 +206,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     // agregar notificacion email
 
                     returnPortalDB.State = 100;
+                    _emailCommand.SendEmail(new EmailModel
+                    {
+                        To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
+                        Plantilla = "14"
+                    });
                     return returnPortalDB;
                 }
             }
@@ -209,6 +219,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 // State 99 es por que no tiene horario para comparar
                 // agregar notificacion email
                 returnPortalDB.State = 99;
+                _emailCommand.SendEmail(new EmailModel
+                {
+                    To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
+                    Plantilla = "8"
+                });
                 return returnPortalDB;
             }
 
@@ -236,6 +251,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 //Se ha superado el límite de horas para StandBy
                 // agregar notificacion email
                 returnPortalDB.State = 101;
+                _emailCommand.SendEmail(new EmailModel
+                {
+                    To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
+                    Plantilla = "13"
+                });
                 return returnPortalDB;
             }
 
@@ -271,6 +291,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     //se termina por overlapping!!!!!
                     //el Registro se encuentra en Overlapi StandBy
                     horusModel.State = 102;
+                    _emailCommand.SendEmail(new EmailModel
+                    {
+                        To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
+                        Plantilla = "10"
+                    });
                     return returnPortalDB;
                     // agregar notificacion email
 

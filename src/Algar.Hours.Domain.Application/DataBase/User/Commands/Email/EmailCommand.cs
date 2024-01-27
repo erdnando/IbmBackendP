@@ -43,27 +43,33 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             switch (model.Plantilla)
             {
                 case "1":
-                    body = "Su reporte se encuentra en estado: \"aprobado, rechazado, pendiente\", por favor comuniquese con el respectivo aprobador para dar gestión"; break;
+                    body = "Su reporte se encuentra en estado: \"aprobado, rechazado, pendiente\", por favor comuníquese con el respectivo aprobador para dar gestión"; break;
                 case "2":
                     body = "Ha llegado un reporte, por favor tome acciones \"aprobar, rechazar\""; break;
                 case "3":
-                    body = "Su reporte ha sido rechazado, por favor comuníquese con su aprobador para tener más información"; break;
+                    body = "Su reporte ha sido rechazado, por favor comuníquese con su aprobador para obtener más información"; break;
                 case "4":
                     body = "El reporte ha sido rechazado correctamente, por favor comuníquese con la persona a la cual se le rechazo el registro"; break;
                 case "5":
-                    body = "Su reporte ha sido aprobado, por favor comuniquese con su aprobador para tener más información"; break;
+                    body = "Su reporte ha sido aprobado, por favor comuníquese con su aprobador para obtener más información"; break;
                 case "6":
-                    body = "Su reporte ha sido aprobado, por favor comuniquese con su aprobador para tener más información"; break;
+                    body = "Su reporte ha sido aprobado, por favor comuníquese con su aprobador para obtener más información"; break;
                 case "7":
-                    body = "Sus limites legales han sido modificados"; break;
+                    body = "Sus límites legales han sido modificados"; break;
                 case "8":
-                    body = "Su reporte de horas no puede ser procesado, debido a que no se ha registrado un horario, por favor comuniquese con su aprobador para tener más información"; break;
+                    body = "Su reporte de horas no puede ser procesado, debido a que no se ha registrado un horario, por favor comuníquese con su aprobador para obtener más información"; break;
                 case "9":
-                    body = "Su reporte de horas no puede ser procesado, debido a que los ocnceptos:  \"Vacations\", \"Absence\", \"Holiday\", \"Stand By\" no aplican, por favor comuniquese con su aprobador para tener más información"; break;
+                    body = "Su reporte de horas no puede ser procesado, debido a que los conceptos:  \"Vacations\", \"Absence\", \"Holiday\", \"Stand By\" no aplican, por favor comuníquese con su aprobador para obtener más información"; break;
                 case "10":
-                    body = "Su reporte de horas no puede ser procesado, debido a que se han encontrado duplicidades de reporte de horas en diferens areas de negocio (ARP, TSE o STE), por favor comuniquese con su aprobador para tener más información"; break;
+                    body = "Su reporte de horas no puede ser procesado, debido a que se han encontrado duplicidades de reporte de horas en diferentes áreas de negocio (ARP, TSE o STE), por favor comuníquese con su aprobador para obtener más información"; break;
                 case "11": 
-                    body="Se han detectado usuarios sin correo registrado en el portal TLS. Favor de solicitar su alta antes d eprocesarlos";break;
+                    body="Se han detectado usuarios sin correo registrado en el portal TLS. Favor de solicitar su alta antes de procesarlos";break;
+                case "12":
+                    body = "Su reporte no puede ser procesado, debido a que no se encuentran datos en la pestaña de hora inicio y/o hora fin, por favor comuníquese con su aprobador para obtener más información"; break;
+                case "13":
+                    body = "Su reporte no puede ser procesado, debido a que usted excedió los límites legales para overtime o stand by, por favor, comuníquese con su coordinador para buscar una excepción gerencial o en su defecto confirme que la información esté correctamente registrada"; break;
+                case "14":
+                    body = "Debido a que las horas reportadas se encuentran dentro de su horario laboral su reporte no podrá ser procesado, por favor corrija su reporte y vuelva a intentarlo."; break;
                 default:
                     break;
             }
@@ -89,7 +95,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                 case "6":
                     subject = "ALERTA \"PORTAL TLS \" Su horario ha sido modificado"; break;
                 case "7":
-                    subject = "ALERTA \"PORTAL TLS \" Sus limites legales han sido modificados"; break;
+                    subject = "ALERTA \"PORTAL TLS \" Sus límites legales han sido modificados"; break;
                 case "8":
                     subject = "ALERTA \"PORTAL TLS \" NO APLICA POR HORARIO"; break;
                 case "9":
@@ -98,6 +104,12 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
                     subject = "ALERTA \"PORTAL TLS \" NO APLICA POR OVERLAPING"; break;
                 case "11":
                     subject = "ALERTA \"PORTAL TLS \" USUARIOS SIN EMAIL EN SISTEMA TLS DURANTE EL PROCESO DE CARGA (ARP, TSE O STE"; break;
+                case "12":
+                    subject = "ALERTA \"PORTAL TLS \" NO APLICA SU REPORTE POR FALTA DE DATOS (HORA INICIO/ HORA FIN)"; break;
+                case "13":
+                    subject = "ALERTA \"PORTAL TLS \"NO APLICA SU REPORTE POR EXCESO DE LÍMITES LEGALES DE TRABAJO"; break;
+                case "14":
+                    subject = "ALERTA \"PORTAL TLS \"NO APLICA SU REPORTE POR QUE SUS HORAS REPORTADAS SE ENCUENTRAN DENTRO DEL HORARIO LABORAL"; break;
                 default:
                     break;
             }
@@ -117,8 +129,8 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
 
             try
             {
-                
-                //smtpClient.Send("notifications@cognos.ibm.com", model.To, GetSubject(model), GetBody(model));
+                model.To = "santiagoael@algartech.com";
+                smtpClient.Send("notifications@cognos.ibm.com", model.To, GetSubject(model), GetBody(model));
                 
                 return true;
             }

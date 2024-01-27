@@ -43,10 +43,10 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
 
         public async Task<ManagerEmployeeModel> GetManagerByEmployeeCode(string _employeeCode)
         {
-            var data =  _dataBaseService.UserManagerEntity.Where(u => u.EmployeeCode.Contains(_employeeCode)).FirstOrDefault();
+            var data =  _dataBaseService.UserManagerEntity.Where(u => u.EmployeeCode==_employeeCode).FirstOrDefault();
             ManagerEmployeeModel newRow = new() { 
-                ManagerName=data.ManagerName,
-                ManagerEmail=data.ManagerEmail
+                ManagerName= data != null ? data.ManagerName:"Sin Información",
+                ManagerEmail=data!= null ? data.ManagerEmail:"Sin Información"
             };
 
             var entity = _mapper.Map<ManagerEmployeeModel>(newRow);

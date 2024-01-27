@@ -55,6 +55,7 @@ namespace Algar.Hours.Api.Controllers
             }
             else
             {
+
                 return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, null));
             }
            
