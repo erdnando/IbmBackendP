@@ -3165,7 +3165,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                 }
 
-                await _dataBaseService.SaveAsync();
+                _dataBaseService.SaveAsync();
 
                 //los sobrantes estan en overtime, insertar en portaldb y su history, como se hace en reporte de horas stand by
                 //TODO
@@ -3315,7 +3315,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
 
 
-                await _dataBaseService.SaveAsync();
+                _dataBaseService.SaveAsync();
 
                 var rowARPParameterGral =  _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterGral =  _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
