@@ -3078,7 +3078,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 var listaCountries =_dataBaseService.CountryEntity.ToList();
                 var listExeptios = _dataBaseService.UsersExceptions.ToList();
+                var listHorusReport = _dataBaseService.HorusReportEntity.ToList();
 
+                var CoEmple = "";
+                var HoursTotEMp = 0.0;
 
                 foreach (var itemARP in rowARPParameter)
                 {
@@ -3089,8 +3092,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         //var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
-                        var HorasARP = rowARPParameter.Where(co => co.FECHA_REP == itemARP.FECHA_REP).ToList();
-                        var HorasARPGral = HorasARP.Select(x => double.Parse(x.totalHoras)).Sum();
+                        var HorasARP = listHorusReport.Where(co => co.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && co.UserEntityId== UserRow.IdUser).ToList();
+
+                        var HorasARPGral = HorasARP.Select(x => double.Parse(x.CountHours)).Sum();
+
                         if ((tsReportado.TotalHours + HorasARPGral) > (HorasLimiteDia + horasExceptuada))
                         {
                             itemARP.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
@@ -3115,8 +3120,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         // var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
-                        var HorasTSE = rowTSEParameter.Where(co => co.FECHA_REP == itemTSE.FECHA_REP).ToList();
-                        var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.totalHoras)).Sum();
+                        //var HorasTSE = rowTSEParameter.Where(co => co.FECHA_REP == itemTSE.FECHA_REP).ToList();
+
+                        var HorasTSE = listHorusReport.Where(co => co.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && co.UserEntityId == UserRow.IdUser).ToList();
+
+                        var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.CountHours)).Sum();
+
                         if ((tsReportadoTSE.TotalHours + HorasTSEGral) > (HorasLimiteDia + horasExceptuada))
                         {
                             itemTSE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
@@ -3140,8 +3149,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         //var HorasSTE = rowSTEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemSTE.FECHA_REP)).ToList();
-                        var HorasSTE = rowSTEParameter.Where(co => co.FECHA_REP == itemSTE.FECHA_REP).ToList();
-                        var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
+                        //var HorasSTE = rowSTEParameter.Where(co => co.FECHA_REP == itemSTE.FECHA_REP).ToList();
+                        //var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
+                        var HorasSTE = listHorusReport.Where(co => co.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && co.UserEntityId == UserRow.IdUser).ToList();
+
+                        var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.CountHours)).Sum();
                         if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
                         {
                             itemSTE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
