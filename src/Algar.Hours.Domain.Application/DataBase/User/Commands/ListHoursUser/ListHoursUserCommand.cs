@@ -25,26 +25,60 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
 
         public async Task<List<ListHorursUserModel>> Execute(Guid IdClient)
         {
+            var userRef = _dataBaseService.UserEntity
+                .Include(a => a.RoleEntity)
+                .Where(x => x.IdUser == IdClient).FirstOrDefault();
 
-            var listuserhours = _dataBaseService.HorusReportEntity
-                .Include(a => a.UserEntity)
-                .Include(a => a.ClientEntity)
-                .Where(x => x.UserEntityId == IdClient).ToList();
-
-            foreach (var item in listuserhours)
+            if(userRef.RoleEntity.NameRole=="Usuario estandar")
             {
-                var assigment = _dataBaseService.assignmentReports
-                   .Include(a => a.UserEntity)
-                   .Where(x => x.HorusReportEntityId == item.IdHorusReport).FirstOrDefault();
-                if (assigment != null)
+                //standar
+                var listStandar = _dataBaseService.HorusReportEntity
+                    .Include(a => a.UserEntity)
+                    .Include(a => a.ClientEntity)
+                    .Where(x => x.UserEntityId == IdClient).ToList();
+
+                foreach (var item in listStandar)
                 {
-                    item.ApproverId = assigment.UserEntity.NameUser + " " + assigment.UserEntity.surnameUser;
-                    item.StartTime = assigment.State.ToString();
+                    var assigment = _dataBaseService.assignmentReports
+                       .Include(a => a.UserEntity)
+                       .Where(x => x.HorusReportEntityId == item.IdHorusReport).FirstOrDefault();
+                    if (assigment != null)
+                    {
+                        item.ApproverId = assigment.UserEntity.NameUser + " " + assigment.UserEntity.surnameUser;
+                        item.StartTime = assigment.State.ToString();
+                    }
                 }
+
+                var listmodel = _mapper.Map<List<ListHorursUserModel>>(listStandar);
+                return listmodel;
+            }
+            else 
+            {
+                //aprobador
+                var listAprob = _dataBaseService.HorusReportEntity
+                    .Include(a => a.UserEntity)
+                    .Include(a => a.ClientEntity)
+                    .Where(x => x.ApproverId == IdClient.ToString()).ToList();
+
+                foreach (var item in listAprob)
+                {
+                    var assigment = _dataBaseService.assignmentReports
+                       .Include(a => a.UserEntity)
+                       .Where(x => x.HorusReportEntityId == item.IdHorusReport).FirstOrDefault();
+                    if (assigment != null)
+                    {
+                        item.ApproverId = assigment.UserEntity.NameUser + " " + assigment.UserEntity.surnameUser;
+                        item.StartTime = assigment.State.ToString();
+                    }
+                }
+
+                var listmodel = _mapper.Map<List<ListHorursUserModel>>(listAprob);
+                return listmodel;
             }
 
-            var listmodel = _mapper.Map<List<ListHorursUserModel>>(listuserhours);
-            return listmodel;
+
+
+
 
         }
     }
