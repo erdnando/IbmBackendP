@@ -2282,376 +2282,390 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //limites, excepciones y carga portalDB
                 //-------------------------------------------------------------------------------------------------------------------------------------------
-                try
-                {
-                    //aqui
-                    var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                    var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                    var rowSTEParameter = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //try
+                //{
+                //    //aqui
+                //    var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowSTEParameter = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
-                    var limitesCountryARP = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == Guid.Parse("908465f1-4848-4c86-9e30-471982c01a2d"));
-                    var HorasLimiteDia = limitesCountryARP.TargetTimeDay;
+                //    var limitesCountryARP = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == Guid.Parse("908465f1-4848-4c86-9e30-471982c01a2d"));
+                //    var HorasLimiteDia = limitesCountryARP.TargetTimeDay;
                     
-                    //var listaCountries = _dataBaseService.CountryEntity.ToList();
-                    var listExeptios = _dataBaseService.UsersExceptions.ToList();
+                //    //var listaCountries = _dataBaseService.CountryEntity.ToList();
+                //    var listExeptios = _dataBaseService.UsersExceptions.ToList();
 
 
-                    foreach (var itemARP in rowARPParameter)
-                    {
-                        TimeSpan tsReportado = DateTimeOffset.Parse(itemARP.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemARP.HoraInicio).TimeOfDay;
-                        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
-                        if (UserRow != null)
-                        {
-                            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-                            //var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
-                            var HorasARP = rowARPParameter.Where(co => co.FECHA_REP == itemARP.FECHA_REP).ToList();
-                            var HorasARPGral = HorasARP.Select(x => double.Parse(x.totalHoras)).Sum();
-                            if ((tsReportado.TotalHours + HorasARPGral) > (HorasLimiteDia + horasExceptuada))
-                            {
-                                itemARP.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
-                            }
-                        }
-                        else
-                        {
-                            itemARP.EstatusProceso = "NO_APLICA_NO_USUARIO";
-                        }
-                    }
+                //    foreach (var itemARP in rowARPParameter)
+                //    {
+                //        TimeSpan tsReportado = DateTimeOffset.Parse(itemARP.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemARP.HoraInicio).TimeOfDay;
+                //        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
+                //        if (UserRow != null)
+                //        {
+                //            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                //            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                //            //var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
+                //            var HorasARP = rowARPParameter.Where(co => co.FECHA_REP == itemARP.FECHA_REP).ToList();
+                //            var HorasARPGral = HorasARP.Select(x => double.Parse(x.totalHoras)).Sum();
+                //            if ((tsReportado.TotalHours + HorasARPGral) > (HorasLimiteDia + horasExceptuada))
+                //            {
+                //                itemARP.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
+                //            }
+                //        }
+                //        else
+                //        {
+                //            itemARP.EstatusProceso = "NO_APLICA_NO_USUARIO";
+                //        }
+                //    }
 
-                    foreach (var itemTSE in rowTSEParameter)
-                    {
-                        var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemTSE.EmployeeCode.Substring(itemTSE.EmployeeCode.Length - 3));
-                        var limitesCountryTSE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
-                        var HorasLimiteDiaTSE = limitesCountryTSE.TargetTimeDay;
-                        TimeSpan tsReportadoTSE = DateTimeOffset.Parse(itemTSE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemTSE.HoraInicio).TimeOfDay;
-                        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
-                        if (UserRow != null)
-                        {
-                            //var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemTSE.FECHA_REP).ToString("dd/MM/yyyy"));
-                            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-                            // var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
-                            var HorasTSE = rowTSEParameter.Where(co => co.FECHA_REP == itemTSE.FECHA_REP).ToList();
-                            var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.totalHoras)).Sum();
-                            if ((tsReportadoTSE.TotalHours + HorasTSEGral) > (HorasLimiteDia + horasExceptuada))
-                            {
-                                itemTSE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
-                            }
-                        }
-                        else
-                        {
-                            itemTSE.EstatusProceso = "NO_APLICA_NO_USUARIO";
-                        }
-                    }
+                //    foreach (var itemTSE in rowTSEParameter)
+                //    {
+                //        var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemTSE.EmployeeCode.Substring(itemTSE.EmployeeCode.Length - 3));
+                //        var limitesCountryTSE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
+                //        var HorasLimiteDiaTSE = limitesCountryTSE.TargetTimeDay;
+                //        TimeSpan tsReportadoTSE = DateTimeOffset.Parse(itemTSE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemTSE.HoraInicio).TimeOfDay;
+                //        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
+                //        if (UserRow != null)
+                //        {
+                //            //var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemTSE.FECHA_REP).ToString("dd/MM/yyyy"));
+                //            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                //            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                //            // var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
+                //            var HorasTSE = rowTSEParameter.Where(co => co.FECHA_REP == itemTSE.FECHA_REP).ToList();
+                //            var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.totalHoras)).Sum();
+                //            if ((tsReportadoTSE.TotalHours + HorasTSEGral) > (HorasLimiteDia + horasExceptuada))
+                //            {
+                //                itemTSE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
+                //            }
+                //        }
+                //        else
+                //        {
+                //            itemTSE.EstatusProceso = "NO_APLICA_NO_USUARIO";
+                //        }
+                //    }
 
-                    foreach (var itemSTE in rowSTEParameter)
-                    {
-                        var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemSTE.EmployeeCode.Substring(itemSTE.EmployeeCode.Length - 3));
-                        var limitesCountrySTE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
-                        var HorasLimiteDiaSTE = limitesCountrySTE.TargetTimeDay;
-                        TimeSpan tsReportadoSTE = DateTimeOffset.Parse(itemSTE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemSTE.HoraInicio).TimeOfDay;
-                        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
-                        if (UserRow != null)
-                        {
-                            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-                            //var HorasSTE = rowSTEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemSTE.FECHA_REP)).ToList();
-                            var HorasSTE = rowSTEParameter.Where(co => co.FECHA_REP == itemSTE.FECHA_REP).ToList();
-                            var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
-                            if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
-                            {
-                                itemSTE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
-                            }
-                        }
-                        else
-                        {
-                            itemSTE.EstatusProceso = "NO_APLICA_NO_USUARIO";
-                        }
-                    }
+                //    foreach (var itemSTE in rowSTEParameter)
+                //    {
+                //        var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemSTE.EmployeeCode.Substring(itemSTE.EmployeeCode.Length - 3));
+                //        var limitesCountrySTE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
+                //        var HorasLimiteDiaSTE = limitesCountrySTE.TargetTimeDay;
+                //        TimeSpan tsReportadoSTE = DateTimeOffset.Parse(itemSTE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemSTE.HoraInicio).TimeOfDay;
+                //        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
+                //        if (UserRow != null)
+                //        {
+                //            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                //            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                //            //var HorasSTE = rowSTEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemSTE.FECHA_REP)).ToList();
+                //            var HorasSTE = rowSTEParameter.Where(co => co.FECHA_REP == itemSTE.FECHA_REP).ToList();
+                //            var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
+                //            if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
+                //            {
+                //                itemSTE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
+                //            }
+                //        }
+                //        else
+                //        {
+                //            itemSTE.EstatusProceso = "NO_APLICA_NO_USUARIO";
+                //        }
+                //    }
 
-                    await _dataBaseService.SaveAsync();
+                //    await _dataBaseService.SaveAsync();
 
-                    //los sobrantes estan en overtime, insertar en portaldb y su history, como se hace en reporte de horas stand by
-                    //TODO
+                //    //los sobrantes estan en overtime, insertar en portaldb y su history, como se hace en reporte de horas stand by
+                //    //TODO
 
-                    var rowARPParameterFinal = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                    var rowTSEParameterFinal = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                    var rowSTEParameterFinal = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowARPParameterFinal = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowTSEParameterFinal = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowSTEParameterFinal = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
-                    var datax = _dataBaseService.HorusReportEntity.ToList();
-                    //aqui
-                    foreach (var itemARPp in rowARPParameterFinal)
-                    {
-                        //------------------------------------------------------------------------------------------------------------------
-                        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
+                //    var datax = _dataBaseService.HorusReportEntity.ToList();
+                //    //aqui
+                //    foreach (var itemARPp in rowARPParameterFinal)
+                //    {
+                //        //------------------------------------------------------------------------------------------------------------------
+                //        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
 
-                        /* var data = _dataBaseService.HorusReportEntity
-                         .Where(h => h.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && h.UserEntityId == UserRow.IdUser)
-                         .AsEnumerable()
-                         .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
-                         (TimeInRange(h.StartTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin)) &&
-                          TimeInRange(h.EndTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin))))
-                         .ToList();*/
+                //        /* var data = _dataBaseService.HorusReportEntity
+                //         .Where(h => h.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && h.UserEntityId == UserRow.IdUser)
+                //         .AsEnumerable()
+                //         .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
+                //         (TimeInRange(h.StartTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin)) &&
+                //          TimeInRange(h.EndTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin))))
+                //         .ToList();*/
 
-                        var startTime = DateTime.Parse(itemARPp.HoraInicio);
-                        var endTime = DateTime.Parse(itemARPp.HoraFin);
+                //        var startTime = DateTime.Parse(itemARPp.HoraInicio);
+                //        var endTime = DateTime.Parse(itemARPp.HoraFin);
 
-                        DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                //        DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                //        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
 
-                        var data = _dataBaseService.HorusReportEntity
-                            .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == userRow.IdUser)
-                            .AsEnumerable()
-                            .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
-                            (TimeInRange(h.StartTime, startTime, endTime) &&
-                            TimeInRange(h.EndTime, startTime, endTime)))
-                            .ToList();
-
-
-
-
-                        if (data.Count > 0)
-                        {
-                            var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                            var assignmentRef = _dataBaseService.assignmentReports.
-                                 Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                                 .FirstOrDefault();
-
-                            if (assignmentRef!.State != 3)
-                            {
-                                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                            }
-                        }
-                        //------------------------------------------------------------------------------------------------------------------
-                    }
-
-                    foreach (var itemTSEp in rowTSEParameterFinal)
-                    {
-                        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
-
-                        var startTime = DateTime.Parse(itemTSEp.HoraInicio);
-                        var endTime = DateTime.Parse(itemTSEp.HoraFin);
-
-                        DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-
-                        var data = _dataBaseService.HorusReportEntity
-                            .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
-                            .AsEnumerable()
-                            .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
-                            (TimeInRange(h.StartTime, startTime, endTime) &&
-                            TimeInRange(h.EndTime, startTime, endTime)))
-                            .ToList();
+                //        var data = _dataBaseService.HorusReportEntity
+                //            .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == userRow.IdUser)
+                //            .AsEnumerable()
+                //            .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
+                //            (TimeInRange(h.StartTime, startTime, endTime) &&
+                //            TimeInRange(h.EndTime, startTime, endTime)))
+                //            .ToList();
 
 
 
 
+                //        if (data.Count > 0)
+                //        {
+                //            var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                //            var assignmentRef = _dataBaseService.assignmentReports.
+                //                 Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                //                 .FirstOrDefault();
 
-                        if (data.Count > 0)
-                        {
-                            var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                            var assignmentRef = _dataBaseService.assignmentReports.
-                                 Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                                 .FirstOrDefault();
+                //            if (assignmentRef!.State != 3)
+                //            {
+                //                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                //            }
+                //        }
+                //        //------------------------------------------------------------------------------------------------------------------
+                //    }
 
-                            if (assignmentRef!.State != 3)
-                            {
-                                itemTSEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                            }
-                        }
-                    }
+                //    foreach (var itemTSEp in rowTSEParameterFinal)
+                //    {
+                //        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
 
-                    foreach (var itemSTEp in rowSTEParameterFinal)
-                    {
-                        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
+                //        /*var data = _dataBaseService.HorusReportEntity
+                //        .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
+                //        .AsEnumerable()
+                //        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
+                //        (TimeInRange(h.StartTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin)) &&
+                //         TimeInRange(h.EndTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin))))
+                //        .ToList();*/
 
-                      
+                //        var startTime = DateTime.Parse(itemTSEp.HoraInicio);
+                //        var endTime = DateTime.Parse(itemTSEp.HoraFin);
 
-                        var startTime = DateTime.Parse(itemSTEp.HoraInicio);
-                        var endTime = DateTime.Parse(itemSTEp.HoraFin);
+                //        DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                //        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
 
-                        DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-
-                        var data = _dataBaseService.HorusReportEntity
-                            .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
-                            .AsEnumerable()
-                            .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
-                            (TimeInRange(h.StartTime, startTime, endTime) &&
-                            TimeInRange(h.EndTime, startTime, endTime)))
-                            .ToList();
-
-                        if (data.Count > 0)
-                        {
-                            var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                            var assignmentRef = _dataBaseService.assignmentReports.
-                                 Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                                 .FirstOrDefault();
-
-                            if (assignmentRef!.State != 3)
-                            {
-                                itemSTEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                            }
-                        }
-                    }
+                //        var data = _dataBaseService.HorusReportEntity
+                //            .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
+                //            .AsEnumerable()
+                //            .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
+                //            (TimeInRange(h.StartTime, startTime, endTime) &&
+                //            TimeInRange(h.EndTime, startTime, endTime)))
+                //            .ToList();
 
 
-                    await _dataBaseService.SaveAsync();
 
-                    var rowARPParameterGral = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                    var rowTSEParameterGral = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                    var rowSTEParameterGral = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
-                    List<HorusReportEntity> rowsHorusNew = new();
-                    HorusReportEntity rowAdd = new();
-                    List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
-                    Domain.Entities.AssignmentReport.AssignmentReport rowAddAssig = new();
 
-                    //ARP
-                    //--------------------------------------------------------------------------
-                    var Maxen = 0;
-                    Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
-                    foreach (var itemARPNew in rowARPParameterGral)
-                    {
-                        Maxen++;
-                        DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-                        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+                //        if (data.Count > 0)
+                //        {
+                //            var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                //            var assignmentRef = _dataBaseService.assignmentReports.
+                //                 Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                //                 .FirstOrDefault();
 
-                        rowAdd = new()
-                        {
-                            IdHorusReport = Guid.NewGuid(),
-                            CreationDate = DateTime.Now,
-                            DateApprovalSystem = DateTime.Now,
-                            NumberReport = Maxen,
-                            StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
-                            StartTime = itemARPNew.HoraInicio,
-                            EndTime = itemARPNew.HoraFin,
-                            Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
-                            UserEntityId = userRow.IdUser,
-                            ClientEntityId= Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
-                            TipoReporte=2,
-                            Acitivity=0,
-                            CountHours= itemARPNew.totalHoras,
-                            ApproverId= userRow.IdUser.ToString(),
-                            ARPLoadingId= model.IdCarga
-                        };
-                        rowsHorusNew.Add(rowAdd);
+                //            if (assignmentRef!.State != 3)
+                //            {
+                //                itemTSEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                //            }
+                //        }
+                //    }
 
-                        //var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+                //    foreach (var itemSTEp in rowSTEParameterFinal)
+                //    {
+                //        var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
 
-                        rowAddAssig = new()
-                        {
-                            IdAssignmentReport = Guid.NewGuid(),
-                            HorusReportEntityId = rowAdd.IdHorusReport,
-                            UserEntityId = userRow.IdUser,
-                            Description = "PROCESO_OVERTIME",
-                            State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+                //        /*var data = _dataBaseService.HorusReportEntity
+                //        .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
+                //        .AsEnumerable()
+                //        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
+                //        (TimeInRange(h.StartTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin)) &&
+                //         TimeInRange(h.EndTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin))))
+                //        .ToList();*/
 
-                        };
-                        rowAssignments.Add(rowAddAssig);
-                    }
+                //        var startTime = DateTime.Parse(itemSTEp.HoraInicio);
+                //        var endTime = DateTime.Parse(itemSTEp.HoraFin);
 
-                    //TSE
-                    //------------------------------------------------------------------------
+                //        DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                //        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
 
-                    foreach (var itemTSENew in rowTSEParameterGral)
-                    {
-                        Maxen++;
-                        DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-                        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
+                //        var data = _dataBaseService.HorusReportEntity
+                //            .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
+                //            .AsEnumerable()
+                //            .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
+                //            (TimeInRange(h.StartTime, startTime, endTime) &&
+                //            TimeInRange(h.EndTime, startTime, endTime)))
+                //            .ToList();
 
-                        rowAdd = new()
-                        {
-                            IdHorusReport = Guid.NewGuid(),
-                            CreationDate = DateTime.Now,
-                            DateApprovalSystem = DateTime.Now,
-                            NumberReport = Maxen,
-                            StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
-                            StartTime = itemTSENew.HoraInicio,
-                            EndTime = itemTSENew.HoraFin,
-                            Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
-                            UserEntityId=userRow.IdUser,
-                            ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
-                            TipoReporte = 2,
-                            Acitivity = 0,
-                            CountHours = itemTSENew.totalHoras,
-                            ApproverId = userRow.IdUser.ToString(),
-                            ARPLoadingId = model.IdCarga
+                //        if (data.Count > 0)
+                //        {
+                //            var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
+                //            var assignmentRef = _dataBaseService.assignmentReports.
+                //                 Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
+                //                 .FirstOrDefault();
 
-                        };
-                        rowsHorusNew.Add(rowAdd);
+                //            if (assignmentRef!.State != 3)
+                //            {
+                //                itemSTEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                //            }
+                //        }
+                //    }
 
-                        
 
-                        rowAddAssig = new()
-                        {
-                            IdAssignmentReport = Guid.NewGuid(),
-                            HorusReportEntityId = rowAdd.IdHorusReport,
-                            UserEntityId = userRow.IdUser,
-                            Description = "PROCESO_OVERTIME",
-                            State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+                //    await _dataBaseService.SaveAsync();
 
-                        };
-                        rowAssignments.Add(rowAddAssig);
-                    }
-                    //STE
-                    //------------------------------------------------------------------------
-                    foreach (var itemSTENew in rowSTEParameterGral)
-                    {
-                        Maxen++;
-                        DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-                        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
+                //    var rowARPParameterGral = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowTSEParameterGral = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                //    var rowSTEParameterGral = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(model.IdCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
-                        rowAdd = new()
-                        {
-                            IdHorusReport = Guid.NewGuid(),
-                            CreationDate = DateTime.Now,
-                            DateApprovalSystem = DateTime.Now,
-                            NumberReport = Maxen,
-                            StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
-                            StartTime = itemSTENew.HoraInicio,
-                            EndTime= itemSTENew.HoraFin,
-                            Description= itemSTENew.EstatusProceso + " Generado por proceso overtime",
-                            UserEntityId = userRow.IdUser,
-                            ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
-                            TipoReporte = 2,
-                            Acitivity = 0,
-                            CountHours = itemSTENew.totalHoras,
-                            ApproverId = userRow.IdUser.ToString(),
-                            ARPLoadingId = model.IdCarga
-                        };
-                        rowsHorusNew.Add(rowAdd);
+                //    List<HorusReportEntity> rowsHorusNew = new();
+                //    HorusReportEntity rowAdd = new();
+                //    List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
+                //    Domain.Entities.AssignmentReport.AssignmentReport rowAddAssig = new();
+
+                //    //ARP
+                //    //--------------------------------------------------------------------------
+                //    var Maxen = 0;
+                //    Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
+                //    foreach (var itemARPNew in rowARPParameterGral)
+                //    {
+                //        Maxen++;
+                //        DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                //        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                //        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+
+                //        rowAdd = new()
+                //        {
+                //            IdHorusReport = Guid.NewGuid(),
+                //            CreationDate = DateTime.Now,
+                //            DateApprovalSystem = DateTime.Now,
+                //            NumberReport = Maxen,
+                //            StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                //            StartTime = itemARPNew.HoraInicio,
+                //            EndTime = itemARPNew.HoraFin,
+                //            Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
+                //            UserEntityId = userRow.IdUser,
+                //            ClientEntityId= Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                //            TipoReporte=2,
+                //            Acitivity=0,
+                //            CountHours= itemARPNew.totalHoras,
+                //            ApproverId= userRow.IdUser.ToString(),
+                //            ARPLoadingId= model.IdCarga
+                //        };
+                //        rowsHorusNew.Add(rowAdd);
+
+                //        //var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+
+                //        rowAddAssig = new()
+                //        {
+                //            IdAssignmentReport = Guid.NewGuid(),
+                //            HorusReportEntityId = rowAdd.IdHorusReport,
+                //            UserEntityId = userRow.IdUser,
+                //            Description = "PROCESO_OVERTIME",
+                //            State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+
+                //        };
+                //        rowAssignments.Add(rowAddAssig);
+                //    }
+
+                //    //TSE
+                //    //------------------------------------------------------------------------
+
+                //    foreach (var itemTSENew in rowTSEParameterGral)
+                //    {
+                //        Maxen++;
+                //        DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                //        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                //        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
+
+                //        rowAdd = new()
+                //        {
+                //            IdHorusReport = Guid.NewGuid(),
+                //            CreationDate = DateTime.Now,
+                //            DateApprovalSystem = DateTime.Now,
+                //            NumberReport = Maxen,
+                //            StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                //            StartTime = itemTSENew.HoraInicio,
+                //            EndTime = itemTSENew.HoraFin,
+                //            Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
+                //            UserEntityId=userRow.IdUser,
+                //            ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                //            TipoReporte = 2,
+                //            Acitivity = 0,
+                //            CountHours = itemTSENew.totalHoras,
+                //            ApproverId = userRow.IdUser.ToString(),
+                //            ARPLoadingId = model.IdCarga
+
+                //        };
+                //        rowsHorusNew.Add(rowAdd);
 
                         
 
-                        rowAddAssig = new()
-                        {
-                            IdAssignmentReport = Guid.NewGuid(),
-                            HorusReportEntityId = rowAdd.IdHorusReport,
-                            UserEntityId = userRow.IdUser,
-                            Description = "PROCESO_OVERTIME",
-                            State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                            DateApprovalCancellation = DateTime.Now,
+                //        rowAddAssig = new()
+                //        {
+                //            IdAssignmentReport = Guid.NewGuid(),
+                //            HorusReportEntityId = rowAdd.IdHorusReport,
+                //            UserEntityId = userRow.IdUser,
+                //            Description = "PROCESO_OVERTIME",
+                //            State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
 
-                        };
-                        rowAssignments.Add(rowAddAssig);
-                    }
-                    _dataBaseService.HorusReportEntity.AddRange(rowsHorusNew);
-                    await _dataBaseService.SaveAsync();
+                //        };
+                //        rowAssignments.Add(rowAddAssig);
+                //    }
+                //    //STE
+                //    //------------------------------------------------------------------------
+                //    foreach (var itemSTENew in rowSTEParameterGral)
+                //    {
+                //        Maxen++;
+                //        DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                //        string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                //        var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
+
+                //        rowAdd = new()
+                //        {
+                //            IdHorusReport = Guid.NewGuid(),
+                //            CreationDate = DateTime.Now,
+                //            DateApprovalSystem = DateTime.Now,
+                //            NumberReport = Maxen,
+                //            StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                //            StartTime = itemSTENew.HoraInicio,
+                //            EndTime= itemSTENew.HoraFin,
+                //            Description= itemSTENew.EstatusProceso + " Generado por proceso overtime",
+                //            UserEntityId = userRow.IdUser,
+                //            ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                //            TipoReporte = 2,
+                //            Acitivity = 0,
+                //            CountHours = itemSTENew.totalHoras,
+                //            ApproverId = userRow.IdUser.ToString(),
+                //            ARPLoadingId = model.IdCarga
+                //        };
+                //        rowsHorusNew.Add(rowAdd);
+
+                        
+
+                //        rowAddAssig = new()
+                //        {
+                //            IdAssignmentReport = Guid.NewGuid(),
+                //            HorusReportEntityId = rowAdd.IdHorusReport,
+                //            UserEntityId = userRow.IdUser,
+                //            Description = "PROCESO_OVERTIME",
+                //            State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                //            DateApprovalCancellation = DateTime.Now,
+
+                //        };
+                //        rowAssignments.Add(rowAddAssig);
+                //    }
+                //    _dataBaseService.HorusReportEntity.AddRange(rowsHorusNew);
+                //    await _dataBaseService.SaveAsync();
 
 
-                    _dataBaseService.assignmentReports.AddRange(rowAssignments);
+                //    _dataBaseService.assignmentReports.AddRange(rowAssignments);
 
-                    await _dataBaseService.SaveAsync();
-                }
-                catch (Exception ex)
-                {
+                //    await _dataBaseService.SaveAsync();
+                //}
+                //catch (Exception ex)
+                //{
 
-                    string error = ex.Message;
-                }
+                //    string error = ex.Message;
+                //}
 
 
 
@@ -2934,25 +2948,25 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             var STEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso != "EN_OVERTIME" && e.IdCarga == new Guid(idCarga)).ToList();
             var TSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso != "EN_OVERTIME" && e.IdCarga == new Guid(idCarga)).ToList();
 
-            var eventosNotificables = from arp in ARPGral
-                                     join ste in STEGral on arp.IdCarga equals ste.IdCarga
-                                     join tse in TSEGral on ste.IdCarga equals tse.IdCarga
-                                     select new
-                                     {
-                                         CodeUser = arp.IdParametersInitialEntity,
-                                         EstatusProceso = arp.EstatusProceso,
-                                         EmployeCode = arp.EmployeeCode,
-                                         Anio = arp.Anio,
-                                         Semana = arp.Semana,
-                                         HoraInicio = arp.HoraInicio,
-                                         HoraFin = arp.HoraFin,
-                                     };
+            //var eventosNotificables = from arp in ARPGral
+            //                         join ste in STEGral on arp.IdCarga equals ste.IdCarga
+            //                         join tse in TSEGral on ste.IdCarga equals tse.IdCarga
+            //                         select new
+            //                         {
+            //                             CodeUser = arp.IdParametersInitialEntity,
+            //                             EstatusProceso = arp.EstatusProceso,
+            //                             EmployeCode = arp.EmployeeCode,
+            //                             Anio = arp.Anio,
+            //                             Semana = arp.Semana,
+            //                             HoraInicio = arp.HoraInicio,
+            //                             HoraFin = arp.HoraFin,
+            //                         };
 
             
 
-            foreach (var evento in eventosNotificables)
+            foreach (var evento in ARPGral)
             {
-                var userData = usersTLS.FirstOrDefault(e => e.EmployeeCode == evento.EmployeCode);
+                var userData = usersTLS.FirstOrDefault(e => e.EmployeeCode == evento.EmployeeCode);
                 if (userData == null)
                 {
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
@@ -2971,10 +2985,74 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "8" });break;
                         case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "9" }); break;
                         case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "10" }); break;
-                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "11" }); break;
+                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "12" }); break;
                         default: break; 
                     }
                    
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+
+            foreach (var eventoSTE in STEGral)
+            {
+                var userDataSte = usersTLS.FirstOrDefault(e => e.EmployeeCode == eventoSTE.EmployeeCode);
+                if (userDataSte == null)
+                {
+                    //no se pudo enviar el correo, por q no hay datos registrados en el sistema
+
+                    //notificar al admin
+                    _emailCommand.SendEmail(new EmailModel { To = "santiagoael@algartech.com", Plantilla = "11" });
+                    Thread.Sleep(300);
+                    continue;
+                }
+
+                try
+                {
+                    //TODO Definir plantilla de correo
+                    switch (eventoSTE.EstatusProceso)
+                    {
+                        case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "8" }); break;
+                        case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "9" }); break;
+                        case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "10" }); break;
+                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "12" }); break;
+                        default: break;
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+
+            foreach (var eventoTSE in TSEGral)
+            {
+                var userDataTse = usersTLS.FirstOrDefault(e => e.EmployeeCode == eventoTSE.EmployeeCode);
+                if (userDataTse == null)
+                {
+                    //no se pudo enviar el correo, por q no hay datos registrados en el sistema
+
+                    //notificar al admin
+                    _emailCommand.SendEmail(new EmailModel { To = "santiagoael@algartech.com", Plantilla = "11" });
+                    Thread.Sleep(300);
+                    continue;
+                }
+
+                try
+                {
+                    //TODO Definir plantilla de correo
+                    switch (eventoTSE.EstatusProceso)
+                    {
+                        case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "8" }); break;
+                        case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "9" }); break;
+                        case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "10" }); break;
+                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "12" }); break;
+                        default: break;
+                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -2997,7 +3075,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 var limitesCountryARP = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == Guid.Parse("908465f1-4848-4c86-9e30-471982c01a2d"));
                 var HorasLimiteDia = limitesCountryARP.TargetTimeDay;
-                //var listaCountries = await _consultCountryCommand.List();
+
                 var listaCountries = _dataBaseService.CountryEntity.ToList();
                 var listExeptios = _dataBaseService.UsersExceptions.ToList();
 
@@ -3008,7 +3086,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
                     if (UserRow != null)
                     {
-                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy")== DateTimeOffset.ParseExact(itemARP.FECHA_REP,"dd/MM/yyyy HH:mm:ss",CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         //var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
                         var HorasARP = rowARPParameter.Where(co => co.FECHA_REP == itemARP.FECHA_REP).ToList();
@@ -3034,9 +3112,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if (UserRow != null)
                     {
                         //var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemTSE.FECHA_REP).ToString("dd/MM/yyyy"));
-                          var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-                       // var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
+                        // var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
                         var HorasTSE = rowTSEParameter.Where(co => co.FECHA_REP == itemTSE.FECHA_REP).ToList();
                         var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.totalHoras)).Sum();
                         if ((tsReportadoTSE.TotalHours + HorasTSEGral) > (HorasLimiteDia + horasExceptuada))
@@ -3088,14 +3166,34 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //aqui
                 foreach (var itemARPp in rowARPParameterFinal)
                 {
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
+                    //------------------------------------------------------------------------------------------------------------------
+                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
+
+                    /* var data = _dataBaseService.HorusReportEntity
+                     .Where(h => h.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && h.UserEntityId == UserRow.IdUser)
+                     .AsEnumerable()
+                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
+                     (TimeInRange(h.StartTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin)) &&
+                      TimeInRange(h.EndTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin))))
+                     .ToList();*/
+
+                    var startTime = DateTime.Parse(itemARPp.HoraInicio);
+                    var endTime = DateTime.Parse(itemARPp.HoraFin);
+
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+
                     var data = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && h.UserEntityId == UserRow.IdUser)
-                    .AsEnumerable()
-                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
-                    (TimeInRange(h.StartTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin)) &&
-                     TimeInRange(h.EndTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin))))
-                    .ToList();
+                        .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == userRow.IdUser)
+                        .AsEnumerable()
+                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
+                        (TimeInRange(h.StartTime, startTime, endTime) &&
+                        TimeInRange(h.EndTime, startTime, endTime)))
+                        .ToList();
+
+
+
+
                     if (data.Count > 0)
                     {
                         var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
@@ -3108,18 +3206,39 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
                         }
                     }
+                    //------------------------------------------------------------------------------------------------------------------
                 }
 
                 foreach (var itemTSEp in rowTSEParameterFinal)
                 {
                     var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
-                    var data = _dataBaseService.HorusReportEntity
+
+                    /*var data = _dataBaseService.HorusReportEntity
                     .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
                     (TimeInRange(h.StartTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin)) &&
                      TimeInRange(h.EndTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin))))
-                    .ToList();
+                    .ToList();*/
+
+                    var startTime = DateTime.Parse(itemTSEp.HoraInicio);
+                    var endTime = DateTime.Parse(itemTSEp.HoraFin);
+
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+
+                    var data = _dataBaseService.HorusReportEntity
+                        .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
+                        .AsEnumerable()
+                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
+                        (TimeInRange(h.StartTime, startTime, endTime) &&
+                        TimeInRange(h.EndTime, startTime, endTime)))
+                        .ToList();
+
+
+
+
+
                     if (data.Count > 0)
                     {
                         var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
@@ -3137,13 +3256,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var itemSTEp in rowSTEParameterFinal)
                 {
                     var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
-                    var data = _dataBaseService.HorusReportEntity
+
+                    /*var data = _dataBaseService.HorusReportEntity
                     .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
                     (TimeInRange(h.StartTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin)) &&
                      TimeInRange(h.EndTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin))))
-                    .ToList();
+                    .ToList();*/
+
+                    var startTime = DateTime.Parse(itemSTEp.HoraInicio);
+                    var endTime = DateTime.Parse(itemSTEp.HoraFin);
+
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+
+                    var data = _dataBaseService.HorusReportEntity
+                        .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
+                        .AsEnumerable()
+                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
+                        (TimeInRange(h.StartTime, startTime, endTime) &&
+                        TimeInRange(h.EndTime, startTime, endTime)))
+                        .ToList();
+
                     if (data.Count > 0)
                     {
                         var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
@@ -3177,23 +3312,37 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var itemARPNew in rowARPParameterGral)
                 {
                     Maxen++;
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
-                        StartDate = DateTimeOffset.Parse(itemARPNew.FECHA_REP).Date
+                        StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StartTime = itemARPNew.HoraInicio,
+                        EndTime = itemARPNew.HoraFin,
+                        Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
+                        UserEntityId = userRow.IdUser,
+                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        TipoReporte = 2,
+                        Acitivity = 0,
+                        CountHours = itemARPNew.totalHoras,
+                        ApproverId = userRow.IdUser.ToString(),
+                        ARPLoadingId = idCarga
                     };
                     rowsHorusNew.Add(rowAdd);
 
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+                    //var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
 
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
                         HorusReportEntityId = rowAdd.IdHorusReport,
-                        UserEntityId = UserRow.IdUser,
+                        UserEntityId = userRow.IdUser,
                         Description = "PROCESO_OVERTIME",
                         State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
 
@@ -3203,28 +3352,42 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //TSE
                 //------------------------------------------------------------------------
-                
+
                 foreach (var itemTSENew in rowTSEParameterGral)
                 {
-                    Maxen ++;
-                    
+                    Maxen++;
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
+
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
-                        StartDate = DateTimeOffset.Parse(itemTSENew.FECHA_REP).Date
+                        StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StartTime = itemTSENew.HoraInicio,
+                        EndTime = itemTSENew.HoraFin,
+                        Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
+                        UserEntityId = userRow.IdUser,
+                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        TipoReporte = 2,
+                        Acitivity = 0,
+                        CountHours = itemTSENew.totalHoras,
+                        ApproverId = userRow.IdUser.ToString(),
+                        ARPLoadingId = idCarga
+
                     };
                     rowsHorusNew.Add(rowAdd);
 
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
+
 
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
                         HorusReportEntityId = rowAdd.IdHorusReport,
-                        UserEntityId = UserRow.IdUser,
+                        UserEntityId = userRow.IdUser,
                         Description = "PROCESO_OVERTIME",
                         State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
 
@@ -3236,26 +3399,40 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var itemSTENew in rowSTEParameterGral)
                 {
                     Maxen++;
-                    
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
+
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
-                        StartDate = DateTimeOffset.Parse(itemSTENew.FECHA_REP).Date
+                        StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StartTime = itemSTENew.HoraInicio,
+                        EndTime = itemSTENew.HoraFin,
+                        Description = itemSTENew.EstatusProceso + " Generado por proceso overtime",
+                        UserEntityId = userRow.IdUser,
+                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        TipoReporte = 2,
+                        Acitivity = 0,
+                        CountHours = itemSTENew.totalHoras,
+                        ApproverId = userRow.IdUser.ToString(),
+                        ARPLoadingId = idCarga
                     };
                     rowsHorusNew.Add(rowAdd);
 
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
+
 
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
                         HorusReportEntityId = rowAdd.IdHorusReport,
-                        UserEntityId = UserRow.IdUser,
+                        UserEntityId = userRow.IdUser,
                         Description = "PROCESO_OVERTIME",
-                        State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+                        State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        DateApprovalCancellation = DateTime.Now,
 
                     };
                     rowAssignments.Add(rowAddAssig);
@@ -3271,13 +3448,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             catch (Exception ex)
             {
 
-                return false;
+                string error = ex.Message;
             }
-
-            
-
-            
-
             return true;
         }
     }

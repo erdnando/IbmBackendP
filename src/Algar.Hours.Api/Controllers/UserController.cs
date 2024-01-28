@@ -82,19 +82,19 @@ namespace Algar.Hours.Api.Controllers
         {
             var data = await loginuserCommand.Execute(model);
             
-            var token = GenerateToken(model);
+            var token = data==null?"NA":GenerateToken(model);
             var responseLogin = new
             {
-               Email= data.Email,
-                Password = data.Password,
-                RoleEntity =  data.RoleEntity,
-                RoleEntityId=data.RoleEntityId,
-                CountryEntityId=data.CountryEntityId,
-                CountryEntity=data.CountryEntity,
-                EmployeeCode=data.EmployeeCode,
-                IdUser=data.IdUser,
-                NameUser= data.NameUser,
-                surnameUser=data.surnameUser,
+               Email= data == null ? "":data.Email,
+                Password = data == null ? "" : data.Password,
+                RoleEntity = data == null ? null : data.RoleEntity,
+                RoleEntityId= data == null ? new Guid("00000000-0000-0000-0000-000000000000") : data.RoleEntityId,
+                CountryEntityId= data == null ? new Guid("00000000-0000-0000-0000-000000000000") : data.CountryEntityId,
+                CountryEntity= data == null ? null : data.CountryEntity,
+                EmployeeCode= data == null ? "" : data.EmployeeCode,
+                IdUser= data == null ? new Guid("00000000-0000-0000-0000-000000000000") : data.IdUser,
+                NameUser= data == null ? "" : data.NameUser,
+                surnameUser= data == null ? "" : data.surnameUser,
                 token= token
             };
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, responseLogin));
