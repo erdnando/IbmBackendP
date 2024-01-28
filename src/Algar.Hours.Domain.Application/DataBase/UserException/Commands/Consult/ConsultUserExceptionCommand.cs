@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.Festivos.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -27,6 +28,16 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Consult
                 .ToListAsync();
             var model = _mapper.Map<List<UserExceptionModel>>(entity);
             return model;
+        }
+        public async Task<List<UserExceptionModel>> ConsultUsersByCountryId(Guid countryId)
+        {
+            var userByCountryId = await _dataBaseService.UsersExceptions
+                .Include(u => u.User)
+                .Where(u => u.User.CountryEntityId == countryId)
+                .ToListAsync();
+
+            var userModels = _mapper.Map<List<UserExceptionModel>>(userByCountryId);
+            return userModels;
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
         Task<CreateUserModelc> Consult(Guid Id);
         Task<ManagerEmployeeModel> GetManagerByEmployeeCode(string _employeeCode);
         Task<List<CreateUserModel>> ConsultUsersByRoleId(Guid roleId);
+        Task<List<CreateUserModel>> ConsultUsersByCountryId(Guid countryId);
         Task<Guid> GetUserIdByEmployeeCode(string employeeCode, Guid countryId);
         Task<Guid> GetUserIdByID(string employeeId, Guid countryId);
         Task<UserEntity> GetByEmail(string EmailUser);

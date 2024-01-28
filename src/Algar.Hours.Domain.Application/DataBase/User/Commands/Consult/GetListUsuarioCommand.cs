@@ -88,6 +88,18 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
             return userModels;
         }
 
+        public async Task<List<CreateUserModel>> ConsultUsersByCountryId(Guid countryId)
+        {
+            var userByCountryId = await _dataBaseService.UserEntity
+                .Include(u => u.RoleEntity)
+                .Include(u => u.CountryEntity)
+                .Where(u => u.CountryEntityId == countryId)
+                .ToListAsync();
+
+            var userModels = _mapper.Map<List<CreateUserModel>>(userByCountryId);
+            return userModels;
+        }
+
         public async Task<UserEntity> GetByEmail(string EmailUser)
         {
             var userEntity = await _dataBaseService.UserEntity.FirstOrDefaultAsync(u => u.Email.Trim().ToUpper() == EmailUser.Trim().ToUpper());

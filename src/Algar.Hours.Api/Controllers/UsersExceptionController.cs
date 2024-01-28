@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.HoursReport.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
 using Algar.Hours.Application.DataBase.User.Commands.Update;
 using Algar.Hours.Application.DataBase.UserException.Commands.Consult;
@@ -33,6 +34,13 @@ namespace Algar.Hours.Api.Controllers
         {
             var data = await consultUserExceptionCommand.List();
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+        [HttpGet("GetByCountryList")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> ListByCountryId([FromQuery] Guid Id, [FromServices] IConsultUserExceptionCommand consultUserExceptionCommand)
+        {
+            var data = await consultUserExceptionCommand.ConsultUsersByCountryId(Id);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
         [HttpPost("Update")]
         [Authorize(Roles = "standard")]

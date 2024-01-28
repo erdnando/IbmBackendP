@@ -266,6 +266,13 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             var data = await getListUsuarioCommand.ConsultUsersByRoleId(Id);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
+        [HttpGet("GetByCountryList")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> ListByCountryId([FromQuery] Guid Id, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
+        {
+            var data = await getListUsuarioCommand.ConsultUsersByCountryId(Id);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status200OK, data));
+        }
         [HttpGet("GetByEmployeCode")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> GetByEmployeCode([FromQuery] string EmployeeCode, [FromQuery] Guid PaisId, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
