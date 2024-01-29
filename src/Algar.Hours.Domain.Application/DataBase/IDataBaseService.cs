@@ -59,9 +59,6 @@ namespace Algar.Hours.Application.DataBase
         DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
 
         Task<bool> SaveAsync();
-        void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records);
-        void BulkInsertARPLoadDetailEntity(List<ARPLoadDetailEntity> records);
-        
 
     }
 }

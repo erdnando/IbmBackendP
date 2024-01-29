@@ -95,9 +95,9 @@ namespace Algar.Hours.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> ValidaLimitesExcepcionesOverlapping([FromBody] Loadnotificaciones requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
-            loadHoursReport.ValidaLimitesExcepcionesOverlapping(requestData.IdCarga);
+            var dataFinal = loadHoursReport.ValidaLimitesExcepcionesOverlapping(requestData.IdCarga);
 
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, true));
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
 
 

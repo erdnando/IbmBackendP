@@ -24,6 +24,8 @@ namespace Algar.Hours.Domain.Entities.Load
         public string NombreCuenta { get; set;}
         [JsonProperty("Start Date/Time")]
         public string StartDateTime { get; set;}
+        [JsonProperty("TSE: Status")]
+        public string Status { get; set; }
         [JsonProperty("End Date/Time")]
         public string EndDateTime { get; set;}
         public string EndHours { get; set;}

@@ -2034,7 +2034,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
             try
             {
-                List<STELoadEntity> datosSTEExcel = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
+                List<STELoadEntity> datosSTEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
+                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.Status != "Extracted" && x.Status != "Final" && x.Status != "Submitted" && x.TotalDuration=="0").ToList();
                 datosSTEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
 
 
@@ -2195,7 +2196,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     listParametersInitialEntity.Add(parametersSTEInitialEntity);
                 }
 
-                await _dataBaseService.ParametersSteInitialEntity.AddRangeAsync(listParametersInitialEntity);
+                _dataBaseService.ParametersSteInitialEntity.AddRangeAsync(listParametersInitialEntity);
                 await _dataBaseService.SaveAsync();
 
 
@@ -2775,6 +2776,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.NO_APLICA_X_OVERLAPING_STE = "0";
                 summary.EN_PROCESO_STE = "0";
                 summary.STE_OMITIDOS = "0";
+                summary.ARP_CARGA = "0";
+                summary.TSE_CARGA = "0";
+                summary.STE_CARGA = "0";
 
                 summary.IdCarga = model.IdCarga;
 
@@ -3064,8 +3068,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             return true;
         }
 
-        public async Task<bool> ValidaLimitesExcepcionesOverlapping(string idCarga)
+        public async Task<SummaryLoad> ValidaLimitesExcepcionesOverlapping(string idCarga)
         {
+            SummaryLoad summary = new SummaryLoad();
             try
             {
                 //aqui
@@ -3209,9 +3214,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if (data.Count > 0)
                     {
                         var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                        var assignmentRef = await _dataBaseService.assignmentReports.
+                        var assignmentRef = _dataBaseService.assignmentReports.
                              Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                             .FirstOrDefaultAsync();
+                             .FirstOrDefault();
                         if (assignmentRef != null)
                         {
                             if (assignmentRef!.State != 3)
@@ -3320,6 +3325,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var rowARPParameterGral =  _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterGral =  _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowSTEParameterGral =  _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
+                
+                summary.Mensaje = "Carga procesada";
+                summary.ARP_CARGA = rowARPParameterGral.Count()==0?"0":rowARPParameterGral.Count().ToString();
+                summary.TSE_CARGA = rowARPParameterGral.Count() == 0 ? "0" : rowTSEParameterGral.Count().ToString();
+                summary.STE_CARGA = rowARPParameterGral.Count() == 0 ? "0" : rowSTEParameterGral.Count().ToString();
 
                 List<HorusReportEntity> rowsHorusNew = new();
                 HorusReportEntity rowAdd = new();
@@ -3479,7 +3489,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 string error = ex.Message;
             }
-            return true;
+            return summary;
         }
     }
 }
