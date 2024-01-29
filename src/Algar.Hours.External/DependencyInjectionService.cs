@@ -15,7 +15,8 @@ namespace Algar.Hours.External
             // services.AddDbContext<DatabaseService>(options =>
             // options.UseSqlServer(configuration["sqlconnectionstrings"]));
 
-            services.AddDbContext<DatabaseService>(options => options.UseNpgsql(configuration["SQLConnectionStringsPost"],providerOptions => providerOptions.EnableRetryOnFailure()));
+            services.AddDbContext<DatabaseService>(options => options.UseNpgsql(configuration["SQLConnectionStringsPost"],providerOptions => providerOptions.EnableRetryOnFailure() ));
+
             services.AddTransient<DatabaseService>();
 
             services.AddScoped<IDataBaseService, DatabaseService>();

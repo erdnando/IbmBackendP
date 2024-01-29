@@ -114,7 +114,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     ReportUpdate.DateApprovalCancellation = DateTime.Now;
 
                     _dataBaseService.assignmentReports.Update(ReportUpdate);
-                    _dataBaseService.SaveAsync();
+                   await _dataBaseService.SaveAsync();
 
 
 
