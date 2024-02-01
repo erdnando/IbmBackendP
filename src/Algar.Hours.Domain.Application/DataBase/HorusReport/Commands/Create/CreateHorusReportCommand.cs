@@ -162,6 +162,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             PortalDBModel returnPortalDB = new();
             //---------------------------heredado----------------------------------------------------------------
             var horusModel = _mapper.Map<HorusReportModel>(model);
+            
 
             horusModel.IdHorusReport = Guid.NewGuid();
             horusModel.CreationDate = DateTime.Now;
@@ -175,7 +176,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
 
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-            string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+            string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
+            horusModel.StartDate = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
 
 
             //TODO
@@ -239,7 +241,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == horusModel.UserEntityId && x.StartDate == DateTimeOffset.Parse(horusModel.StartDate.ToString()));
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
             var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").
-                Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StartDate == DateTime.Parse(horusModel.StartDate.ToString())   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
+                Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StrStartDate == horusModel.StartDate.ToString("dd/MM/yyyy 00:00:00")   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
 
             //var HorasPortalDB = _dataBaseService.HorusReportEntity.Where(co => co.StartDate == DateTime.Parse(horusModel.StartDate.ToString() && co.State == 0 || co.State == 1).ToList();
 
@@ -267,7 +269,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             //obtine datos para validar si existe un registro previo (OVERLAPPING)
             var data = _dataBaseService.HorusReportEntity
-                .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == model.UserEntityId)
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == model.UserEntityId)
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, model.StartTime, model.EndTime) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -277,29 +279,13 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             if (data.Count > 0)
             {
-                var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                var assignmentRef = _dataBaseService.assignmentReports.
-                     Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                     .FirstOrDefault();
-
-                
-
-                if (assignmentRef!.State != 3)
+                returnPortalDB.State = 102;
+                _emailCommand.SendEmail(new EmailModel
                 {
-                    //is pending
-                    canSendAgainHours = false;
-                    //se termina por overlapping!!!!!
-                    //el Registro se encuentra en Overlapi StandBy
-                    horusModel.State = 102;
-                    _emailCommand.SendEmail(new EmailModel
-                    {
-                        To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
-                        Plantilla = "10"
-                    });
-                    return returnPortalDB;
-                    // agregar notificacion email
-
-                }
+                    To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
+                    Plantilla = "10"
+                });
+                return returnPortalDB;
             }
             
 

@@ -2035,7 +2035,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 List<STELoadEntity> datosSTEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
-                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.Status != "Extracted" && x.Status != "Final" && x.Status != "Submitted" && x.TotalDuration=="0").ToList();
+                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.TotalDuration=="0").ToList();
                 datosSTEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
 
 
@@ -3068,9 +3068,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             return true;
         }
 
-        public async Task<SummaryLoad> ValidaLimitesExcepcionesOverlapping(string idCarga)
+        public async Task<SummaryPortalDB> ValidaLimitesExcepcionesOverlapping(string idCarga)
         {
-            SummaryLoad summary = new SummaryLoad();
+            SummaryPortalDB summary = new SummaryPortalDB();
             try
             {
                 //aqui
@@ -3084,6 +3084,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var listaCountries =_dataBaseService.CountryEntity.ToList();
                 var listExeptios = _dataBaseService.UsersExceptions.ToList();
                 var listHorusReport = _dataBaseService.HorusReportEntity.ToList();
+                var UserLst = _dataBaseService.UserEntity.ToList();
 
                 var CoEmple = "";
                 var HoursTotEMp = 0.0;
@@ -3091,13 +3092,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var itemARP in rowARPParameter)
                 {
                     TimeSpan tsReportado = DateTimeOffset.Parse(itemARP.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemARP.HoraInicio).TimeOfDay;
-                    var UserRow =  _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
+                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
                     if (UserRow != null)
                     {
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         //var HorasARP = rowARPParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemARP.FECHA_REP)).ToList();
-                        var HorasARP = listHorusReport.Where(co => co.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && co.UserEntityId== UserRow.IdUser).ToList();
+                        var HorasARP = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy 00:00:00") && co.UserEntityId== UserRow.IdUser).ToList();
 
                         var HorasARPGral = HorasARP.Select(x => double.Parse(x.CountHours)).Sum();
 
@@ -3118,7 +3119,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var limitesCountryTSE =  _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
                     var HorasLimiteDiaTSE = limitesCountryTSE.TargetTimeDay;
                     TimeSpan tsReportadoTSE = DateTimeOffset.Parse(itemTSE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemTSE.HoraInicio).TimeOfDay;
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
+                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
                     if (UserRow != null)
                     {
                         //var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("dd/MM/yyyy") == DateTime.Parse(itemTSE.FECHA_REP).ToString("dd/MM/yyyy"));
@@ -3127,7 +3128,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         // var HorasTSE = rowTSEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemTSE.FECHA_REP)).ToList();
                         //var HorasTSE = rowTSEParameter.Where(co => co.FECHA_REP == itemTSE.FECHA_REP).ToList();
 
-                        var HorasTSE = listHorusReport.Where(co => co.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && co.UserEntityId == UserRow.IdUser).ToList();
+                        var HorasTSE = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy 00:00:00") && co.UserEntityId == UserRow.IdUser).ToList();
 
                         var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.CountHours)).Sum();
 
@@ -3148,7 +3149,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var limitesCountrySTE =  _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
                     var HorasLimiteDiaSTE = limitesCountrySTE.TargetTimeDay;
                     TimeSpan tsReportadoSTE = DateTimeOffset.Parse(itemSTE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemSTE.HoraInicio).TimeOfDay;
-                    var UserRow =  _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
+                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
                     if (UserRow != null)
                     {
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
@@ -3156,7 +3157,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //var HorasSTE = rowSTEParameter.Where(co => DateTimeOffset.Parse(co.FECHA_REP) == DateTimeOffset.Parse(itemSTE.FECHA_REP)).ToList();
                         //var HorasSTE = rowSTEParameter.Where(co => co.FECHA_REP == itemSTE.FECHA_REP).ToList();
                         //var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.totalHoras)).Sum();
-                        var HorasSTE = listHorusReport.Where(co => co.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && co.UserEntityId == UserRow.IdUser).ToList();
+                        var HorasSTE = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy 00:00:00") && co.UserEntityId == UserRow.IdUser).ToList();
 
                         var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.CountHours)).Sum();
                         if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
@@ -3184,7 +3185,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var itemARPp in rowARPParameterFinal)
                 {
                     //------------------------------------------------------------------------------------------------------------------
-                    var userRow =  _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
+                    var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
 
                     /* var data = _dataBaseService.HorusReportEntity
                      .Where(h => h.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && h.UserEntityId == UserRow.IdUser)
@@ -3198,10 +3199,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var endTime = DateTime.Parse(itemARPp.HoraFin);
 
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
+
+                    //var horuste = _dataBaseService.HorusReportEntity.ToList();
+
+                    //var data1 = _dataBaseService.HorusReportEntity.Where(x => x.StrStartDate == nuevaFechaHoraFormato && x.UserEntityId == userRow.IdUser && x.StartTime == itemARPp.HoraInicio && x.EndTime == itemARPp.HoraFin).ToList();
 
                     var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == userRow.IdUser)
+                        .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
                         .AsEnumerable()
                         .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
                         (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -3213,25 +3218,15 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (data.Count > 0)
                     {
-                        var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                        var assignmentRef = _dataBaseService.assignmentReports.
-                             Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                             .FirstOrDefault();
-                        if (assignmentRef != null)
-                        {
-                            if (assignmentRef!.State != 3)
-                            {
-                                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                            }
-                        }
-                        
+                        itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+
                     }
                     //------------------------------------------------------------------------------------------------------------------
                 }
 
                 foreach (var itemTSEp in rowTSEParameterFinal)
                 {
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
+                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
 
                     /*var data = _dataBaseService.HorusReportEntity
                     .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
@@ -3245,10 +3240,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var endTime = DateTime.Parse(itemTSEp.HoraFin);
 
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
 
                     var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
+                        .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == UserRow.IdUser)
                         .AsEnumerable()
                         .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
                         (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -3261,41 +3256,23 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (data.Count > 0)
                     {
-                        var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                        var assignmentRef =  _dataBaseService.assignmentReports.
-                             Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                             .FirstOrDefault();
-                        if (assignmentRef != null)
-                        {
-                            if (assignmentRef!.State != 3)
-                            {
-                                itemTSEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                            }
-                        }
-                        
+                        itemTSEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+
                     }
                 }
 
                 foreach (var itemSTEp in rowSTEParameterFinal)
                 {
-                    var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
-
-                    /*var data = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
-                    .AsEnumerable()
-                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
-                    (TimeInRange(h.StartTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin)) &&
-                     TimeInRange(h.EndTime, DateTime.Parse(itemSTEp.HoraInicio), DateTime.Parse(itemSTEp.HoraFin))))
-                    .ToList();*/
+                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
 
                     var startTime = DateTime.Parse(itemSTEp.HoraInicio);
                     var endTime = DateTime.Parse(itemSTEp.HoraFin);
 
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
 
                     var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId == UserRow.IdUser)
+                        .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == UserRow.IdUser)
                         .AsEnumerable()
                         .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
                         (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -3304,32 +3281,25 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (data.Count > 0)
                     {
-                        var horusReportRef = _mapper.Map<Domain.Entities.HorusReport.HorusReportEntity>(data[0]);
-                        var assignmentRef = _dataBaseService.assignmentReports.
-                             Where(x => x.HorusReportEntityId == horusReportRef.IdHorusReport)
-                             .FirstOrDefault();
-                        if (assignmentRef!=null)
-                        {
-                            if (assignmentRef!.State != 3)
-                            {
-                                itemSTEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                            }
-                        }
-                        
+                        itemSTEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
                     }
                 }
 
 
-                _dataBaseService.SaveAsync();
+                await _dataBaseService.SaveAsync();
 
                 var rowARPParameterGral =  _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterGral =  _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowSTEParameterGral =  _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                
+                int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+
                 summary.Mensaje = "Carga procesada";
-                summary.ARP_CARGA = rowARPParameterGral.Count()==0?"0":rowARPParameterGral.Count().ToString();
-                summary.TSE_CARGA = rowARPParameterGral.Count() == 0 ? "0" : rowTSEParameterGral.Count().ToString();
-                summary.STE_CARGA = rowARPParameterGral.Count() == 0 ? "0" : rowSTEParameterGral.Count().ToString();
+                summary.REGISTROS_PORTALDB = (rowARPParameterGral.Count() + rowSTEParameterGral.Count()+ rowTSEParameterGral.Count()).ToString();
+                summary.NO_APLICA_X_OVERLAPING_ARP = arpNoAplicaXOverLaping.ToString();
+                summary.NO_APLICA_X_OVERLAPING_TSE = tseNoAplicaXOverLaping.ToString();
+                summary.NO_APLICA_X_OVERLAPING_STE = steNoAplicaXOverLaping.ToString();
 
                 List<HorusReportEntity> rowsHorusNew = new();
                 HorusReportEntity rowAdd = new();
@@ -3351,9 +3321,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var itemARPNew in rowARPParameterGral)
                 {
                     Maxen++;
-                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.CurrentCulture);
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
+                    var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
 
                     rowAdd = new()
                     {
@@ -3362,6 +3332,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
                         StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StrStartDate = itemARPNew.FECHA_REP,
                         StartTime = itemARPNew.HoraInicio,
                         EndTime = itemARPNew.HoraFin,
                         Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
@@ -3397,7 +3368,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
+                    var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
 
                     rowAdd = new()
                     {
@@ -3406,6 +3377,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
                         StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemTSENew.HoraInicio,
                         EndTime = itemTSENew.HoraFin,
                         Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
@@ -3440,7 +3412,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
-                    var userRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
+                    var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
 
                     rowAdd = new()
                     {
@@ -3449,6 +3421,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
                         StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemSTENew.HoraInicio,
                         EndTime = itemSTENew.HoraFin,
                         Description = itemSTENew.EstatusProceso + " Generado por proceso overtime",
@@ -3476,6 +3449,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     };
                     rowAssignments.Add(rowAddAssig);
                 }
+
+
                 _dataBaseService.HorusReportEntity.AddRange(rowsHorusNew);
                 _dataBaseService.SaveAsync();
 

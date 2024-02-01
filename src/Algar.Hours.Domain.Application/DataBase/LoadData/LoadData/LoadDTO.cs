@@ -55,6 +55,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
     }
 
+    public class SummaryPortalDB
+    {
+
+        public string Mensaje { get; set; }
+
+        public string REGISTROS_PORTALDB { get; set; }
+        public string NO_APLICA_X_OVERLAPING_ARP { get; set; }
+        public string NO_APLICA_X_OVERLAPING_TSE { get; set; }
+        public string NO_APLICA_X_OVERLAPING_STE { get; set; }
+
+    }
+
     public class Loadnotificaciones
     {
 
