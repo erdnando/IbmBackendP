@@ -25,14 +25,17 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Win32;
 using NetTopologySuite.Index.HPRtree;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Utilities;
 using Sustainsys.Saml2.Metadata;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Policy;
 using System.Text.Json.Nodes;
@@ -41,10 +44,25 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 {
+    public static class Extensions
+    {
+        public static List<List<T>> partition<T>(this List<T> values, int chunkSize)
+        {
+            return values.Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / chunkSize)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
+    }
+
     public class LoadHoursReport : ILoadHoursReport
     {
 
         private readonly IDataBaseService _dataBaseService;
+        private readonly IDataBaseService _dataBaseService2;
+        private readonly IDataBaseService _dataBaseService3;
+        private readonly IDataBaseService _dataBaseService4;
+        private readonly IDataBaseService _dataBaseService5;
         private readonly IMapper _mapper;
         private IConsultCountryCommand _consultCountryCommand;
         private IEmailCommand _emailCommand;
@@ -55,6 +73,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             _mapper = mapper;
             _consultCountryCommand = consultCountryCommand;
             _emailCommand = emailCommand;
+            _dataBaseService2 = dataBaseService;
+            _dataBaseService3 = dataBaseService;
+            _dataBaseService4 = dataBaseService;
+            _dataBaseService5 = dataBaseService;
         }
 
         ARPLoadDetailEntity validaFormatosFecha(ARPLoadDetailEntity arp)
@@ -98,26 +120,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                    /*if (DateTimeOffset.TryParseExact(fecha, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                    {
-                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                    }
-                    else if (DateTimeOffset.TryParseExact(fecha, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                    {
-                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                    }
-                    else if (DateTimeOffset.TryParseExact(fecha, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                    {
-                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                    }
-                    else if (DateTimeOffset.TryParseExact(fecha, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out fechaRep))
-                    {
-                        registroARP.FECHA_REP = fechaRep.ToString("dd/MM/yyyy");
-                    }
-                    else
-                    {
-                        return registroARP;
-                    }*/
 
 
 
@@ -145,35 +147,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         }
 
-       
-
-        public async Task<string> LoadARP(LoadJsonPais model)
+        
+        public async Task<string> GeneraCarga()
         {
-
             try
             {
-                //deleting loads previous processing..
-                _dataBaseService.ParametersArpInitialEntity.ExecuteDelete();
-                _dataBaseService.ARPLoadDetailEntity.ExecuteDelete();
-                _dataBaseService.ARPLoadEntity.ExecuteDelete();
-                await _dataBaseService.SaveAsync();
-
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            try
-            {
-                #region Se registra la carga en ARPLoadEntity
+                
                 ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
                 {
                     Estado = 1,
                     FechaCreacion = DateTime.Now,
                     IdArpLoad = Guid.NewGuid(),
                     userEntityId = Guid.Parse("3696718D-D05A-4831-96CE-ED500C5BBC97"),
-                    ARPCarga="0",
+                    ARPCarga = "0",
                     ARPOmitidos = "0",
                     ARPXHorario = "0",
                     ARPXOverlaping = "0",
@@ -186,7 +172,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     TSECarga = "0",
                     TSEOmitidos = "0",
                     TSEXHorario = "0",
-                    TSEXOverlaping  = "0",
+                    TSEXOverlaping = "0",
                     TSEXOvertime = "0",
                     ARPXProceso = "0",
                     STEXProceso = "0",
@@ -194,20 +180,30 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 };
 
-                await _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
+                 _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
                 await _dataBaseService.SaveAsync();
-                #endregion
+                return aRPLoadEntity.IdArpLoad.ToString();
+            }catch(Exception ex)
+            {
+                return "-1";
+            }
+        }
+
+        public async Task<string> LoadARP(LoadJsonPais model)
+        {
+
+            try { 
 
                 Int64 counter = 0;
                 List<ParametersArpInitialEntity> listParametersInitialEntity = new();
 
 
-                //Serializa la carga excel en un obj
-                List<ARPLoadDetailEntity> datosARPExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
+                //Serializa la carga completa del excel
+                List<ARPLoadDetailEntity> datosARPExcel = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
                
                 
                 //Omite registros Extracted y final
-                List<ARPLoadDetailEntity> datosARPExcel = datosARPExcelFull!.Where(x => x.ESTADO != "EXTRACTEDx" && x.ESTADO != "FINALx").ToList();
+                //List<ARPLoadDetailEntity> datosARPExcel = datosARPExcelFull!.Where(x => x.ESTADO != "EXTRACTEDx" && x.ESTADO != "FINALx").ToList();
 
 
 
@@ -216,12 +212,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
+                //Actualiza metricas en la carga acerca de cuantos registros se procesaran
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
+                                              ForEach(x => x.ARPCarga = datosARPExcel.Count.ToString());
 
-                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == aRPLoadEntity.IdArpLoad).ToList().
-                                              ForEach(x => x.ARPCarga = datosARPExcelFull.Count.ToString());
-
-                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == aRPLoadEntity.IdArpLoad).ToList().
-                                              ForEach(x => x.ARPOmitidos = (datosARPExcelFull.Count - datosARPExcel.Count).ToString() );
+                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
+                                              ForEach(x => x.ARPOmitidos = (datosARPExcel.Count - datosARPExcel.Count).ToString() );
 
                 await _dataBaseService.SaveAsync();
 
@@ -328,9 +324,45 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var arp = validaHoraGMT(arpx, horariosGMT, paisGeneral);
 
 
-                    arp.ARPLoadEntityId = aRPLoadEntity.IdArpLoad;//check it!!!
+                    arp.ARPLoadEntityId = new Guid(model.IdCarga);//check it!!!
                     //semanahorario = DateTimeOffset.Parse(arp.FECHA_REP);;
-                    semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+
+                    try
+                    {
+                        semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    }
+                    catch(Exception ex)
+                    {
+                        ParametersArpInitialEntity parametersARPInitialEntity = new ParametersArpInitialEntity();
+
+                        parametersARPInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
+                        parametersARPInitialEntity.EstatusProceso = "NO_APLICA_X_FORMATO_FECHA";
+                        parametersARPInitialEntity.FECHA_REP = entity.FECHA_REP;
+                        parametersARPInitialEntity.TOTAL_MINUTOS = entity.TOTAL_MINUTOS;
+                        parametersARPInitialEntity.totalHoras = getHoras(entity.TOTAL_MINUTOS);
+                        parametersARPInitialEntity.HorasInicio = 0;
+                        parametersARPInitialEntity.HorasFin = 0;
+                        parametersARPInitialEntity.EmployeeCode = entity.ID_EMPLEADO;
+                        parametersARPInitialEntity.IdCarga = new Guid(model.IdCarga);
+
+
+                        parametersARPInitialEntity.HoraInicio = "0";
+                        parametersARPInitialEntity.HoraFin = "0";
+
+                        parametersARPInitialEntity.OutIme = "N";
+                        parametersARPInitialEntity.Semana = 0;
+                        parametersARPInitialEntity.HoraInicioHoraio = "0";
+                        parametersARPInitialEntity.HoraFinHorario = "0";
+                        parametersARPInitialEntity.OverTime = "N";
+                        parametersARPInitialEntity.Anio = semanahorario.Year.ToString();
+                        parametersARPInitialEntity.Festivo = "N";
+                        parametersARPInitialEntity.Estado = "";
+
+
+                        listParametersInitialEntity.Add(parametersARPInitialEntity);
+                        continue;
+                    }
+                    
 
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 
@@ -414,14 +446,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     listParametersInitialEntity.Add(parametersInitialEntity);
                 }
 
+                //AQUI IVAN!!!!!!
+                const int PAGE_SIZE = 40000;
+                List<List<ParametersArpInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE);
 
 
-                _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);
-                await _dataBaseService.SaveAsync();
 
+                var task1 = insertP(partitions[0], 1);
+                var task2 = insertP(partitions[1], 2);
+                var task3 = insertP(partitions[2], 3);
+                var task4 = insertP(partitions[3], 4);
+                var task5 = insertP(partitions[4], 5);
+                var task6 = insertP(partitions[5], 1);
+                var task7 = insertP(partitions[6], 2);
+                var task8 = insertP(partitions[7], 3);
+                var task9 = insertP(partitions[8], 4);
+                var task10 = insertP(partitions[9], 5);
 
+                await Task.WhenAll(task1, task2, task3, task4, task5, task6, task7, task8, task9, task10);
+                // _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);
+                // await _dataBaseService.SaveAsync();
+                
 
-                return aRPLoadEntity.IdArpLoad.ToString();
+                return model.IdCarga.ToString();
 
 
 
@@ -432,6 +479,57 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 return "00000000-0000-0000-0000-000000000000";
             }
             
+        }
+
+        private async Task<bool> insertP(List<ParametersArpInitialEntity>  partition, int dbx )
+        {
+            switch (dbx)
+            {
+                case 1:
+                    _dataBaseService.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService.SaveAsync(); 
+                    break;
+                case 2:
+                    _dataBaseService2.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService2.SaveAsync();
+                    break;
+                case 3:
+                    _dataBaseService3.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService3.SaveAsync();
+                    break;
+                case 4:
+                    _dataBaseService4.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService4.SaveAsync();
+                    break;
+                case 5:
+                    _dataBaseService5.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService5.SaveAsync();
+                    break;
+                case 6:
+                    _dataBaseService.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService.SaveAsync();
+                    break;
+                case 7:
+                    _dataBaseService2.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService2.SaveAsync();
+                    break;
+                case 8:
+                    _dataBaseService3.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService3.SaveAsync();
+                    break;
+                case 9:
+                    _dataBaseService4.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService4.SaveAsync();
+                    break;
+                case 10:
+                    _dataBaseService5.ParametersArpInitialEntity.AddRange(partition);
+                    await _dataBaseService5.SaveAsync();
+                    break;
+                default:
+                    break;
+            }
+           
+            return true;
         }
 
         private ARPLoadDetailEntity validaHoraGMT(ARPLoadDetailEntity arpRegistro, List<PaisRelacionGMTEntity> paisGMT, List<CountryEntity> paisGeneral)
@@ -685,7 +783,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<string> LoadTSE(LoadJsonPais model)
         {
-            try
+            /*try
             {
                 //deleting loads previous processing..
                 _dataBaseService.TSELoadEntity.ExecuteDelete();
@@ -696,7 +794,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             catch (Exception ex)
             {
 
-            }
+            }*/
+
             try { 
             
                 List<TSELoadEntity> datosTSEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.Data.ToJsonString());
@@ -970,35 +1069,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
         }
 
-      
-        //private TSELoadEntity validaHoraTSEGMT(TSELoadEntity tseRegistro, string horasDiff)
-        //{
-        //    //var paisComparacion = paisGMT.FirstOrDefault(e => e.NameCountryCompare == paisEntidad.NameCountry);
-        //    try
-        //    {
-        //        var HoraInicioOrigin = DateTime.Parse(tseRegistro.StartTime);
-        //        var horaActualizada = HoraInicioOrigin.AddHours(Int32.Parse(horasDiff));
-        //        tseRegistro.StartTime = horaActualizada.ToString("dd/MM/yyyy HH:mm:ss");
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        tseRegistro.StartTime = tseRegistro.StartTime;
-        //    }
-
-        //    try
-        //    {
-        //        var HoraFinOrigin = DateTime.Parse(tseRegistro.EndTime);
-        //        var horaFinActualizada = HoraFinOrigin.AddHours(Int32.Parse(horasDiff));
-        //        tseRegistro.EndTime = horaFinActualizada.ToString("dd/MM/yyyy HH:mm:ss");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        tseRegistro.HoraFin = "0";
-        //    }
-
-        //    return tseRegistro;
-        //}
 
         private TSELoadEntity validaFormatosFechaTSE(TSELoadEntity item)
         {
@@ -1355,6 +1425,22 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     var dt = new DateTimeOffset();
                     var paisComparacion = horariosGMT.FirstOrDefault(e => e.NameCountryCompare == paisRegistro.NameCountry);
+
+                    try
+                    {
+                        if (convert.FECHA_REP.Length == 5)
+                        {
+                            var julianDate = DateTime.FromOADate((Double.Parse(convert.FECHA_REP) - 2415018.5) + 2400000.5);
+                            convert.FECHA_REP = julianDate.Date.ToString("dd/MM/yyyy 00:00:00");
+                            //11/20/1981 12:00:00 AM
+                        }
+                        //
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
                     try
                     {
 
@@ -2097,7 +2183,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
          
 
-            try
+           /* try
             {
                 //deleting loads previous processing..
                 _dataBaseService.STELoadEntity.ExecuteDelete();
@@ -2108,7 +2194,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             catch (Exception ex)
             {
 
-            }
+            }*/
 
             try
             {

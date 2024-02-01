@@ -73,4 +73,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public string IdCarga { get; set; }
 
     }
+
+    public class Carga
+    {
+
+        public string IdCarga { get; set; }
+
+    }
 }
