@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Win32;
 using NetTopologySuite.Index.HPRtree;
+using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Utilities;
 using Sustainsys.Saml2.Metadata;
 using System;
@@ -204,11 +205,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Serializa la carga excel en un obj
                 List<ARPLoadDetailEntity> datosARPExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
                
-                // datosARPExcel.Where(e => e.ESTADO.Trim() == "EXTRACTED").ToList().ForEach(x => x.ESTADO = "Extracted");
-                //datosARPExcel.Where(e => e.ESTADO.Trim() == "FINAL").ToList().ForEach(x => x.ESTADO = "Submitted");
-
+                
                 //Omite registros Extracted y final
-                List<ARPLoadDetailEntity> datosARPExcel = datosARPExcelFull!.Where(x => x.ESTADO != "EXTRACTED" && x.ESTADO != "FINAL").ToList();
+                List<ARPLoadDetailEntity> datosARPExcel = datosARPExcelFull!.Where(x => x.ESTADO != "EXTRACTEDx" && x.ESTADO != "FINALx").ToList();
 
 
 
@@ -250,6 +249,42 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var entity in datosARPExcel)
                 {
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
+
+
+                    if (paisRegistro == null)
+                    {
+                        //PAIS no valido
+                        ParametersArpInitialEntity parametersARPInitialEntity = new ParametersArpInitialEntity();
+
+                        parametersARPInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
+                        parametersARPInitialEntity.EstatusProceso = "NO_APLICA_X_PAIS";
+                        parametersARPInitialEntity.FECHA_REP = entity.FECHA_REP;
+                        parametersARPInitialEntity.TOTAL_MINUTOS = entity.TOTAL_MINUTOS;
+                        parametersARPInitialEntity.totalHoras = getHoras(entity.TOTAL_MINUTOS);
+                        parametersARPInitialEntity.HorasInicio = 0;
+                        parametersARPInitialEntity.HorasFin = 0;
+                        parametersARPInitialEntity.EmployeeCode = entity.ID_EMPLEADO;
+                        parametersARPInitialEntity.IdCarga = new Guid(model.IdCarga);
+
+
+                        parametersARPInitialEntity.HoraInicio = "0";
+                        parametersARPInitialEntity.HoraFin = "0";
+
+                        parametersARPInitialEntity.OutIme = "N";
+                        parametersARPInitialEntity.Semana = 0;
+                        parametersARPInitialEntity.HoraInicioHoraio = "0";
+                        parametersARPInitialEntity.HoraFinHorario = "0";
+                        parametersARPInitialEntity.OverTime = "N";
+                        parametersARPInitialEntity.Anio = semanahorario.Year.ToString();
+                        parametersARPInitialEntity.Festivo = "N";
+                        parametersARPInitialEntity.Estado = "";
+
+
+                        listParametersInitialEntity.Add(parametersARPInitialEntity);
+                        
+                        continue;
+                    }
+                    
                     var arpx = fHomologaARP(entity, horariosGMT, paisRegistro!);
 
                    // var arp = fHomologaARP(entity);
@@ -331,12 +366,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                    if (arp.ESTADO == "Extracted" || arp.ESTADO == "EXTRACTED")
-                    {
-                        parametersInitialEntity.EstatusProceso = "NO_APLICA_X_EXTRACTED";
-                        listParametersInitialEntity.Add(parametersInitialEntity);
-                        continue;
-                    }
+                   
 
                     var previosAndPos = new List<double>();
                     if (horario != null)
@@ -673,7 +703,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //datosTSEExcel.Where(e => e.Status.Trim() == "EXTRACTED").ToList().ForEach(x => x.Status = "Extracted");
                // datosTSEExcel.Where(e => e.Status.Trim() == "SUBMITTED").ToList().ForEach(x => x.Status = "Submitted");
 
-                List<TSELoadEntity> datosTSEExcel = datosTSEExcelFull!.Where(x => x.Status != "Extracted" && x.Status != "Final" && x.Status != "Submitted").ToList();
+                List<TSELoadEntity> datosTSEExcel = datosTSEExcelFull!.Where(x => x.Status != "Extractedx" && x.Status != "Finalx" && x.Status != "Submittedx").ToList();
 
 
                 //Remueve duplicados 
@@ -728,6 +758,42 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
 
                         var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.NumeroEmpleado.Substring(registrox.NumeroEmpleado.Length - 3));
+                        //valida pais
+                        if (paisRegistro == null)
+                        {
+                            //PAIS no valido
+                            ParametersTseInitialEntity parametersTseInitialEntityaux = new ParametersTseInitialEntity();
+
+                            parametersTseInitialEntityaux.IdParamTSEInitialId = Guid.NewGuid();
+                            parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_PAIS";
+                            parametersTseInitialEntityaux.FECHA_REP = registrox.StartTime;
+                            parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.DurationInHours);
+                            parametersTseInitialEntityaux.totalHoras = registrox.DurationInHours;
+                            parametersTseInitialEntityaux.HorasInicio = 0;
+                            parametersTseInitialEntityaux.HorasFin = 0;
+                            parametersTseInitialEntityaux.EmployeeCode = registrox.NumeroEmpleado;
+                            parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
+                            parametersTseInitialEntityaux.HoraInicio = "0";
+                            parametersTseInitialEntityaux.HoraFin = "0";
+
+                            parametersTseInitialEntityaux.OutIme = "N";
+                            parametersTseInitialEntityaux.Semana = 0;
+                            parametersTseInitialEntityaux.HoraInicioHoraio = "0";
+                            parametersTseInitialEntityaux.HoraFinHorario = "0";
+                            parametersTseInitialEntityaux.OverTime = "N";
+                            parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
+                            parametersTseInitialEntityaux.Festivo = "N";
+                            parametersTseInitialEntityaux.Estado = "";
+
+
+                            listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                            continue;
+
+                            
+                        }
+
+
+
                         var tse = fHomologaTSE(registrox, horariosGMT, paisRegistro!);
                         if (tse == null)
                         {
@@ -1295,6 +1361,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                         {
                             //convert.FECHA_REP = dt.ToString("dd/MM/yyyy HH:mm:ss");
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
+                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
+                        }
+                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        {
                             convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
                         }
                         else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
@@ -2035,7 +2113,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             try
             {
                 List<STELoadEntity> datosSTEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
-                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.TotalDuration=="0").ToList();
+                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.TotalDuration!="0").ToList();
                 datosSTEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
 
 
@@ -2070,7 +2148,43 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var registrox in datosSTEExcel)
                 {
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.SessionEmployeeSerialNumber.Substring(registrox.SessionEmployeeSerialNumber.Length - 3));
-                    var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
+
+                    //valida pais
+                    if (paisRegistro == null)
+                    {
+                        //PAIS no valido
+                        ParametersSteInitialEntity parametersTseInitialEntityaux = new ParametersSteInitialEntity();
+
+                        parametersTseInitialEntityaux.IdParamSTEInitialId = Guid.NewGuid();
+                        parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_PAIS";
+                        parametersTseInitialEntityaux.FECHA_REP = registrox.StartDateTime;
+                        parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
+                        parametersTseInitialEntityaux.totalHoras = registrox.TotalDuration;
+                        parametersTseInitialEntityaux.HorasInicio = 0;
+                        parametersTseInitialEntityaux.HorasFin = 0;
+                        parametersTseInitialEntityaux.EmployeeCode = registrox.SessionEmployeeSerialNumber;
+                        parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
+                        parametersTseInitialEntityaux.HoraInicio = "0";
+                        parametersTseInitialEntityaux.HoraFin = "0";
+
+                        parametersTseInitialEntityaux.OutIme = "N";
+                        parametersTseInitialEntityaux.Semana = 0;
+                        parametersTseInitialEntityaux.HoraInicioHoraio = "0";
+                        parametersTseInitialEntityaux.HoraFinHorario = "0";
+                        parametersTseInitialEntityaux.OverTime = "N";
+                        parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
+                        parametersTseInitialEntityaux.Festivo = "N";
+                        parametersTseInitialEntityaux.Estado = "";
+
+
+                        listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                        continue;
+                    }
+
+
+
+
+                        var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
 
                     if (ste == null)
                     {
@@ -2976,7 +3090,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
                     //notificar al admin
-                    _emailCommand.SendEmail(new EmailModel { To = "santiagoael@algartech.com", Plantilla = "11" });
+                    
+                    _emailCommand.SendEmail(new EmailModel { To = "pruebasportaltls@gmail.com", Plantilla = "11" });
                     Thread.Sleep(300);
                     continue;
                 }
@@ -3008,7 +3123,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
                     //notificar al admin
-                    _emailCommand.SendEmail(new EmailModel { To = "santiagoael@algartech.com", Plantilla = "11" });
+                    _emailCommand.SendEmail(new EmailModel { To = "pruebasportaltls@gmail.com", Plantilla = "11" });
                     Thread.Sleep(300);
                     continue;
                 }
@@ -3040,7 +3155,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
                     //notificar al admin
-                    _emailCommand.SendEmail(new EmailModel { To = "santiagoael@algartech.com", Plantilla = "11" });
+                    _emailCommand.SendEmail(new EmailModel { To = "pruebasportaltls@gmail.com", Plantilla = "11" });
                     Thread.Sleep(300);
                     continue;
                 }
@@ -3187,13 +3302,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //------------------------------------------------------------------------------------------------------------------
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
 
-                    /* var data = _dataBaseService.HorusReportEntity
-                     .Where(h => h.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && h.UserEntityId == UserRow.IdUser)
-                     .AsEnumerable()
-                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
-                     (TimeInRange(h.StartTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin)) &&
-                      TimeInRange(h.EndTime, DateTime.Parse(itemARPp.HoraInicio), DateTime.Parse(itemARPp.HoraFin))))
-                     .ToList();*/
+                  
 
                     var startTime = DateTime.Parse(itemARPp.HoraInicio);
                     var endTime = DateTime.Parse(itemARPp.HoraFin);
@@ -3201,10 +3310,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
 
-                    //var horuste = _dataBaseService.HorusReportEntity.ToList();
-
-                    //var data1 = _dataBaseService.HorusReportEntity.Where(x => x.StrStartDate == nuevaFechaHoraFormato && x.UserEntityId == userRow.IdUser && x.StartTime == itemARPp.HoraInicio && x.EndTime == itemARPp.HoraFin).ToList();
-
+                   
                     var data = _dataBaseService.HorusReportEntity
                         .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
                         .AsEnumerable()
@@ -3228,13 +3334,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
 
-                    /*var data = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StartDate.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy") && h.UserEntityId == UserRow.IdUser)
-                    .AsEnumerable()
-                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
-                    (TimeInRange(h.StartTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin)) &&
-                     TimeInRange(h.EndTime, DateTime.Parse(itemTSEp.HoraInicio), DateTime.Parse(itemTSEp.HoraFin))))
-                    .ToList();*/
+                   
 
                     var startTime = DateTime.Parse(itemTSEp.HoraInicio);
                     var endTime = DateTime.Parse(itemTSEp.HoraFin);
@@ -3452,12 +3552,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                 _dataBaseService.HorusReportEntity.AddRange(rowsHorusNew);
-                _dataBaseService.SaveAsync();
+               await _dataBaseService.SaveAsync();
 
 
                  _dataBaseService.assignmentReports.AddRangeAsync(rowAssignments);
 
-                _dataBaseService.SaveAsync();
+                await _dataBaseService.SaveAsync();
             }
             catch (Exception ex)
             {
