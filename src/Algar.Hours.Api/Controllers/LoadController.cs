@@ -2,6 +2,7 @@
 using Algar.Hours.Application.DataBase.Menu.Commands;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
+using Algar.Hours.Domain.Entities.ParametrosInicial;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Nodes;
@@ -20,6 +21,17 @@ namespace Algar.Hours.Api.Controllers
         public async Task<IActionResult> GeneraCarga( [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.GeneraCarga();
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+
+        [HttpGet("CargaAvance")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CargaAvance([FromQuery] string idCarga,[FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var dataFinal = await loadHoursReport.CargaAvance(idCarga);
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
@@ -75,6 +87,68 @@ namespace Algar.Hours.Api.Controllers
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, true));
         }
+
+        [HttpPost("UploadHorizontalARP1")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHorizontalARP1([FromBody] JsonArray requestData, [FromServices] ILoadGeneric loadgeneric)
+        {
+            var dataFinal = await loadgeneric.UploadHorizontalARP1(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+        [HttpPost("UploadHorizontalARP2")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHorizontalARP2([FromBody] JsonArray requestData, [FromServices] ILoadGeneric loadgeneric)
+        {
+            var dataFinal = await loadgeneric.UploadHorizontalARP2(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+        [HttpPost("UploadHorizontalTSE1")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHorizontalTSE1([FromBody] JsonArray requestData, [FromServices] ILoadGeneric loadgeneric)
+        {
+            var dataFinal = await loadgeneric.UploadHorizontalTSE1(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+        [HttpPost("UploadHorizontalTSE2")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHorizontalTSE2([FromBody] JsonArray requestData, [FromServices] ILoadGeneric loadgeneric)
+        {
+            var dataFinal = await loadgeneric.UploadHorizontalTSE2(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+        [HttpPost("UploadHorizontalSTE1")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHorizontalSTE1([FromBody] JsonArray requestData, [FromServices] ILoadGeneric loadgeneric)
+        {
+            var dataFinal = await loadgeneric.UploadHorizontalSTE1(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+        [HttpPost("UploadHorizontalSTE2")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadHorizontalSTE2([FromBody] JsonArray requestData, [FromServices] ILoadGeneric loadgeneric)
+        {
+            var dataFinal = await loadgeneric.UploadHorizontalSTE2(requestData);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+
 
 
     }

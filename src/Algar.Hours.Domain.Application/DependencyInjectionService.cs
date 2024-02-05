@@ -113,6 +113,7 @@ namespace Algar.Hours.Application
             services.AddTransient<ICreateHorusReportManagerCommand, CreateHorusReportManagerCommand>();
             services.AddTransient<IReporte1Command, Reporte1Command>();
             services.AddTransient<IEmailCommand, EmailCommand>();
+            services.AddTransient<ILoadGeneric, LoadGeneric>();
 
             #region AssigmentReportCommand
             services.AddTransient<ICreateAssignmentReportCommand, CreateAssignmentReportCommand>();
@@ -140,6 +141,7 @@ namespace Algar.Hours.Application
 
             #region ArchivosLoad
             services.AddTransient<ILoadHoursReport, LoadHoursReport>();
+
             #endregion
 
             #region UserExepction

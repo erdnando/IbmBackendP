@@ -41,5 +41,15 @@ namespace Algar.Hours.Domain.Entities.Load
         public string STEXOverlaping { get; set; }
         public string STEXProceso { get; set; }
 
+        public string ARPOmitidosXDuplicidad { get; set; }
+        public string TSEOmitidosXDuplicidad { get; set; }
+        public string STEOmitidosXDuplicidad { get; set; }
+        
+        public string ARPXDatosNovalidos { get; set; }
+        public string TSEXDatosNovalidos { get; set; }
+        public string STEXDatosNovalidos { get; set; }
+
+
+
     }
 }

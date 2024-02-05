@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240204170821_addingMetics2Duplicated")]
+    partial class addingMetics2Duplicated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -449,10 +452,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("ARPXDatosNovalidos")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("ARPXHorario")
                         .IsRequired()
                         .HasColumnType("text");
@@ -491,10 +490,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("STEXDatosNovalidos")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("STEXHorario")
                         .IsRequired()
                         .HasColumnType("text");
@@ -516,10 +511,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("TSEOmitidosXDuplicidad")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TSEXDatosNovalidos")
                         .IsRequired()
                         .HasColumnType("text");
 
