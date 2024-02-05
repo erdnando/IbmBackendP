@@ -102,7 +102,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
 
-
+     
         [HttpPost("SendEmail")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> SendEmail(
