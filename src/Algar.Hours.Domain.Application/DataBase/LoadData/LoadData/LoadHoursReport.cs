@@ -173,6 +173,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             contadores.ste = sTECarga != 0 ? (Int32)Math.Ceiling((double)steEnProceso * 100 / sTECarga) : 0;
             contadores.total = (contadores.arp + contadores.tse + contadores.ste) / 3;
             contadores.estadoCarga = cargaRef.Estado;
+
+            string mensaje = string.Empty;
+
+
+            switch (contadores.estadoCarga)
+            {
+                case 1:
+                    if (contadores.ste > 0)
+                    {
+                        mensaje = "Realizando carga STE...";
+                    }
+                    else if (contadores.tse > 0)
+                    {
+                        mensaje = "Realizando carga TSE...";
+                    }
+                    else if (contadores.arp > 0)
+                    {
+                        mensaje = "Realizando carga ARP...";
+                    }
+                    break;
+                case 2:
+                    mensaje = "Carga finalizada";
+                    break;
+                default:
+                    break;
+            }
+
+            contadores.mensaje = mensaje;
+
             return contadores;
         }
 
