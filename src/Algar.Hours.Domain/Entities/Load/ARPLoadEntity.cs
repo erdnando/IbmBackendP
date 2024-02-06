@@ -48,7 +48,7 @@ namespace Algar.Hours.Domain.Entities.Load
         public string ARPXDatosNovalidos { get; set; }
         public string TSEXDatosNovalidos { get; set; }
         public string STEXDatosNovalidos { get; set; }
-
+        
 
 
     }

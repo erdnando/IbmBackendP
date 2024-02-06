@@ -164,15 +164,41 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     //Email para el empleado
                     if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                     {
-                        _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
-                    }
+                        //TODO validar correo
+                        /*try
+                        {
+                            _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
+                        }
+                        catch(Exception ex)
+                        {
+
+                        }*/
                         
-                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "5" });
+                    }
+
+                    try
+                    {
+                        _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "5" });
+                    }
+                    catch (Exception exx)
+                    {
+
+                     
+                    }
+                    
                 }
                 else
                 {
-                   
-                    _emailCommand.SendEmail(new EmailModel { To = ( _usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "3" });
+                    try
+                    {
+                        _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "3" });
+                    }
+                    catch (Exception exc)
+                    {
+
+                        
+                    }
+                    
                 }
 
 

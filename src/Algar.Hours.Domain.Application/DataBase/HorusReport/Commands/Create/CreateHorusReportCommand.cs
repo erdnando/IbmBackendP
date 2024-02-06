@@ -193,8 +193,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
-            var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy/MM/dd");
-            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.FechaWorking.ToString("yyy/MM/dd") == fechaformateadaReporta);
+            var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy-MM-dd 00:00:00");
+            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() );//&& x.FechaWorking.ToString("yyyy-MM-dd 00:00:00") == fechaformateadaReporta
 
 
             //Validación del Horario reportado
@@ -318,7 +318,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             {
                 Maxen = 1;
             }
-
+            entity.Acitivity = 1;
             entity.NumberReport = Maxen + 1;
             entity.StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
