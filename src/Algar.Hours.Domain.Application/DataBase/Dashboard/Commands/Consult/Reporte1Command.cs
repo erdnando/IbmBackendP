@@ -261,10 +261,10 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             GralReporteHorasMesTLS GralReportes = new();
             GralReportes.ReportesGral = new();
 
-
+            // 
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.DateApprovalSystem.Year == anio)
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 1  && hor.DateApprovalSystem.Year == anio)
                                         select new
                                         {
                                             Mes = hor.DateApprovalSystem.Month,
