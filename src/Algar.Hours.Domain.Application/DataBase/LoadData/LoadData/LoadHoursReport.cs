@@ -2961,7 +2961,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             SummaryPortalDB summary = new SummaryPortalDB();
             try
             {
-                //aqui
+               
                 var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowSTEParameter = _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
@@ -2977,18 +2977,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var CoEmple = "";
                 var HoursTotEMp = 0.0;
 
-                //format dates horusReport
-                //
-               /* foreach (var horus in listHorusReport)
-                {
-                    horus= validaFormatosFechaHorusreport(horus);
-                }*/
-               // listHorusReport.ToList().ForEach(b => b.StartDate = validaFormatosFechaHorusreport(b.StartDate));
 
+                //NO_APLICA_X_LIMITE_HORAS
                 foreach (var itemARP in rowARPParameter)
                 {
-
-                   
 
                     TimeSpan tsReportado = DateTimeOffset.Parse(itemARP.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemARP.HoraInicio).TimeOfDay;
                     var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
@@ -2997,8 +2989,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         
-                      //var HorasARP = listHorusReport.Where(co => DateTimeOffset.ParseExact(co.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy 00:00:00") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy 00:00:00") && co.UserEntityId== UserRow.IdUser).ToList();
-                        var HorasARP = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd 00:00:00") && co.UserEntityId == UserRow.IdUser).ToList();
+                        var HorasARP = listHorusReport.Where(co => co.StrStartDate == itemARP.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
 
                         var HorasARPGral = HorasARP.Select(x => double.Parse(x.CountHours)).Sum();
 
@@ -3027,7 +3018,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         
                         //ok
-                        var HorasTSE = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd 00:00:00") && co.UserEntityId == UserRow.IdUser).ToList();
+                        var HorasTSE = listHorusReport.Where(co => co.StrStartDate == itemTSE.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
 
                         var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.CountHours)).Sum();
 
@@ -3054,8 +3045,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
                         
-                        //var HorasSTE = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy 00:00:00") && co.UserEntityId == UserRow.IdUser).ToList();
-                        var HorasSTE = listHorusReport.Where(co => co.StrStartDate == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd 00:00:00") && co.UserEntityId == UserRow.IdUser).ToList();
+                        var HorasSTE = listHorusReport.Where(co => co.StrStartDate == itemSTE.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
                         var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.CountHours)).Sum();
                         if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
                         {
@@ -3070,15 +3060,15 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 _dataBaseService.SaveAsync();
 
-                //los sobrantes estan en overtime, insertar en portaldb y su history, como se hace en reporte de horas stand by
-                //TODO
+                
 
                 var rowARPParameterFinal =  _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterFinal =  _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowSTEParameterFinal =  _dataBaseService.ParametersSteInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
 
                 var datax =  _dataBaseService.HorusReportEntity.ToList();
-                //aqui
+                
+                //NO_APLICA_X_OVERLAPING
                 foreach (var itemARPp in rowARPParameterFinal)
                 {
                     //------------------------------------------------------------------------------------------------------------------
@@ -3167,9 +3157,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                 }
 
-
                 await _dataBaseService.SaveAsync();
-
+                
+                //Metricas finales
                 var rowARPParameterGral =  _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterGral =  _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowSTEParameterGral =  _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
@@ -3220,7 +3210,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         EndTime = itemARPNew.HoraFin,
                         Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
                         UserEntityId = userRow.IdUser,
-                        ClientEntityId = Guid.Parse("00000000-0000-0000-0000-000000000000"),//   dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),//   dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
                         TipoReporte = 2,
                         Acitivity = 0,
                         CountHours = itemARPNew.totalHoras,
@@ -3266,7 +3256,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         EndTime = itemTSENew.HoraFin,
                         Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
                         UserEntityId = userRow.IdUser,
-                        ClientEntityId = Guid.Parse("00000000-0000-0000-0000-000000000000"),
+                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
                         TipoReporte = 2,
                         Acitivity = 0,
                         CountHours = itemTSENew.totalHoras,
@@ -3311,7 +3301,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         EndTime = itemSTENew.HoraFin,
                         Description = itemSTENew.EstatusProceso + " Generado por proceso overtime",
                         UserEntityId = userRow.IdUser,
-                        ClientEntityId = Guid.Parse("00000000-0000-0000-0000-000000000000"), // Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        ClientEntityId =  Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
                         TipoReporte = 2,
                         Acitivity = 0,
                         CountHours = itemSTENew.totalHoras,
