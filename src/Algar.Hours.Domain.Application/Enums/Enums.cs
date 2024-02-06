@@ -15,7 +15,8 @@
             AprobadoN1 = 1,
             AprobadoN2 = 2,
             Rechazado = 3,
-            
+            Cerrada = 4,
+
         }
 
         public enum Pais
