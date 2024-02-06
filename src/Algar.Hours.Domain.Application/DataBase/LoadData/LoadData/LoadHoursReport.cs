@@ -3204,7 +3204,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.CurrentCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                   // string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
 
                     rowAdd = new()
@@ -3213,13 +3214,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
-                        StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
-                        StrStartDate = itemARPNew.FECHA_REP,
+                        StartDate = fechaHoraOriginal,// DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StrStartDate = nuevaFechaHoraFormato,//itemARPNew.FECHA_REP,
                         StartTime = itemARPNew.HoraInicio,
                         EndTime = itemARPNew.HoraFin,
                         Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
                         UserEntityId = userRow.IdUser,
-                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        ClientEntityId = Guid.Parse("00000000-0000-0000-0000-000000000000"),//   dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
                         TipoReporte = 2,
                         Acitivity = 0,
                         CountHours = itemARPNew.totalHoras,
@@ -3249,7 +3250,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    //string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
 
                     rowAdd = new()
@@ -3258,13 +3260,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
-                        StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
                         StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemTSENew.HoraInicio,
                         EndTime = itemTSENew.HoraFin,
                         Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
                         UserEntityId = userRow.IdUser,
-                        ClientEntityId = Guid.Parse("dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        ClientEntityId = Guid.Parse("00000000-0000-0000-0000-000000000000"),
                         TipoReporte = 2,
                         Acitivity = 0,
                         CountHours = itemTSENew.totalHoras,
@@ -3293,7 +3295,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTENew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                   // string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
+                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
 
                     rowAdd = new()
@@ -3302,7 +3305,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         CreationDate = DateTime.Now,
                         DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
-                        StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
                         StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemSTENew.HoraInicio,
                         EndTime = itemSTENew.HoraFin,
