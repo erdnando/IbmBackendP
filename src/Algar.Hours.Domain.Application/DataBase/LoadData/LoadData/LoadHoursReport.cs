@@ -231,14 +231,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 Int64 counter = 0;
                 List<ParametersArpInitialEntity> listParametersInitialEntity = new();
+                var semanahorario = new DateTimeOffset();
+                CultureInfo cul = CultureInfo.CurrentCulture;
+                List<HorarioReturn> fueraH = new List<HorarioReturn>();
+                List<FestivosEntity> esfestivos = new();
 
 
                 //Serializa la carga completa del excel
                 List<ARPLoadDetailEntity> datosARPExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
                
                 
-              
-
                 //Remueve duplicados 
                 var datosARPExcel = datosARPExcelFull.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO,m.HORA_FIN }).ToList();
 
@@ -247,24 +249,23 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                  await _dataBaseService.SaveAsync();
 
 
-                //Actualiza metricas en la carga acerca de cuantos registros se procesaran
+                //Set metrica de la carga en ARPLoadEntity
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
                                               ForEach(x => x.ARPCarga = datosARPExcel.Count.ToString());
 
-                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
+                //SEt metrica de omitidos en ARPLoadEntity
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
                                               ForEach(x => x.ARPOmitidos = (datosARPExcel.Count - datosARPExcel.Count).ToString() );
 
                 await _dataBaseService.SaveAsync();
 
+                //Obteniendo politicas overtime
                 List<string> politicaOvertime = new() { "Vacations", "Absence", "Holiday", "Stand By" };
 
-                var semanahorario = new DateTimeOffset();
-
-                CultureInfo cul = CultureInfo.CurrentCulture;
-                List<HorarioReturn> fueraH = new List<HorarioReturn>();
-
+               
+                //Obteniendo listado de paises
                 var listaCountries = await _consultCountryCommand.List();
-                List<FestivosEntity> esfestivos = new();
+                
 
                 //Para ARP, busca festivos de Colombia solamente
                 esfestivos = _dataBaseService.FestivosEntity.Where(x => x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
@@ -277,83 +278,55 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //busca Gral Paises
                 var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
 
+
+                //Aplica validaciones del PROCESO TLS para overtime
                 foreach (var entity in datosARPExcel)
                 {
+                    var arpx = fHomologaARP(entity!);
+                    var parametersARP = new ParametersArpInitialEntity();
+
+                    parametersARP.IdParametersInitialEntity = Guid.NewGuid();
+                    parametersARP.EstatusProceso = "";
+                    parametersARP.FECHA_REP = arpx.FECHA_REP;
+                    parametersARP.TOTAL_MINUTOS = arpx.TOTAL_MINUTOS;
+                    parametersARP.totalHoras = getHoras(arpx.TOTAL_MINUTOS);
+                    parametersARP.HorasInicio = 0;
+                    parametersARP.HorasFin = 0;
+                    parametersARP.EmployeeCode = arpx.ID_EMPLEADO;
+                    parametersARP.IdCarga = new Guid(model.IdCarga);
+                    parametersARP.HoraInicio = arpx.HORA_INICIO;//hora reportada inicio
+                    parametersARP.HoraFin = arpx.HORA_FIN;//hora reportada fin
+                    parametersARP.OutIme = "N";
+                    parametersARP.Semana = 0;
+                    parametersARP.HoraInicioHoraio = "0";
+                    parametersARP.HoraFinHorario = "0";
+                    parametersARP.OverTime = "N";
+                    parametersARP.Anio = semanahorario.Year.ToString();
+                    parametersARP.Festivo = "N";
+                    parametersARP.Estado = "";
+                    parametersARP.Reporte = arpx.DOC_NUM;
+
+
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
 
 
                     if (paisRegistro == null)
                     {
-                        var arpx2 = fHomologaARP(entity!);
-                        //PAIS no valido
-                        ParametersArpInitialEntity parametersARPInitialEntity = new ParametersArpInitialEntity();
-
-                        parametersARPInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                        parametersARPInitialEntity.EstatusProceso = "NO_APLICA_X_PAIS";
-                        parametersARPInitialEntity.FECHA_REP = arpx2.FECHA_REP;
-                        parametersARPInitialEntity.TOTAL_MINUTOS = arpx2.TOTAL_MINUTOS;
-                        parametersARPInitialEntity.totalHoras = getHoras(arpx2.TOTAL_MINUTOS);
-                        parametersARPInitialEntity.HorasInicio = 0;
-                        parametersARPInitialEntity.HorasFin = 0;
-                        parametersARPInitialEntity.EmployeeCode = arpx2.ID_EMPLEADO;
-                        parametersARPInitialEntity.IdCarga = new Guid(model.IdCarga);
-                        parametersARPInitialEntity.HoraInicio = "0";
-                        parametersARPInitialEntity.HoraFin = "0";
-                        parametersARPInitialEntity.OutIme = "N";
-                        parametersARPInitialEntity.Semana = 0;
-                        parametersARPInitialEntity.HoraInicioHoraio = "0";
-                        parametersARPInitialEntity.HoraFinHorario = "0";
-                        parametersARPInitialEntity.OverTime = "N";
-                        parametersARPInitialEntity.Anio = semanahorario.Year.ToString();
-                        parametersARPInitialEntity.Festivo = "N";
-                        parametersARPInitialEntity.Estado = "";
-                        parametersARPInitialEntity.Reporte = arpx2.DOC_NUM;
-
-                        listParametersInitialEntity.Add(parametersARPInitialEntity);
-                        
+                        parametersARP.EstatusProceso = "NO_APLICA_X_PAIS";
+                        listParametersInitialEntity.Add(parametersARP);
                         continue;
                     }
-                    
-                    var arpx = fHomologaARP(entity);
 
                    
-                    if (arpx == null)
+                    if (arpx.FECHA_REP == null)
                     {
-                        ParametersArpInitialEntity parametersARPInitialEntity = new ParametersArpInitialEntity();
-
-                        parametersARPInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                        parametersARPInitialEntity.EstatusProceso = "NO_APLICA_X_FALTA_DATOS";
-                        parametersARPInitialEntity.FECHA_REP = entity.FECHA_REP;
-                        parametersARPInitialEntity.TOTAL_MINUTOS = entity.TOTAL_MINUTOS;
-                        parametersARPInitialEntity.totalHoras = getHoras(entity.TOTAL_MINUTOS);
-                        parametersARPInitialEntity.HorasInicio = 0;
-                        parametersARPInitialEntity.HorasFin = 0;
-                        parametersARPInitialEntity.EmployeeCode = entity.ID_EMPLEADO;
-                        parametersARPInitialEntity.IdCarga = new Guid(model.IdCarga);
-
-                        
-                        parametersARPInitialEntity.HoraInicio = "0";
-                        parametersARPInitialEntity.HoraFin = "0";
-                        
-                        parametersARPInitialEntity.OutIme = "N";
-                        parametersARPInitialEntity.Semana = 0;
-                        parametersARPInitialEntity.HoraInicioHoraio = "0";
-                        parametersARPInitialEntity.HoraFinHorario = "0";
-                        parametersARPInitialEntity.OverTime = "N";
-                        parametersARPInitialEntity.Anio = semanahorario.Year.ToString();
-                        parametersARPInitialEntity.Festivo = "N";
-                        parametersARPInitialEntity.Estado = "";
-                        parametersARPInitialEntity.Reporte = entity.DOC_NUM;
-
-                        listParametersInitialEntity.Add(parametersARPInitialEntity);
+                        parametersARP.EstatusProceso = "NO_APLICA_X_FALTA_DATOS";
+                        listParametersInitialEntity.Add(parametersARP);
                         continue;
-
                     }
 
 
                     var arp = validaHoraGMT(arpx, horariosGMT, paisGeneral);
-
-
                     arp.ARPLoadEntityId = new Guid(model.IdCarga);
 
 
@@ -363,33 +336,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                     catch(Exception ex)
                     {
-                        ParametersArpInitialEntity parametersARPInitialEntity = new ParametersArpInitialEntity();
-
-                        parametersARPInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                        parametersARPInitialEntity.EstatusProceso = "NO_APLICA_X_FORMATO_FECHA";
-                        parametersARPInitialEntity.FECHA_REP = entity.FECHA_REP;
-                        parametersARPInitialEntity.TOTAL_MINUTOS = entity.TOTAL_MINUTOS;
-                        parametersARPInitialEntity.totalHoras = getHoras(entity.TOTAL_MINUTOS);
-                        parametersARPInitialEntity.HorasInicio = 0;
-                        parametersARPInitialEntity.HorasFin = 0;
-                        parametersARPInitialEntity.EmployeeCode = entity.ID_EMPLEADO;
-                        parametersARPInitialEntity.IdCarga = new Guid(model.IdCarga);
-
-
-                        parametersARPInitialEntity.HoraInicio = "0";
-                        parametersARPInitialEntity.HoraFin = "0";
-
-                        parametersARPInitialEntity.OutIme = "N";
-                        parametersARPInitialEntity.Semana = 0;
-                        parametersARPInitialEntity.HoraInicioHoraio = "0";
-                        parametersARPInitialEntity.HoraFinHorario = "0";
-                        parametersARPInitialEntity.OverTime = "N";
-                        parametersARPInitialEntity.Anio = semanahorario.Year.ToString();
-                        parametersARPInitialEntity.Festivo = "N";
-                        parametersARPInitialEntity.Estado = "";
-                        parametersARPInitialEntity.Reporte = entity.DOC_NUM;
-
-                        listParametersInitialEntity.Add(parametersARPInitialEntity);
+                        parametersARP.EstatusProceso = "NO_APLICA_X_FORMATO_FECHA";
+                        listParametersInitialEntity.Add(parametersARP);
                         continue;
                     }
                     
@@ -404,30 +352,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
 
 
-                    ParametersArpInitialEntity parametersInitialEntity = new ParametersArpInitialEntity();
-                    parametersInitialEntity.IdParametersInitialEntity = Guid.NewGuid();
-                    parametersInitialEntity.FECHA_REP = arp.FECHA_REP;
-                    parametersInitialEntity.TOTAL_MINUTOS = arp.TOTAL_MINUTOS;
-                    parametersInitialEntity.totalHoras = getHoras(arp.TOTAL_MINUTOS);
-                    parametersInitialEntity.EstatusProceso = "EN_OVERTIME";
-                    parametersInitialEntity.HorasInicio = 0;
-                    parametersInitialEntity.HorasFin = 0;
-                    parametersInitialEntity.EmployeeCode = arp.ID_EMPLEADO;
-                    parametersInitialEntity.Anio = semanahorario.Year.ToString();
-                    parametersInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
-                    parametersInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
-                    parametersInitialEntity.HoraInicio = arp.HORA_INICIO;//hora reportada inicio
-                    parametersInitialEntity.HoraFin = arp.HORA_FIN;//hora reportada fin
-                    parametersInitialEntity.OverTime = "N";
-                    parametersInitialEntity.OutIme = "N";
-                    parametersInitialEntity.Semana = Semana;
-                    parametersInitialEntity.HoraInicioHoraio = "0";
-                    parametersInitialEntity.HoraFinHorario = "0";
-                    parametersInitialEntity.IdCarga =arp.ARPLoadEntityId;
-                    parametersInitialEntity.Reporte = arp.DOC_NUM;
-
-
-
+                    parametersARP.FECHA_REP = arp.FECHA_REP;
+                    parametersARP.EstatusProceso = "EN_OVERTIME";
+                    parametersARP.Anio = semanahorario.Year.ToString();
+                    parametersARP.Festivo = esfestivo != null ? "Y" : "N";
+                    parametersARP.Semana = Semana;
+                   
 
 
                     var previosAndPos = new List<double>();
@@ -444,40 +374,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if (horario != null)
                     {
                         //fechas registadas en el horario asignado
-                        parametersInitialEntity.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                        parametersInitialEntity.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
+                        parametersARP.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                        parametersARP.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
+                        parametersARP.OverTime = horario.HoraInicio == null ? "N" : politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) == -1 ? "N" : "S";
+                        parametersARP.EstatusProceso = parametersARP.OverTime == "N" ? parametersARP.EstatusProceso : "NO_APLICA_X_OVERTIME";
+                        parametersARP.HorasInicio = previosAndPos[0];
+                        parametersARP.HorasFin = previosAndPos[1];
 
-                        parametersInitialEntity.OverTime = horario.HoraInicio == null ? "N" : politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) == -1 ? "N" : "S";
-                        parametersInitialEntity.EstatusProceso = parametersInitialEntity.OverTime == "N" ? parametersInitialEntity.EstatusProceso : "NO_APLICA_X_OVERTIME";
-                        parametersInitialEntity.HorasInicio = previosAndPos[0];
-                        parametersInitialEntity.HorasFin = previosAndPos[1];
 
-                       // parametersInitialEntity.HorarioExistenteInicio=horario
-
-                        if (parametersInitialEntity.OverTime == "S")
+                        if (parametersARP.OverTime == "S")
                         {
                             //---------------NO_APLICA_X_OVERTIME----------
-                            listParametersInitialEntity.Add(parametersInitialEntity);
+                            listParametersInitialEntity.Add(parametersARP);
                             continue;
                         }
                     }
                     else
                     {
                         //NO hay horario
-                        parametersInitialEntity.HoraInicioHoraio = "0";
-                        parametersInitialEntity.HoraFinHorario = "0";
-                        parametersInitialEntity.Reporte = arp.DOC_NUM;
-                        parametersInitialEntity.EstatusProceso = "NO_APLICA_X_HORARIO";
-                        listParametersInitialEntity.Add(parametersInitialEntity);
+                        parametersARP.EstatusProceso = "NO_APLICA_X_HORARIO";
+                        listParametersInitialEntity.Add(parametersARP);
                         continue;
                     }
 
 
-                    listParametersInitialEntity.Add(parametersInitialEntity);
+                    listParametersInitialEntity.Add(parametersARP);
                 }
 
                
-               int PAGE_SIZE = listParametersInitialEntity.Count()/10;
+               int PAGE_SIZE = listParametersInitialEntity.Count()/20;
                 List<List<ParametersArpInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE);
 
                 for (int i = 0; i < partitions.Count(); i++)
@@ -494,17 +419,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     
                 }
 
-              
-
-                // _dataBaseService.ParametersArpInitialEntity.AddRange(listParametersInitialEntity);
-                // await _dataBaseService.SaveAsync();
-
 
                 return model.IdCarga.ToString();
-
-
-
-
 
             }
             catch (Exception ex){
@@ -842,17 +758,20 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<string> LoadTSE(LoadJsonPais model)
         {
-            
+
+            int counter = 0;
+
+            var semanahorario = new DateTimeOffset();
+
+            CultureInfo cul = CultureInfo.CurrentCulture;
+            List<HorarioReturn> fueraH = new List<HorarioReturn>();
+            List<FestivosEntity> listFestivos = new();
+
 
             try { 
             
                 List<TSELoadEntity> datosTSEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.Data.ToJsonString());
-                //datosTSEExcel.Where(e => e.Status.Trim() == "EXTRACTED").ToList().ForEach(x => x.Status = "Extracted");
-               // datosTSEExcel.Where(e => e.Status.Trim() == "SUBMITTED").ToList().ForEach(x => x.Status = "Submitted");
-
-                //List<TSELoadEntity> datosTSEExcel = datosTSEExcelFull!.Where(x => x.Status != "Extractedx" && x.Status != "Finalx" && x.Status != "Submittedx").ToList();
-
-
+               
                 //Remueve duplicados 
                 var datosTSEExcel = datosTSEExcelFull.DistinctBy(m => new { m.NumeroEmpleado, m.StartTime, m.EndTime }).ToList();
 
@@ -867,7 +786,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                                                  ForEach(x => x.TSEOmitidos = (datosTSEExcelFull.Count - datosTSEExcel.Count).ToString());
                     await _dataBaseService.SaveAsync();
 
-                    //Setting number of register on STE
+                    //Setting number of register on ARPLoadEntity
                     _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().
                                                   ForEach(x => x.TSECarga = datosTSEExcelFull.Count().ToString());
                     await _dataBaseService.SaveAsync();
@@ -878,22 +797,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
                 
 
-
-
                 datosTSEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true || e.AccountCMRNumber == "N/A").ToList().ForEach(x => x.AccountCMRNumber = "1234");
-                int counter = 0;
-        
-                var semanahorario = new DateTimeOffset();
-
-                CultureInfo cul = CultureInfo.CurrentCulture;
-                List<HorarioReturn> fueraH = new List<HorarioReturn>();
-
-
-
+                
+                //Getting list of countries
                 var listaCountries = await _consultCountryCommand.List();
 
-                List<FestivosEntity> listFestivos = new();
-                listFestivos = _dataBaseService.FestivosEntity.ToList(); //&& x.CountryId == "");
+                //Getting list of holidays
+                listFestivos = _dataBaseService.FestivosEntity.ToList();
                
                 var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
                 var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
@@ -909,169 +819,116 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
 
                         var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.NumeroEmpleado.Substring(registrox.NumeroEmpleado.Length - 3));
+                        
+                            var parametersTse = new ParametersTseInitialEntity();
+                            parametersTse.IdParamTSEInitialId = Guid.NewGuid();
+                            parametersTse.EstatusProceso = "";
+                            parametersTse.FECHA_REP = registrox.StartTime;
+                            parametersTse.TOTAL_MINUTOS = getMins(registrox.DurationInHours);
+                            parametersTse.totalHoras = registrox.DurationInHours;
+                            parametersTse.HorasInicio = 0;
+                            parametersTse.HorasFin = 0;
+                            parametersTse.EmployeeCode = registrox.NumeroEmpleado;
+                            parametersTse.IdCarga = new Guid(model.IdCarga);
+                            parametersTse.HoraInicio = "0";
+                            parametersTse.HoraFin = "0";
+                            parametersTse.OutIme = "N";
+                            parametersTse.Semana = 0;
+                            parametersTse.HoraInicioHoraio = "0";
+                            parametersTse.HoraFinHorario = "0";
+                            parametersTse.OverTime = "N";
+                            parametersTse.Anio = semanahorario.Year.ToString();
+                            parametersTse.Festivo = "N";
+                            parametersTse.Estado = "";
+                            parametersTse.Reporte = registrox.WorkOrder;
+
+
                         //valida pais
                         if (paisRegistro == null)
                         {
                             //PAIS no valido
-                            ParametersTseInitialEntity parametersTseInitialEntityaux = new ParametersTseInitialEntity();
-
-                            parametersTseInitialEntityaux.IdParamTSEInitialId = Guid.NewGuid();
-                            parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_PAIS";
-                            parametersTseInitialEntityaux.FECHA_REP = registrox.StartTime;
-                            parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.DurationInHours);
-                            parametersTseInitialEntityaux.totalHoras = registrox.DurationInHours;
-                            parametersTseInitialEntityaux.HorasInicio = 0;
-                            parametersTseInitialEntityaux.HorasFin = 0;
-                            parametersTseInitialEntityaux.EmployeeCode = registrox.NumeroEmpleado;
-                            parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
-                            parametersTseInitialEntityaux.HoraInicio = "0";
-                            parametersTseInitialEntityaux.HoraFin = "0";
-
-                            parametersTseInitialEntityaux.OutIme = "N";
-                            parametersTseInitialEntityaux.Semana = 0;
-                            parametersTseInitialEntityaux.HoraInicioHoraio = "0";
-                            parametersTseInitialEntityaux.HoraFinHorario = "0";
-                            parametersTseInitialEntityaux.OverTime = "N";
-                            parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
-                            parametersTseInitialEntityaux.Festivo = "N";
-                            parametersTseInitialEntityaux.Estado = "";
-                            parametersTseInitialEntityaux.Reporte = registrox.WorkOrder;
-
-                            listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                            parametersTse.EstatusProceso = "NO_APLICA_X_PAIS";
+                            listParametersInitialEntity.Add(parametersTse);
                             continue;
-
-                            
                         }
 
 
 
                         var tse = fHomologaTSE(registrox, horariosGMT, paisRegistro!);
+
+
                         if (tse == null)
                         {
-                            ParametersTseInitialEntity parametersTseInitialEntityaux = new ParametersTseInitialEntity();
+                            parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                            parametersTse.FECHA_REP = registrox.StartTime;
 
-                            parametersTseInitialEntityaux.IdParamTSEInitialId = Guid.NewGuid();
-                            parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
-                            parametersTseInitialEntityaux.FECHA_REP = registrox.StartTime;
-                            parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.DurationInHours);
-                            parametersTseInitialEntityaux.totalHoras = registrox.DurationInHours;
-                            parametersTseInitialEntityaux.HorasInicio = 0;
-                            parametersTseInitialEntityaux.HorasFin = 0;
-                            parametersTseInitialEntityaux.EmployeeCode = registrox.NumeroEmpleado;
-                            parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
-                            parametersTseInitialEntityaux.HoraInicio = "0";
-                            parametersTseInitialEntityaux.HoraFin = "0";
-
-                            parametersTseInitialEntityaux.OutIme = "N";
-                            parametersTseInitialEntityaux.Semana = 0;
-                            parametersTseInitialEntityaux.HoraInicioHoraio = "0";
-                            parametersTseInitialEntityaux.HoraFinHorario = "0";
-                            parametersTseInitialEntityaux.OverTime = "N";
-                            parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
-                            parametersTseInitialEntityaux.Festivo = "N";
-                            parametersTseInitialEntityaux.Estado ="E204 NO TIENE HORARIO ASIGNADO";
-                            parametersTseInitialEntityaux.Reporte = registrox.WorkOrder;
-
-                            listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                            listParametersInitialEntity.Add(parametersTse);
                             continue;
-                           
                         }
                     
-                   // var paisRegistro = listaCountries.FirstOrDefault(e=>e.CodigoPais== registro.NumeroEmpleado.Substring(registro.NumeroEmpleado.Length - 3));
-
-                   // var tse = validaHoraTSEGMT(registro, horariosGMT, paisRegistro);
 
                         semanahorario = DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                        
 
                         int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
-                    bool bValidacionHorario = false;
+                        bool bValidacionHorario = false;
 
-                    var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString());// && x.FechaWorking== semanahorario.DateTime);
-                    //var horario = _dataBaseService.workinghoursEntity.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString() && x.FechaWorking == semanahorario);
-                    var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId== paisRegistro!.IdCounty);
+                        var horario = Lsthorario.FirstOrDefault(x => x.UserEntity.EmployeeCode == tse.NumeroEmpleado && x.week == Semana.ToString());
+                        var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId== paisRegistro!.IdCounty);
 
                     
 
+         
+                    parametersTse.EstatusProceso = "EN_OVERTIME";
+                    parametersTse.FECHA_REP = tse.StartTime;
+                    parametersTse.Festivo = esfestivo != null ? "Y" : "N";
+                    parametersTse.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
+                    parametersTse.HoraInicio = tse.StartHours;      
+                    parametersTse.HoraFin = tse.EndHours;
+                    parametersTse.Semana = Semana;
+                    parametersTse.Anio = semanahorario.Year.ToString();
                    
 
 
-                    ParametersTseInitialEntity parametersTseInitialEntity = new ParametersTseInitialEntity();
 
-                    parametersTseInitialEntity.IdParamTSEInitialId = Guid.NewGuid();
-                    parametersTseInitialEntity.EstatusProceso = "EN_OVERTIME";
-
-                    parametersTseInitialEntity.FECHA_REP = tse.StartTime;
-                    parametersTseInitialEntity.TOTAL_MINUTOS = getMins(tse.DurationInHours);
-                    parametersTseInitialEntity.totalHoras = tse.DurationInHours;
-
-                    parametersTseInitialEntity.HorasInicio = 0;
-                    parametersTseInitialEntity.HorasFin = 0;
-                    parametersTseInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
-                    parametersTseInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
-                    parametersTseInitialEntity.HoraInicio = tse.StartHours;// DateTimeOffset.ParseExact(tse.StartTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();
-                                                                              //DateTimeOffset.Parse(tse.StartTime).TimeOfDay.ToString();
-                    parametersTseInitialEntity.HoraFin = tse.EndHours;// DateTimeOffset.ParseExact(tse.EndTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();
-                        //DateTimeOffset.Parse(tse.EndTime).TimeOfDay.ToString();
-                    parametersTseInitialEntity.OverTime = "N";
-                    parametersTseInitialEntity.OutIme = "N";
-                    parametersTseInitialEntity.Semana = Semana;
-                    parametersTseInitialEntity.HoraInicioHoraio = "0";
-                    parametersTseInitialEntity.HoraFinHorario = "0";
-
-                    //parametersTseInitialEntity.OutIme = fueraH.Count > 0 ? "Y" : "N";
-                    // parametersTseInitialEntity.OverTime = fueraH.Count > 0 ? "Y" : "N";
-                    parametersTseInitialEntity.Anio = semanahorario.Year.ToString();
-                    parametersTseInitialEntity.EmployeeCode = tse.NumeroEmpleado;
-                    parametersTseInitialEntity.IdCarga = new Guid(model.IdCarga);
-                    parametersTseInitialEntity.Reporte = tse.WorkOrder;
-
-
-
-                        var previosAndPos = new List<double>();
+                    var previosAndPos = new List<double>();
                     if (horario != null)
                     {
                         previosAndPos = getPreviasAndPosHorario(tse.StartHours, tse.EndHours, horario.HoraInicio, horario.HoraFin);
-                        //bValidacionHorario = true;
                     }
                     else
                     {
                         previosAndPos.Add(0.0);
                         previosAndPos.Add(0.0);
-                        //bValidacionHorario = false;
                     }
 
                     if (horario != null)
                     {
-                        
-                        parametersTseInitialEntity.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                        parametersTseInitialEntity.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
-                        parametersTseInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
+
+                        parametersTse.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                        parametersTse.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
+                        parametersTse.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
                         //Para TSE, no aplica la politica por overtime
 
-                        parametersTseInitialEntity.HorasInicio = previosAndPos[0];
-                        parametersTseInitialEntity.HorasFin = previosAndPos[1];
-                        parametersTseInitialEntity.Reporte = tse.WorkOrder;
+                        parametersTse.HorasInicio = previosAndPos[0];
+                        parametersTse.HorasFin = previosAndPos[1];
+                        parametersTse.Reporte = tse.WorkOrder;
 
                         }
                     else
                     {
                         //NO hay horario
-                        parametersTseInitialEntity.HoraInicioHoraio = "0";
-                        parametersTseInitialEntity.HoraFinHorario = "0";
-                        parametersTseInitialEntity.EstatusProceso = "NO_APLICA_X_HORARIO";
-                        parametersTseInitialEntity.Reporte = tse.WorkOrder;
-                        listParametersInitialEntity.Add(parametersTseInitialEntity);
+                        parametersTse.HoraInicioHoraio = "0";
+                        parametersTse.HoraFinHorario = "0";
+                        parametersTse.EstatusProceso = "NO_APLICA_X_HORARIO";
+                        parametersTse.Reporte = tse.WorkOrder;
+                        listParametersInitialEntity.Add(parametersTse);
                         
                         continue;
                     }
                    
 
-                  
-
-
-
-                    listParametersInitialEntity.Add(parametersTseInitialEntity);
+                    listParametersInitialEntity.Add(parametersTse);
 
                 }
 
@@ -1083,11 +940,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     string error = ex.Message;
                 }
-                //await _dataBaseService.ParametersTseInitialEntity.AddRangeAsync(listParametersInitialEntity);
-                //await _dataBaseService.SaveAsync();
+               
 
-
-                int PAGE_SIZE = listParametersInitialEntity.Count() / 10;
+                int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
                 List<List<ParametersTseInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE);
 
                 for (int i = 0; i < partitions.Count(); i++)
@@ -1462,11 +1317,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 DateTimeOffset dateTimeOffset = new DateTimeOffset();
 
-                if (convert.FECHA_REP == null)
+                /*if (convert.FECHA_REP == null)
                 {
                     return null;
 
-                }
+                }*/
                 
 
                 try
@@ -1915,17 +1770,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 DateTimeOffset dateTimeOffset = new DateTimeOffset();
 
-
+                
                 if (convert.EndDateTime == null)
                 {
-                    return null;
+                    return convert;
 
                 }
                 if (convert.StartDateTime == null)
                 {
-                    return null;
+                    return convert;
                 }
-
+                
 
 
 
@@ -2229,20 +2084,26 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<SummaryLoad> LoadSTE(LoadJsonPais model)
         {
-         
 
-         
+            var semanahorario = new DateTimeOffset();
+
+            CultureInfo cul = CultureInfo.CurrentCulture;
+            List<HorarioReturn> fueraH = new List<HorarioReturn>();
+            List<FestivosEntity> listFestivos = new();
+            List<ParametersSteInitialEntity> listParametersInitialEntity = new();
 
             try
             {
+                //Deserializa obj con carga STE
                 List<STELoadEntity> datosSTEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
 
-
+                //Obtiene datos con totalduration>0
                 List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.TotalDuration!="0").ToList();
-                datosSTEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
+                //
+                // datosSTEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
 
 
-                //Setting number of register on STE
+                //Setting number of register on ARPLoadEntity
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().
                                               ForEach(x => x.STECarga = datosSTEExcel.Count().ToString());
                 await _dataBaseService.SaveAsync();
@@ -2256,103 +2117,80 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
 
 
-                var semanahorario = new DateTimeOffset();
-
-                CultureInfo cul = CultureInfo.CurrentCulture;
-                List<HorarioReturn> fueraH = new List<HorarioReturn>();
-
+                
+                //Obtiene listado de paises
                 var listaCountries = await _consultCountryCommand.List();
 
-                List<FestivosEntity> listFestivos = new();
+                //Obtiene listado de festivos
                 listFestivos = _dataBaseService.FestivosEntity.ToList();
 
+                //Obtiene listado de horarios disponibles
                 var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
 
                 var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
                 var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
 
-                List<ParametersSteInitialEntity> listParametersInitialEntity = new();
+               
 
                 //Remueve duplicados 
                 datosSTEExcel = datosSTEExcel.DistinctBy(m => new { m.SessionEmployeeSerialNumber, m.StartDateTime, m.EndDateTime }).ToList();
-
+                DateTime currentDateTime = DateTime.Now;
 
 
                 foreach (var registrox in datosSTEExcel)
                 {
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.SessionEmployeeSerialNumber.Substring(registrox.SessionEmployeeSerialNumber.Length - 3));
 
+                    var parametersTse = new ParametersSteInitialEntity();
+                    parametersTse.IdParamSTEInitialId = Guid.NewGuid();
+                    parametersTse.EstatusProceso = "";
+                    parametersTse.FECHA_REP = registrox.FechaRegistro==null ? currentDateTime.ToString(): registrox.FechaRegistro;
+                    parametersTse.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
+                    parametersTse.totalHoras = registrox.TotalDuration;
+                    parametersTse.HorasInicio = 0;
+                    parametersTse.HorasFin = 0;
+                    parametersTse.EmployeeCode = registrox.SessionEmployeeSerialNumber;
+                    parametersTse.IdCarga = new Guid(model.IdCarga);
+                    parametersTse.HoraInicio = "0";
+                    parametersTse.HoraFin = "0";
+                    parametersTse.OutIme = "N";
+                    parametersTse.Semana = 0;
+                    parametersTse.HoraInicioHoraio = "0";
+                    parametersTse.HoraFinHorario = "0";
+                    parametersTse.OverTime = "N";
+                    parametersTse.Anio = semanahorario.Year.ToString();
+                    parametersTse.Festivo = "N";
+                    parametersTse.Estado = "";
+                    parametersTse.Reporte = registrox.NumeroCaso;
+
                     //valida pais
                     if (paisRegistro == null)
                     {
                         //PAIS no valido
-                        ParametersSteInitialEntity parametersTseInitialEntityaux = new ParametersSteInitialEntity();
-
-                        parametersTseInitialEntityaux.IdParamSTEInitialId = Guid.NewGuid();
-                        parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_PAIS";
-                        parametersTseInitialEntityaux.FECHA_REP = registrox.StartDateTime;
-                        parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
-                        parametersTseInitialEntityaux.totalHoras = registrox.TotalDuration;
-                        parametersTseInitialEntityaux.HorasInicio = 0;
-                        parametersTseInitialEntityaux.HorasFin = 0;
-                        parametersTseInitialEntityaux.EmployeeCode = registrox.SessionEmployeeSerialNumber;
-                        parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
-                        parametersTseInitialEntityaux.HoraInicio = "0";
-                        parametersTseInitialEntityaux.HoraFin = "0";
-
-                        parametersTseInitialEntityaux.OutIme = "N";
-                        parametersTseInitialEntityaux.Semana = 0;
-                        parametersTseInitialEntityaux.HoraInicioHoraio = "0";
-                        parametersTseInitialEntityaux.HoraFinHorario = "0";
-                        parametersTseInitialEntityaux.OverTime = "N";
-                        parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
-                        parametersTseInitialEntityaux.Festivo = "N";
-                        parametersTseInitialEntityaux.Estado = "";
-                        parametersTseInitialEntityaux.Reporte = registrox.NumeroCaso;
-
-                        listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                        parametersTse.EstatusProceso = "NO_APLICA_X_PAIS";
+                        listParametersInitialEntity.Add(parametersTse);
                         continue;
                     }
+                    
+                    var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
 
-
-
-
-                        var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
-
-                    if (ste == null)
+                    if (ste.EndDateTime == null )
                     {
-                        ParametersSteInitialEntity parametersTseInitialEntityaux = new ParametersSteInitialEntity();
-
-                        parametersTseInitialEntityaux.IdParamSTEInitialId = Guid.NewGuid();
-                        parametersTseInitialEntityaux.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
-                        parametersTseInitialEntityaux.FECHA_REP = registrox.StartDateTime;
-                        parametersTseInitialEntityaux.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
-                        parametersTseInitialEntityaux.totalHoras = registrox.TotalDuration;
-                        parametersTseInitialEntityaux.HorasInicio = 0;
-                        parametersTseInitialEntityaux.HorasFin = 0;
-                        parametersTseInitialEntityaux.EmployeeCode = registrox.SessionEmployeeSerialNumber;
-                        parametersTseInitialEntityaux.IdCarga = new Guid(model.IdCarga);
-                        parametersTseInitialEntityaux.HoraInicio = "0";
-                        parametersTseInitialEntityaux.HoraFin = "0";
-
-                        parametersTseInitialEntityaux.OutIme = "N";
-                        parametersTseInitialEntityaux.Semana = 0;
-                        parametersTseInitialEntityaux.HoraInicioHoraio = "0";
-                        parametersTseInitialEntityaux.HoraFinHorario = "0";
-                        parametersTseInitialEntityaux.OverTime = "N";
-                        parametersTseInitialEntityaux.Anio = semanahorario.Year.ToString();
-                        parametersTseInitialEntityaux.Festivo = "N";
-                        parametersTseInitialEntityaux.Estado = "E204 NO TIENE HORARIO ASIGNADO";
-                        parametersTseInitialEntityaux.Reporte = registrox.NumeroCaso;
-
-                        listParametersInitialEntity.Add(parametersTseInitialEntityaux);
+                        parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                        listParametersInitialEntity.Add(parametersTse);
                         continue;
 
                     }
 
+                    if ( ste.StartDateTime == null)
+                    {
+                        parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                        listParametersInitialEntity.Add(parametersTse);
+                        continue;
 
-                     //semanahorario = DateTimeOffset.Parse(ste.StartDateTime);
-                   semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    }
+
+                    semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                    
                     
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
@@ -2363,33 +2201,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     
 
-                  
-
-                    ParametersSteInitialEntity parametersSTEInitialEntity = new ParametersSteInitialEntity();
-
-                    parametersSTEInitialEntity.IdParamSTEInitialId = Guid.NewGuid();
-                    parametersSTEInitialEntity.EstatusProceso = "EN_OVERTIME";
-
-                    parametersSTEInitialEntity.FECHA_REP = ste.StartDateTime;
-                    parametersSTEInitialEntity.TOTAL_MINUTOS = getMins(ste.TotalDuration);
-                    parametersSTEInitialEntity.totalHoras = ste.TotalDuration; //getHoras(arp.TOTAL_MINUTOS);
-                    parametersSTEInitialEntity.HorasInicio = 0;
-                    parametersSTEInitialEntity.HorasFin = 0;
-                    parametersSTEInitialEntity.EmployeeCode = ste.SessionEmployeeSerialNumber;
-                    parametersSTEInitialEntity.Anio = semanahorario.Year.ToString();
-                    parametersSTEInitialEntity.Festivo = esfestivo != null ? "Y" : "N";
-                    parametersSTEInitialEntity.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
-                    parametersSTEInitialEntity.HoraInicio = ste.StartHours;// DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();//DateTimeOffset.Parse(ste.StartDateTime).TimeOfDay.ToString();
-                    parametersSTEInitialEntity.HoraFin = ste.EndHours;// DateTimeOffset.ParseExact(ste.EndDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).TimeOfDay.ToString();//DateTimeOffset.Parse(ste.EndDateTime).TimeOfDay.ToString();
-                    parametersSTEInitialEntity.OverTime = "N";
-                    parametersSTEInitialEntity.OutIme = "N";
-                    parametersSTEInitialEntity.Semana = Semana;
-                    parametersSTEInitialEntity.HoraInicioHoraio = "0";
-                    parametersSTEInitialEntity.HoraFinHorario = "0";
-                    parametersSTEInitialEntity.IdCarga = new Guid(model.IdCarga);
-                    parametersSTEInitialEntity.Reporte = ste.NumeroCaso;
-                    // parametersSTEInitialEntity.OutIme = fueraH.Count > 0 ? "Y" : "N";
-                    /// parametersSTEInitialEntity.OverTime = fueraH.Count > 0 ? "Y" : "N";
+                    parametersTse.EstatusProceso = "EN_OVERTIME";
+                    parametersTse.FECHA_REP = ste.StartDateTime;
+                    parametersTse.Anio = semanahorario.Year.ToString();
+                    parametersTse.Festivo = esfestivo != null ? "Y" : "N";
+                    parametersTse.HoraInicio = ste.StartHours;
+                    parametersTse.HoraFin = ste.EndHours;
+                    parametersTse.Semana = Semana;
+                    
 
 
 
@@ -2409,29 +2228,26 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if (horario != null)
                     {
 
-                        parametersSTEInitialEntity.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                        parametersSTEInitialEntity.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
-                        parametersSTEInitialEntity.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
+                        parametersTse.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                        parametersTse.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
+                        parametersTse.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
 
                         //Para STE, no aplica la politica por overtime
 
-                        parametersSTEInitialEntity.HorasInicio = previosAndPos[0];
+                        parametersTse.HorasInicio = previosAndPos[0];
 
                         //agregar validacion para horasFin
-                        parametersSTEInitialEntity.HorasFin = previosAndPos[1];
-                        parametersSTEInitialEntity.Reporte = ste.NumeroCaso;
+                        parametersTse.HorasFin = previosAndPos[1];
+                        parametersTse.Reporte = ste.NumeroCaso;
 
                     }
                     else
                     {
                         //NO hay horario
-                       
-                        parametersSTEInitialEntity.HoraInicioHoraio = "0";
-                        parametersSTEInitialEntity.HoraFinHorario = "0";
 
-                        parametersSTEInitialEntity.EstatusProceso = "NO_APLICA_X_HORARIO";
-                        parametersSTEInitialEntity.Reporte = ste.NumeroCaso;
-                        listParametersInitialEntity.Add(parametersSTEInitialEntity);
+                        parametersTse.EstatusProceso = "NO_APLICA_X_HORARIO";
+                        parametersTse.Reporte = ste.NumeroCaso;
+                        listParametersInitialEntity.Add(parametersTse);
                         continue;
 
                     }
@@ -2439,13 +2255,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                    
 
                   
-                    listParametersInitialEntity.Add(parametersSTEInitialEntity);
+                    listParametersInitialEntity.Add(parametersTse);
                 }
 
-                //_dataBaseService.ParametersSteInitialEntity.AddRangeAsync(listParametersInitialEntity);
-                //await _dataBaseService.SaveAsync();
+             
 
-                int PAGE_SIZE = listParametersInitialEntity.Count() / 10;
+                int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
                 List<List<ParametersSteInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE);
 
                 for (int i = 0; i < partitions.Count(); i++)
@@ -2523,31 +2338,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 //----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
 
 
 
@@ -2620,20 +2411,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.NO_APLICA_X_OVERTIME_ARP = arpNoAplicaXOverttime.ToString();
                 summary.NO_APLICA_X_OVERLAPING_ARP = arpNoAplicaXOverLaping.ToString();
                 summary.EN_PROCESO_ARP = arpEnProceso.ToString();
-               // summary.ARP_OMITIDOS = cargaRegistro.ARPOmitidos;
 
                 summary.NO_APLICA_X_HORARIO_TSE = tseNoAplicaXHorario.ToString();
                 summary.NO_APLICA_X_OVERTIME_TSE = tseNoAplicaXOverttime.ToString();
                 summary.NO_APLICA_X_OVERLAPING_TSE = tseNoAplicaXOverLaping.ToString();
                 summary.EN_PROCESO_TSE = tseEnProceso.ToString();
-               // summary.TSE_OMITIDOS = cargaRegistro.TSEOmitidos;
 
                 summary.NO_APLICA_X_HORARIO_STE =steNoAplicaXHorario.ToString();
                 summary.NO_APLICA_X_OVERTIME_STE = steNoAplicaXOverttime.ToString();
                 summary.NO_APLICA_X_OVERLAPING_STE = steNoAplicaXOverLaping.ToString();
                 summary.EN_PROCESO_STE =steEnProceso.ToString();
                 summary.IdCarga = model.IdCarga;
-                //summary.STE_OMITIDOS = steOmitidos;
 
                 summary.ARPOmitidosXDuplicidad = cargaRegistro.ARPOmitidosXDuplicidad;
                 summary.TSEOmitidosXDuplicidad = cargaRegistro.TSEOmitidosXDuplicidad;
@@ -2662,19 +2450,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.NO_APLICA_X_OVERTIME_ARP = "0";
                 summary.NO_APLICA_X_OVERLAPING_ARP = "0";
                 summary.EN_PROCESO_ARP = "0";
-               // summary.ARP_OMITIDOS = "0";
 
                 summary.NO_APLICA_X_HORARIO_TSE = "0";
                 summary.NO_APLICA_X_OVERTIME_TSE = "0";
                 summary.NO_APLICA_X_OVERLAPING_TSE = "0";
                 summary.EN_PROCESO_TSE = "0";
-               // summary.TSE_OMITIDOS = "0";
 
                 summary.NO_APLICA_X_HORARIO_STE = "0";
                 summary.NO_APLICA_X_OVERTIME_STE = "0";
                 summary.NO_APLICA_X_OVERLAPING_STE = "0";
                 summary.EN_PROCESO_STE = "0";
-               // summary.STE_OMITIDOS = "0";
+
                 summary.ARP_CARGA = "0";
                 summary.TSE_CARGA = "0";
                 summary.STE_CARGA = "0";
