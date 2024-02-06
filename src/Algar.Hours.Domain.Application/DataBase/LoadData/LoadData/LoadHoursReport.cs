@@ -159,16 +159,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             var contadores = new CountsCarga();
 
 
-            int arpEnProceso = _dataBaseService.ParametersArpInitialEntity.Where(e =>  e.IdCarga == new Guid(idCarga)).ToList().Count();
+            int arpEnProceso = _dataBaseService.ParametersArpInitialEntity.Where(e => e.IdCarga == new Guid(idCarga)).ToList().Count();
             int tseEnProceso = _dataBaseService.ParametersTseInitialEntity.Where(e => e.IdCarga == new Guid(idCarga)).ToList().Count();
             int steEnProceso = _dataBaseService.ParametersSteInitialEntity.Where(e => e.IdCarga == new Guid(idCarga)).ToList().Count();
             var cargaRef = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(idCarga)).FirstOrDefault();
 
-            
-            contadores.arp = arpEnProceso * 100 / Int32.Parse(cargaRef!.ARPCarga == "" ? "0" : cargaRef.ARPCarga);
-            contadores.tse = tseEnProceso * 100 / Int32.Parse(cargaRef!.TSECarga == "" ? "0" : cargaRef.TSECarga);
-            contadores.ste = steEnProceso * 100 / Int32.Parse(cargaRef!.STECarga == "" ? "0" : cargaRef.STECarga);
-            contadores.total = (contadores.arp + contadores.arp + contadores.arp) / 3;
+            var aRPCarga = Int32.Parse(cargaRef!.ARPCarga == "" ? "0" : cargaRef.ARPCarga);
+            var tSECarga = Int32.Parse(cargaRef!.TSECarga == "" ? "0" : cargaRef.TSECarga);
+            var sTECarga = Int32.Parse(cargaRef!.STECarga == "" ? "0" : cargaRef.STECarga);
+
+            contadores.arp = aRPCarga != 0 ? (Int32)Math.Ceiling((double)arpEnProceso * 100 / aRPCarga) : 0;
+            contadores.tse = tSECarga != 0 ? (Int32)Math.Ceiling((double)tseEnProceso * 100 / tSECarga) : 0;
+            contadores.ste = sTECarga != 0 ? (Int32)Math.Ceiling((double)steEnProceso * 100 / sTECarga) : 0;
+            contadores.total = (contadores.arp + contadores.tse + contadores.ste) / 3;
             contadores.estadoCarga = cargaRef.Estado;
             return contadores;
         }
