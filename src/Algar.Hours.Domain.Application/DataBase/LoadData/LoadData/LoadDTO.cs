@@ -66,6 +66,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public int ste { get; set; }
         public int total { get; set; }
         public int estadoCarga { get; set; }
+        public string? mensaje { get; set; }
         
     }
     public class SummaryPortalDB
