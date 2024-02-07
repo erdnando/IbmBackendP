@@ -79,6 +79,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public string NO_APLICA_X_OVERLAPING_TSE { get; set; }
         public string NO_APLICA_X_OVERLAPING_STE { get; set; }
 
+        public string NO_APLICA_X_LIMITE_HORAS_ARP { get; set; }
+        public string NO_APLICA_X_LIMITE_HORAS_TSE { get; set; }
+        public string NO_APLICA_X_LIMITE_HORAS_STE { get; set; }
+        
+
     }
 
     public class Loadnotificaciones

@@ -2876,7 +2876,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                 }
 
-                _dataBaseService.SaveAsync();
+                await _dataBaseService.SaveAsync();
 
                 
 
@@ -2985,11 +2985,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
                 int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
 
+                int arpNoAplicaLimites = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_LIMITE_HORAS" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int tseNoAplicaLimites = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_LIMITE_HORAS" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int steNoAplicaXLimites = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_LIMITE_HORAS" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+
                 summary.Mensaje = "Carga procesada";
                 summary.REGISTROS_PORTALDB = (rowARPParameterGral.Count() + rowSTEParameterGral.Count()+ rowTSEParameterGral.Count()).ToString();
                 summary.NO_APLICA_X_OVERLAPING_ARP = arpNoAplicaXOverLaping.ToString();
                 summary.NO_APLICA_X_OVERLAPING_TSE = tseNoAplicaXOverLaping.ToString();
                 summary.NO_APLICA_X_OVERLAPING_STE = steNoAplicaXOverLaping.ToString();
+
+                summary.NO_APLICA_X_LIMITE_HORAS_ARP = arpNoAplicaLimites.ToString();
+                summary.NO_APLICA_X_LIMITE_HORAS_TSE = tseNoAplicaLimites.ToString();
+                summary.NO_APLICA_X_LIMITE_HORAS_STE = steNoAplicaXLimites.ToString();
 
                 List<HorusReportEntity> rowsHorusNew = new();
                 HorusReportEntity rowAdd = new();
@@ -3008,7 +3016,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     Maxen = 0;
                 }
                 
-                foreach (var itemARPNew in rowARPParameterGral)
+                foreach (var itemARPNew in rowARPParameterGral)//Inserting to PortalDB
                 {
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.CurrentCulture);
@@ -3027,8 +3035,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         StartTime = itemARPNew.HoraInicio,
                         EndTime = itemARPNew.HoraFin,
                         Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
-                        UserEntityId = userRow.IdUser,
-                        ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   dc606c5a-149e-4f9b-80b3-ba555c7689b9"),
+                        UserEntityId = userRow.IdUser,                                       //Report associated to Employee who reported their hours
+                        ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
                         TipoReporte = 2,
                         Acitivity = 0,
                         CountHours = itemARPNew.totalHoras,
