@@ -63,6 +63,10 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
                     await _dataBaseService.assignmentReports.AddAsync(entity);
                     await _dataBaseService.SaveAsync();
+
+                    //actualiza horus con el aprobador q aprobo
+                    _dataBaseService.HorusReportEntity.Where(y => y.IdHorusReport == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString());
+                    await _dataBaseService.SaveAsync();
                 }
 
                 if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
@@ -112,33 +116,59 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     currentAssignment.Description = modelAprobador.Description;
                     currentAssignment.DateApprovalCancellation = DateTime.Now;
 
-                    _dataBaseService.assignmentReports.Update(currentAssignment);
+                    if(modelAprobador.roleAprobador == "Usuario Aprobador N1")
+                    {
+                        
+                        _dataBaseService.assignmentReports.Where(y => y.HorusReportEntityId == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.State = 4);
+                        await _dataBaseService.SaveAsync();
+
+                        currentAssignment.UserEntityId = Guid.Parse(modelAprobador.Aprobador1UserEntityId.ToString());
+                    }
+                     
+                    else if(modelAprobador.roleAprobador == "Usuario Aprobador N2")
+                    {
+
+
+                        _dataBaseService.assignmentReports.Where(y => y.HorusReportEntityId == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.State = 4);
+                        await _dataBaseService.SaveAsync();
+
+                        currentAssignment.UserEntityId = Guid.Parse(modelAprobador.Aprobador2UserEntityId.ToString());
+                        currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                }
+
+                _dataBaseService.assignmentReports.Update(currentAssignment);
                    await _dataBaseService.SaveAsync();
 
 
 
                     //se le crea al usuario su evidencia
                     CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
+
                     assignmentReport.UserEntityId = Guid.Parse(modelAprobador.EmpleadoUserEntityId.ToString());
                     assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Cerrada; //<----
+                    assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado; //<----
                     assignmentReport.Description = modelAprobador.Description;
                     assignmentReport.DateApprovalCancellation = DateTime.Now;
-
-                    //var response = CrearNivel2(assignmentReport);
                     assignmentReport.IdAssignmentReport = Guid.NewGuid();
                     var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
                     _dataBaseService.assignmentReports.Add(entity);
                     await _dataBaseService.SaveAsync();
 
 
-                    //_dataBaseService.assignmentReports.Where(y => y.HorusReportEntityId == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.State = 3);
-                    //await _dataBaseService.SaveAsync();
 
-
+                if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
+                {
                     //actualiza horus con el aprobador q rechazo
                     _dataBaseService.HorusReportEntity.Where(y => y.IdHorusReport == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString());
                     await _dataBaseService.SaveAsync();
+                }
+                else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
+                {
+                    //actualiza horus con el aprobador q rechazo
+                    _dataBaseService.HorusReportEntity.Where(y => y.IdHorusReport == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.ApproverId = modelAprobador.Aprobador2UserEntityId.ToString());
+                    await _dataBaseService.SaveAsync();
+                }
+                    
                 
             }
 
