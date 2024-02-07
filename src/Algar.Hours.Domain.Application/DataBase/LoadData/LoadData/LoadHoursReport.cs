@@ -240,7 +240,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     STEOmitidos="0",
                     STEXDatosNovalidos="0",
                     ARPXDatosNovalidos="0",
-                    TSEXDatosNovalidos = "0"
+                    TSEXDatosNovalidos = "0",
+                    EstadoCarga="Preparando carga...",
 
                 };
 
