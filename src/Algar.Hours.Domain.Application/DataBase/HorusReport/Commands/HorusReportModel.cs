@@ -10,6 +10,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands
         public Guid UserEntityId { get; set; }
         public UserEntity UserEntity { get; set; }
         public DateTime StartDate { get; set; }
+        public string? StrStartDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public Guid ClientEntityId { get; set; }
