@@ -30,24 +30,24 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
         public async Task<ModelAproveed> Execute(ModelAproveed modelAprobador)
         {
 
-            var ReportUpdate = _dataBaseService.assignmentReports.
+            var currentAssignment = _dataBaseService.assignmentReports.
                         Where(x => x.HorusReportEntityId == modelAprobador.HorusReportEntityId)
                         .FirstOrDefault();
 
-            //0 aprobado 1 rechazado
+            //0 APROBADO 
             if (modelAprobador.State == 0)
             {
                
 
                 if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
-                    ReportUpdate.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2; //<----APROBADO
-                    ReportUpdate.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    ReportUpdate.Description = modelAprobador.Description;
-                    ReportUpdate.DateApprovalCancellation = DateTime.Now;
-                    var entityreport = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(ReportUpdate);
+                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2; //<----APROBADO
+                    currentAssignment.HorusReportEntityId = modelAprobador.HorusReportEntityId;
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.DateApprovalCancellation = DateTime.Now;
+                    var entityreport = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(currentAssignment);
 
-                    _dataBaseService.assignmentReports.Update(ReportUpdate);
+                    _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
                     //nivel 1
@@ -67,13 +67,13 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
                 if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                 {
-                    ReportUpdate.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2; //<----APROBADO
-                    ReportUpdate.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    ReportUpdate.Description = modelAprobador.Description;
-                    ReportUpdate.DateApprovalCancellation = DateTime.Now;
-                    var entityreport = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(ReportUpdate);
+                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2; //<----APROBADO
+                    currentAssignment.HorusReportEntityId = modelAprobador.HorusReportEntityId;
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.DateApprovalCancellation = DateTime.Now;
+                    var entityreport = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(currentAssignment);
 
-                    _dataBaseService.assignmentReports.Update(ReportUpdate);
+                    _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
 
@@ -103,17 +103,16 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 
 
             }
-            else
+            else if (modelAprobador.State == 1)
             {
-                //rechazado
-                if (modelAprobador.State == 1)
-                {
-                    ReportUpdate.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
-                    ReportUpdate.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    ReportUpdate.Description = modelAprobador.Description;
-                    ReportUpdate.DateApprovalCancellation = DateTime.Now;
+                //1 RECHAZADO
+               
+                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentAssignment.HorusReportEntityId = modelAprobador.HorusReportEntityId;
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.DateApprovalCancellation = DateTime.Now;
 
-                    _dataBaseService.assignmentReports.Update(ReportUpdate);
+                    _dataBaseService.assignmentReports.Update(currentAssignment);
                    await _dataBaseService.SaveAsync();
 
 
@@ -122,7 +121,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
                     assignmentReport.UserEntityId = Guid.Parse(modelAprobador.EmpleadoUserEntityId.ToString());
                     assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Cerrada; //<----
                     assignmentReport.Description = modelAprobador.Description;
                     assignmentReport.DateApprovalCancellation = DateTime.Now;
 
@@ -132,17 +131,15 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     _dataBaseService.assignmentReports.Add(entity);
                     await _dataBaseService.SaveAsync();
 
-                    _dataBaseService.assignmentReports.Where(y => y.HorusReportEntityId == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.State = 3);
-                    await _dataBaseService.SaveAsync();
 
-
-
+                    //_dataBaseService.assignmentReports.Where(y => y.HorusReportEntityId == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.State = 3);
+                    //await _dataBaseService.SaveAsync();
 
 
                     //actualiza horus con el aprobador q rechazo
                     _dataBaseService.HorusReportEntity.Where(y => y.IdHorusReport == modelAprobador.HorusReportEntityId).ToList().ForEach(x => x.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString());
                     await _dataBaseService.SaveAsync();
-                }
+                
             }
 
             try
