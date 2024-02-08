@@ -2425,8 +2425,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
 
 
-                
 
+                //finishing load process
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().
+                                              ForEach(x => x.Estado = 2);
+                await _dataBaseService.SaveAsync();
 
 
                 //return summary
