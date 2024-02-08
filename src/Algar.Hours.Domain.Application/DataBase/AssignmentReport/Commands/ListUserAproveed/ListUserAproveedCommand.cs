@@ -18,7 +18,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserApr
             var listAssigment = _dataBaseService.assignmentReports
                   .Include(a => a.UserEntity)
                   .Include(b => b.HorusReportEntity)
-                  .Where(x => x.UserEntityId == UserId).ToList();
+                  .Where(x => x.UserEntityId == UserId ).ToList();
 
             foreach (var item in listAssigment)
             {

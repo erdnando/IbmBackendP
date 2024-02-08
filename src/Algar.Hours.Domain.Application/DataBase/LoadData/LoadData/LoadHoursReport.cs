@@ -261,7 +261,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //SEt metrica de omitidos en ARPLoadEntity
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
-                                              ForEach(x => x.ARPOmitidos = (datosARPExcel.Count - datosARPExcel.Count).ToString() );
+                                              ForEach(x => x.ARPOmitidos = (datosARPExcelFull.Count - datosARPExcel.Count).ToString() );
 
                 await _dataBaseService.SaveAsync();
 
@@ -3029,6 +3029,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         IdAssignmentReport = Guid.NewGuid(),
                         HorusReportEntityId = rowAdd.IdHorusReport,
                         UserEntityId = userRow.IdUser,
+                        Employee = userRow.IdUser.ToString(),
+                        TipoAssignment = "Approver",
                         Description = "PROCESO_OVERTIME",
                         State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
 
@@ -3076,6 +3078,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         IdAssignmentReport = Guid.NewGuid(),
                         HorusReportEntityId = rowAdd.IdHorusReport,
                         UserEntityId = userRow.IdUser,
+                        Employee = userRow.IdUser.ToString(),
+                        TipoAssignment = "Approver",
                         Description = "PROCESO_OVERTIME",
                         State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
 
@@ -3120,6 +3124,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         IdAssignmentReport = Guid.NewGuid(),
                         HorusReportEntityId = rowAdd.IdHorusReport,
                         UserEntityId = userRow.IdUser,
+                        Employee = userRow.IdUser.ToString(),
+                        TipoAssignment= "Approver",
                         Description = "PROCESO_OVERTIME",
                         State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         DateApprovalCancellation = DateTime.Now,

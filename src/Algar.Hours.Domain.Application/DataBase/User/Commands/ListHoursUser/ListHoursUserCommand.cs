@@ -41,7 +41,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
                 {
                     var assigment = _dataBaseService.assignmentReports
                        .Include(a => a.UserEntity)
-                       .Where(x => x.HorusReportEntityId == item.IdHorusReport).FirstOrDefault();
+                       .Where(x =>  x.TipoAssignment == "Approver").FirstOrDefault();//x.HorusReportEntityId == item.IdHorusReport &&
                     if (assigment != null)
                     {
                         item.ApproverId = assigment.UserEntity.NameUser + " " + assigment.UserEntity.surnameUser;
@@ -64,7 +64,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
                 {
                     var assigment = _dataBaseService.assignmentReports
                        .Include(a => a.UserEntity)
-                       .Where(x => x.HorusReportEntityId == item.IdHorusReport).FirstOrDefault();
+                       .Where(x =>  x.TipoAssignment == "Approver").FirstOrDefault();//x.HorusReportEntityId == item.IdHorusReport &&
                     if (assigment != null)
                     {
                         item.ApproverId = assigment.UserEntity.NameUser + " " + assigment.UserEntity.surnameUser;
