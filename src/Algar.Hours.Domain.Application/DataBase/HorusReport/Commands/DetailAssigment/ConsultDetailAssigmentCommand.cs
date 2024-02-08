@@ -21,80 +21,67 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
         }
         public async Task<List<ConsultDetailAssigmentModel>> Execute(Guid IdReport)
         {
-            List<ConsultDetailAssigmentModel> ListconsultDetailAssigmentModels = new List<ConsultDetailAssigmentModel>();
+            var ListconsultDetailAssigment = new List<ConsultDetailAssigmentModel>();
 
             var aprobdaornivel1 = "";
             var aprobadornivel2 = "";
             int estadoaprovadornivel1 = 0;
             int estadoaprovadornivel2 = 0;
             
-            var n = _dataBaseService.assignmentReports
+            //obtiene ref a la list de assignments asociadas al reporte (horusreport)
+            var assignmentList = _dataBaseService.assignmentReports
                 .Include(a => a.UserEntity)
                 .Include(b=> b.HorusReportEntity)
                 .Where(x => x.HorusReportEntityId == IdReport).ToList();
 
            
-
-            foreach (var ns in n)
+            //Recorriendo los assignments encontrados
+            foreach (var assig in assignmentList)
             {
-                ConsultDetailAssigmentModel consultDetailAssigmentModel = new ConsultDetailAssigmentModel();
+                var detailAssigment = new ConsultDetailAssigmentModel();
 
-                if (true)
+                var aprobador = _dataBaseService.AprobadorUsuario
+                        .Include(a => a.UserEntity)
+                        .Include(a => a.Aprobador)
+                        .Where(x => x.UserEntityId == assig.UserEntityId).FirstOrDefault();
+
+                if (aprobador == null) continue;
+
+                if(aprobador.Aprobador.Nivel == 1) 
                 {
-
-                    /* var aprobador = _dataBaseService.AprobadorUsuario
-                          .Include(a => a.UserEntity)
-                          .Include(a => a.Aprobador)
-                          .Where(x => x.UserEntityId == ns.UserEntityId).FirstOrDefault();
-
-
-                             var aprobadorx = _dataBaseService.UserEntity.Where(x => x.IdUser == Guid.Parse(ns.HorusReportEntity.ApproverId.ToString())).FirstOrDefault();
-                             aprobadorNombre = aprobadorx.NameUser;
-                             estadoaprovador = ns.State;*/
-                    var aprobador = _dataBaseService.AprobadorUsuario
-                          .Include(a => a.UserEntity)
-                          .Include(a => a.Aprobador)
-                          .Where(x => x.UserEntityId == ns.UserEntityId).FirstOrDefault();
-
-                    if (aprobador == null) continue;
-
-                    if(aprobador.Aprobador.Nivel == 1) 
-                    {
-                        aprobdaornivel1 = aprobador.UserEntity.NameUser;
-                        estadoaprovadornivel1 = ns.State;
-                    }
-                    else if(aprobador.Aprobador.Nivel == 2) 
-                    {
-                        aprobadornivel2 = aprobador.UserEntity.NameUser;
-                        estadoaprovadornivel2 = ns.State;  
-                    }
-
-
-
-                    var cliente = _dataBaseService.ClientEntity.Where(x => x.IdClient == ns.HorusReportEntity.ClientEntityId).FirstOrDefault();
-                    var pais = _dataBaseService.CountryEntity.Where(x => x.IdCounty == ns.UserEntity.CountryEntityId).FirstOrDefault();
-
-                    consultDetailAssigmentModel.Numeroreporte = ns.HorusReportEntity.NumberReport;
-                    consultDetailAssigmentModel.Horas = ns.HorusReportEntity.CountHours;
-                    consultDetailAssigmentModel.ClientEntity = cliente;
-                    consultDetailAssigmentModel.Fechaenvio = ns.HorusReportEntity.CreationDate;
-                    consultDetailAssigmentModel.Actividad = ns.HorusReportEntity.Acitivity;
-                    consultDetailAssigmentModel.Aprobaador1 = aprobdaornivel1;
-                    consultDetailAssigmentModel.EstadoAprobadorNIvel1 = estadoaprovadornivel1;
-                    consultDetailAssigmentModel.Aprobaador2 = aprobadornivel2;
-                    consultDetailAssigmentModel.EstadoAprobadorNIvel2 = estadoaprovadornivel2;
-                    consultDetailAssigmentModel.Observaciones = ns.Description;
-                    consultDetailAssigmentModel.Pais = pais;
-
-                    ListconsultDetailAssigmentModels.Add(consultDetailAssigmentModel);
+                    aprobdaornivel1 = aprobador.UserEntity.NameUser;
+                    estadoaprovadornivel1 = assig.State;
                 }
-                   
+                else if(aprobador.Aprobador.Nivel == 2) 
+                {
+                    aprobadornivel2 = aprobador.UserEntity.NameUser;
+                    estadoaprovadornivel2 = assig.State;  
+                }
 
 
 
+                var cliente = _dataBaseService.ClientEntity.Where(x => x.IdClient == assig.HorusReportEntity.ClientEntityId).FirstOrDefault();
+                var pais = _dataBaseService.CountryEntity.Where(x => x.IdCounty == assig.UserEntity.CountryEntityId).FirstOrDefault();
+
+                detailAssigment.Numeroreporte = assig.HorusReportEntity.NumberReport;
+                detailAssigment.strNumeroreporte = assig.HorusReportEntity.StrReport;
+                detailAssigment.Horas = assig.HorusReportEntity.CountHours;
+                detailAssigment.ClientEntity = cliente;
+                detailAssigment.Fechaenvio = assig.HorusReportEntity.CreationDate;
+                detailAssigment.Actividad = assig.HorusReportEntity.Acitivity;
+                detailAssigment.Aprobaador1 = aprobdaornivel1;
+                detailAssigment.EstadoAprobadorNIvel1 = estadoaprovadornivel1;
+                detailAssigment.Aprobaador2 = aprobadornivel2;
+                detailAssigment.EstadoAprobadorNIvel2 = estadoaprovadornivel2;
+                detailAssigment.Observaciones = assig.Description;
+                detailAssigment.Pais = pais;
+
+                ListconsultDetailAssigment.Add(detailAssigment);
+                
+                
             }
 
-            return  ListconsultDetailAssigmentModels;
+            return ListconsultDetailAssigment;
 
         }
     }

@@ -42,6 +42,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
          
             horusModel.IdHorusReport = Guid.NewGuid();
             horusModel.CreationDate = DateTime.Now;
+            horusModel.strCreationDate= DateTime.Now.ToString("dd/MM/yyyy HH:mm"); 
             horusModel.DateApprovalSystem = DateTime.Now;
             Boolean canSendAgainHours = false;
 
@@ -132,6 +133,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             }
 
             entity.NumberReport = Maxen + 1;
+            entity.StrReport = (Maxen + 1).ToString();
             entity.StartDate = DateTime.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             await _dataBaseService.SaveAsync();
@@ -166,6 +168,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             horusModel.IdHorusReport = Guid.NewGuid();
             horusModel.CreationDate = DateTime.Now;
+            horusModel.strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
             horusModel.DateApprovalSystem = DateTime.Now;
             Boolean canSendAgainHours = false;
 
@@ -319,8 +322,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             {
                 Maxen = 1;
             }
-            entity.Acitivity = 1;
+            entity.Acitivity = 0;//standby
             entity.NumberReport = Maxen + 1;
+            entity.StrReport = (Maxen + 1).ToString();
             entity.StrStartDate = nuevaFechaHoraFormato;
             entity.StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);

@@ -717,25 +717,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 HorusReportEntity horusReportEntity = new HorusReportEntity();
 
-                //horusReportEntity.Acitivity = 1;
-                //horusReportEntity.ClientEntity = null;
-                //horusReportEntity.Acitivity = 1;
-                //horusReportEntity.UserEntity = null;
-                //horusReportEntity.ApproverId = Guid.NewGuid().ToString();
-                //horusReportEntity.NumberReport = 1;
-                //horusReportEntity.StartDate = DateTime.Now;
-                //horusReportEntity.EndTime = DateTime.Now;
-                //horusReportEntity.ApproverId
+               
 
 
             }
-            else
-            {
-
-                //ActualizarRegister();
-
-
-            }
+           
             //verificar que si se sobrepone alguna hora y enviar el correo electronico 
             //si tiene la misma hora y fecha y id empleado se actualiza la hora
 
@@ -3034,11 +3020,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     Maxen = 0;
                 }
 
-                foreach (var itemARPNew in rowARPParameterGral)//Inserting to PortalDB
+
+                //Inserting to PortalDB
+                //----------------------------------------------------------------------------
+
+                foreach (var itemARPNew in rowARPParameterGral)
                 {
                     Maxen++;
                     DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPNew.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.CurrentCulture);
-                    // string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("yyyy-MM-dd 00:00:00");
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
 
@@ -3046,8 +3035,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
+                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                         DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen,
+                        NumberReport = Maxen,//<--------------------
+                        StrReport=itemARPNew.Reporte,
                         StartDate = fechaHoraOriginal,// DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
                         StrStartDate = nuevaFechaHoraFormato,//itemARPNew.FECHA_REP,
                         StartTime = itemARPNew.HoraInicio,
@@ -3056,7 +3047,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         UserEntityId = userRow.IdUser,                                       //Report associated to Employee who reported their hours
                         ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
                         TipoReporte = 2,
-                        Acitivity = 0,
+                        Acitivity = 1,//overtime
                         CountHours = itemARPNew.totalHoras,
                         ApproverId = "",//userRow.IdUser.ToString(),
                         ARPLoadingId = idCarga
@@ -3094,8 +3085,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
-                        DateApprovalSystem = DateTime.Now,
+                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                    DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
+                        StrReport = itemTSENew.Reporte,
                         StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
                         StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemTSENew.HoraInicio,
@@ -3104,7 +3097,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         UserEntityId = userRow.IdUser,
                         ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
                         TipoReporte = 2,
-                        Acitivity = 0,
+                        Acitivity = 1,//overtime
                         CountHours = itemTSENew.totalHoras,
                         ApproverId = "",//userRow.IdUser.ToString(),
                         ARPLoadingId = idCarga
@@ -3141,8 +3134,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
-                        DateApprovalSystem = DateTime.Now,
+                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                    DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
+                        StrReport = itemSTENew.Reporte,
                         StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
                         StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemSTENew.HoraInicio,
@@ -3151,7 +3146,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         UserEntityId = userRow.IdUser,
                         ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
                         TipoReporte = 2,
-                        Acitivity = 0,
+                        Acitivity = 1,//overtime
                         CountHours = itemSTENew.totalHoras,
                         ApproverId = "",//userRow.IdUser.ToString(),
                         ARPLoadingId = idCarga

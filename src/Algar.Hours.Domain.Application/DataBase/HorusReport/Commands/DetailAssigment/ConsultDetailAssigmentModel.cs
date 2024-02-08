@@ -11,6 +11,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
     public class ConsultDetailAssigmentModel
     {
         public int Numeroreporte { get; set; }
+        public string strNumeroreporte { get; set; }
+        
         public string Horas  { get; set; }
         public ClientEntity ClientEntity { get; set; }
         public DateTime Fechaenvio { get; set; }
