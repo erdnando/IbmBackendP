@@ -194,7 +194,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
             var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy-MM-dd 00:00:00");
-            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() );//&& x.FechaWorking.ToString("yyyy-MM-dd 00:00:00") == fechaformateadaReporta
+            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.DateTime.Year.ToString());
 
 
             //Validación del Horario reportado
@@ -238,7 +238,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var HorasLimiteDia = limitesCountry.TargetTimeDay;
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
-            var exceptionUser = _dataBaseService.UsersExceptions.FirstOrDefault(x => x.AssignedUserId == horusModel.UserEntityId && x.StartDate == DateTimeOffset.Parse(horusModel.StartDate.ToString()));
+            var listExeptios = _dataBaseService.UsersExceptions.ToList();
+            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.ToString("dd/MM/yyyy") == horusModel.StartDate.ToString("dd/MM/yyyy"));
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
             var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").
                 Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StrStartDate == horusModel.StartDate.ToString("dd/MM/yyyy 00:00:00")   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
@@ -320,6 +321,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             }
             entity.Acitivity = 1;
             entity.NumberReport = Maxen + 1;
+            entity.StrStartDate = nuevaFechaHoraFormato;
             entity.StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             await _dataBaseService.SaveAsync();
