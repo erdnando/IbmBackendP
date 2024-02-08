@@ -3050,6 +3050,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Acitivity = 1,//overtime
                         CountHours = itemARPNew.totalHoras,
                         ApproverId = "",//userRow.IdUser.ToString(),
+                        ApproverId2 = "",
+                        Estado = 0,
                         ARPLoadingId = idCarga
                     };
                     rowsHorusNew.Add(rowAdd);
@@ -3100,6 +3102,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Acitivity = 1,//overtime
                         CountHours = itemTSENew.totalHoras,
                         ApproverId = "",//userRow.IdUser.ToString(),
+                        ApproverId2 = "",
+                        Estado=0,
                         ARPLoadingId = idCarga
 
                     };
@@ -3135,7 +3139,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         IdHorusReport = Guid.NewGuid(),
                         CreationDate = DateTime.Now,
                         strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                    DateApprovalSystem = DateTime.Now,
+                        DateApprovalSystem = DateTime.Now,
                         NumberReport = Maxen,
                         StrReport = itemSTENew.Reporte,
                         StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
@@ -3149,6 +3153,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Acitivity = 1,//overtime
                         CountHours = itemSTENew.totalHoras,
                         ApproverId = "",//userRow.IdUser.ToString(),
+                        ApproverId2 = "",
+                        Estado = 0,
                         ARPLoadingId = idCarga
                     };
                     rowsHorusNew.Add(rowAdd);

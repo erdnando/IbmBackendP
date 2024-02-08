@@ -25,6 +25,8 @@ namespace Algar.Hours.Domain.Entities.HorusReport
         public int NumberReport {  get; set; }
         public string StrReport { get; set; }
         public string ApproverId { get; set; }
+        public string ApproverId2 { get; set; }
+        public int Estado { get; set; }
         public string? ARPLoadingId { get; set; }    
 
     }

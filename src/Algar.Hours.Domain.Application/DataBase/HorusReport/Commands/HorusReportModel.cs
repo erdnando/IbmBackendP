@@ -22,6 +22,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands
         public int Acitivity { get; set; }
         public string CountHours { get; set; }
         public string ApproverId { get; set; }
+        public string ApproverId2 { get; set; }
         public Guid CountryId { get; set; }
         public CountryEntity CountryEntity { get; set; }
 

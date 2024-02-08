@@ -35,10 +35,23 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
             Where(x => x.HorusReportEntityId == modelAprobador.HorusReportEntityId && x.IdAssignmentReport==modelAprobador.idAssignmentReport)
             .FirstOrDefault();
 
+            var currentHReport = _dataBaseService.HorusReportEntity
+                   .Include(a => a.UserEntity)
+                   .Include(a => a.ClientEntity)
+                   .Where(x => x.IdHorusReport == currentAssignment.HorusReportEntityId).FirstOrDefault();
+
             if (modelAprobador.State == 0) { //APROBADO
 
                 if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
+
+                    //Se indica aprobador N1 en HORUS
+                    currentHReport.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString();
+                    currentHReport.Estado= (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
+                    _dataBaseService.HorusReportEntity.Update(currentHReport);
+                    await _dataBaseService.SaveAsync();
+
+
                     //Se marca como aprobada N1 para el aprobador N1
                     currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
                     currentAssignment.TipoAssignment = "Employee";
@@ -84,6 +97,12 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
                 }else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                 {
+                    //Se indica aprobador N1 en horus
+                    currentHReport.ApproverId2 = modelAprobador.Aprobador2UserEntityId.ToString();
+                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                    _dataBaseService.HorusReportEntity.Update(currentHReport);
+                    await _dataBaseService.SaveAsync();
+
                     //Se actualiza el estado a la asignacion del N2 
                     currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
                     currentAssignment.TipoAssignment = "Approver";
@@ -117,6 +136,12 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
                 if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
+                    //Se indica aprobador N1 en horus
+                    currentHReport.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString();
+                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    _dataBaseService.HorusReportEntity.Update(currentHReport);
+                    await _dataBaseService.SaveAsync();
+
                     //Se actualiza el estado a la asignacion del N1
                     currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentAssignment.TipoAssignment = "Approver";
@@ -145,6 +170,12 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                 {
+                    //Se indica aprobador N1 en horus
+                    currentHReport.ApproverId2 = modelAprobador.Aprobador2UserEntityId.ToString();
+                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    _dataBaseService.HorusReportEntity.Update(currentHReport);
+                    await _dataBaseService.SaveAsync();
+
                     //Se actualiza el estado a la asignacion del N2
                     currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentAssignment.TipoAssignment = "Approver";
