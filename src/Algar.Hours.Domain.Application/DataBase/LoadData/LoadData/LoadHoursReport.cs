@@ -164,6 +164,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             int steEnProceso = _dataBaseService.ParametersSteInitialEntity.Where(e => e.IdCarga == new Guid(idCarga)).ToList().Count();
             var cargaRef = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(idCarga)).FirstOrDefault();
 
+            string mensaje = cargaRef!.EstadoCarga != null ? cargaRef.EstadoCarga : "Cargando...";
+
             var aRPCarga = Int32.Parse(cargaRef!.ARPCarga == "" ? "0" : cargaRef.ARPCarga);
             var tSECarga = Int32.Parse(cargaRef!.TSECarga == "" ? "0" : cargaRef.TSECarga);
             var sTECarga = Int32.Parse(cargaRef!.STECarga == "" ? "0" : cargaRef.STECarga);
@@ -173,32 +175,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             contadores.ste = sTECarga != 0 ? (Int32)Math.Ceiling((double)steEnProceso * 100 / sTECarga) : 0;
             contadores.total = (contadores.arp + contadores.tse + contadores.ste) / 3;
             contadores.estadoCarga = cargaRef.Estado;
-
-            string mensaje = string.Empty;
-
-
-            switch (contadores.estadoCarga)
-            {
-                case 1:
-                    if (contadores.ste > 0)
-                    {
-                        mensaje = "Realizando carga STE...";
-                    }
-                    else if (contadores.tse > 0)
-                    {
-                        mensaje = "Realizando carga TSE...";
-                    }
-                    else if (contadores.arp > 0)
-                    {
-                        mensaje = "Realizando carga ARP...";
-                    }
-                    break;
-                case 2:
-                    mensaje = "Carga finalizada";
-                    break;
-                default:
-                    break;
-            }
 
             contadores.mensaje = mensaje;
 
