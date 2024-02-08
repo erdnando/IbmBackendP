@@ -328,6 +328,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             assignmentReport.IdAssignmentReport = Guid.NewGuid();
             assignmentReport.HorusReportEntityId = entity.IdHorusReport;
             assignmentReport.UserEntityId = Guid.Parse(entity.ApproverId);
+            assignmentReport.Employee = entity.ApproverId;
+            assignmentReport.TipoAssignment = "Approver";
             assignmentReport.Description = horusModel.Description;
             assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
 

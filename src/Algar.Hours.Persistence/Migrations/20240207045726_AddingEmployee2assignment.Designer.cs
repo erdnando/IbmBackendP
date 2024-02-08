@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240207045726_AddingEmployee2assignment")]
+    partial class AddingEmployee2assignment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,10 +86,6 @@ namespace Algar.Hours.Persistence.Migrations
 
                     b.Property<int>("State")
                         .HasColumnType("integer");
-
-                    b.Property<string>("TipoAssignment")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<Guid>("UserEntityId")
                         .HasColumnType("uuid");

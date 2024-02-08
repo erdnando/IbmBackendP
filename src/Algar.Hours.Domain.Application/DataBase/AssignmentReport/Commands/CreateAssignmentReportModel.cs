@@ -13,6 +13,9 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands
         public Guid HorusReportEntityId { get; set; }
         public int State { get; set; }
         public string Description { get; set; }
+        public string Employee { get; set; }
+        public string TipoAssignment { get; set; }
+        
         public DateTime DateApprovalCancellation { get; set; }
     }
 
