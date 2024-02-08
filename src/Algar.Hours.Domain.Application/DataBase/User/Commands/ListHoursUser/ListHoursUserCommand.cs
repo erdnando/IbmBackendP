@@ -29,8 +29,8 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
                 .Include(a => a.RoleEntity)
                 .Where(x => x.IdUser == IdClient).FirstOrDefault();
 
-            if(userRef.RoleEntity.NameRole=="Usuario estandar")
-            {
+            //if(userRef.RoleEntity.NameRole=="Usuario estandar")
+            //{
                 //standar
                 var listStandar = _dataBaseService.HorusReportEntity
                     .Include(a => a.UserEntity)
@@ -51,8 +51,8 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
 
                 var listmodel = _mapper.Map<List<ListHorursUserModel>>(listStandar);
                 return listmodel;
-            }
-            else 
+          //  }
+           /* else 
             {
                 //aprobador
                 var listAprob = _dataBaseService.HorusReportEntity
@@ -74,7 +74,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
 
                 var listmodel = _mapper.Map<List<ListHorursUserModel>>(listAprob);
                 return listmodel;
-            }
+            }*/
 
 
 
