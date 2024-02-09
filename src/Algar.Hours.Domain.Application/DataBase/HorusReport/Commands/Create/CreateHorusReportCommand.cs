@@ -327,11 +327,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             entity.StrReport = (Maxen + 1).ToString();
             entity.StrStartDate = nuevaFechaHoraFormato;
             entity.StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date;
-            entity.ApproverId = "";
+            entity.ApproverId = horusModel.ApproverId;
             entity.ApproverId2 = "";
             entity.Estado = 1;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
-            await _dataBaseService.SaveAsync();
+            //await _dataBaseService.SaveAsync();
 
             CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
             assignmentReport.IdAssignmentReport = Guid.NewGuid();
