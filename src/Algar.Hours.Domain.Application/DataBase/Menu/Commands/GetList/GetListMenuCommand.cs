@@ -21,7 +21,7 @@ namespace Algar.Hours.Application.DataBase.Menu.Commands.GetList
 
         public async Task<List<MenuModel>> Execute()
         {
-            var entity = _dataBaseService.MenuEntity.ToList();
+            var entity = _dataBaseService.MenuEntity.OrderBy(e => e.Order).ToList();
             var model = _mapper.Map<List<MenuModel>>(entity);
             return model;
 

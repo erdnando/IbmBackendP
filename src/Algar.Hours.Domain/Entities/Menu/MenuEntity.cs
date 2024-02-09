@@ -12,6 +12,7 @@ namespace Algar.Hours.Domain.Entities.Menu
         public Guid IdMenu { get; set; }
         public string NameMenu {  get; set; }   
         public string Path {  get; set; }   
-        public string Icon { get; set; }    
+        public string Icon { get; set; }
+        public int Order { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace Algar.Hours.Application.DataBase.RolMenu.Commands.Consult
         {
             var entities = await _dataBaseService.RoleMenuEntity
                 .Include(i => i.MenuEntity)
-                .Where(rm => rm.RoleId == RolId)
+                .Where(rm => rm.RoleId == RolId).OrderBy(i=>i.MenuEntity.Order)
                 .ToListAsync();
 
             var models = _mapper.Map<List<RolMenuModel>>(entities);

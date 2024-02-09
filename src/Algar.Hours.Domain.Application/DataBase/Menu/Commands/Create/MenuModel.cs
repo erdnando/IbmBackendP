@@ -12,5 +12,6 @@ namespace Algar.Hours.Application.DataBase.Menu.Commands
         public string NameMenu { get; set; }
         public string Path { get; set; }
         public string Icon { get; set; }
+        public int Order { get; set; }
     }
 }
