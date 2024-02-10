@@ -1,4 +1,5 @@
-﻿using Algar.Hours.Domain.Entities.HorusReport;
+﻿using Algar.Hours.Domain.Entities.AssignmentReport;
+using Algar.Hours.Domain.Entities.HorusReport;
 using Algar.Hours.Domain.Entities.User;
 
 namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserAproveed
@@ -12,7 +13,9 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserApr
         public Guid HorusReportEntityId { get; set; }
         public int State { get; set; }
         public string Description { get; set; }
+        public string StrReport { get; set; }
         public DateTime DateApprovalCancellation { get; set; }
+        
 
     }
 }

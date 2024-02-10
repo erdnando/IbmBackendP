@@ -16,7 +16,9 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands
         public string Employee { get; set; }
         public string TipoAssignment { get; set; }
         
-        public DateTime DateApprovalCancellation { get; set; }
+        public string strFechaAtencion { get; set; }
+        public int Resultado { get; set; }
+        public int Nivel { get; set; }
     }
 
 

@@ -24,15 +24,12 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Update
 			}
 
 			cliente.UserEntityId = model.UserEntityId;
-			cliente.StartDate = model.StartDate;
+			cliente.StrStartDate = model.StrStartDate;
 			cliente.StartTime = model.StartTime;
 			cliente.EndTime = model.EndTime;
 			cliente.ClientEntityId = model.ClientEntityId;
-			cliente.Description = model.Description;
-			cliente.CreationDate = model.CreationDate;
-			cliente.TipoReporte = model.TipoReporte;
-			cliente.DateApprovalSystem = model.DateApprovalSystem;
-
+			cliente.strCreationDate = model.strCreationDate;
+			
 			_dataBaseService.HorusReportEntity.Update(cliente);
 			_dataBaseService.SaveAsync();
 

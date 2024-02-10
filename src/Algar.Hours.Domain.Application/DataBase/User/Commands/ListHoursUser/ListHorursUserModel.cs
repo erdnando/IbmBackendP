@@ -34,7 +34,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
         public DateTime DateApprovalSystem { get; set; }//ok
         public string StrStartTime { get; set; }//ok
         public string StrCreationDate { get; set; }//ok
-
+        public string StrStartDate { get; set; }//ok
 
     }
 }

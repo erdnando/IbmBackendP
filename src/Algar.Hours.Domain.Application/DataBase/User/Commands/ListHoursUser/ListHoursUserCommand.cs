@@ -26,36 +26,11 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
         public async Task<List<ListHorursUserModel>> Execute(Guid IdClient)
         {
            
-
+            //Get history from Horus
             var listHorus = _dataBaseService.HorusReportEntity
                 .Include(a => a.UserEntity)
                 .Include(a => a.ClientEntity)
                 .Where(x => x.UserEntityId == IdClient).ToList();
-
-            foreach (var item in listHorus)
-            {
-                if (item.ApproverId != "")
-                {
-                    var ApproverId1 = _dataBaseService.UserEntity
-                 .Where(x => x.IdUser == Guid.Parse(item.ApproverId)).FirstOrDefault();
-
-                    if (ApproverId1 != null)
-                        item.ApproverId = ApproverId1.NameUser + " " + ApproverId1.surnameUser;
-                }
-
-                if (item.ApproverId2 != "")
-                {
-                    var ApproverId2 = _dataBaseService.UserEntity
-                .Where(x => x.IdUser == Guid.Parse(item.ApproverId2)).FirstOrDefault();
-
-
-
-                    if (ApproverId2 != null)
-                        item.ApproverId2 = ApproverId2.NameUser + " " + ApproverId2.surnameUser;
-                }
-                  
-            }
-          
 
            
             try

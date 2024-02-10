@@ -50,16 +50,17 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 if (modelAprobador.roleAprobador == "Usuario estandar")
                 {
 
-                    //Se asocia aprobador N1 en HORUS
-                   //Solo en caso de standar, como el no es aprobador, se toma al N2 como N1
-                    currentHReport.UserEntityId = modelAprobador.Aprobador2UserEntityId;
+                    //Se maerca reporte como pendiente
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+                    currentHReport.DateApprovalSystem = DateTime.Now;
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
-                    //Se marca como aprobada N1 para el aprobador N1
-                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
-                    currentAssignment.TipoAssignment = "Employee";
+                    //Se marca como atendida por el empleado
+                    currentAssignment.State = 1;
+                    currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN0;
+                    currentAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                    currentAssignment.Nivel = 0;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
@@ -68,12 +69,10 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     assignmentN1.IdAssignmentReport = Guid.NewGuid();
                     //Solo en caso de standar, como el no es aprobador, se toma al N2 como N1
                     assignmentN1.UserEntityId = Guid.Parse(modelAprobador.Aprobador2UserEntityId.ToString());
-                    assignmentN1.State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
-                    assignmentN1.Employee = currentAssignment.Employee;
-                    assignmentN1.TipoAssignment = "Approver";
                     assignmentN1.HorusReportEntityId = modelAprobador.HorusReportEntityId;
+                    assignmentN1.State =0;
                     assignmentN1.Description = modelAprobador.Description;
-                    assignmentN1.DateApprovalCancellation = DateTime.Now;
+                    assignmentN1.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
                     var entityN1 = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentN1);
                     await _dataBaseService.assignmentReports.AddAsync(entityN1);
@@ -85,86 +84,55 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
 
-                    //Se indica aprobador N1 en HORUS
-                    currentHReport.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString();
-                    currentHReport.Estado= (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
+                    //Se maerca reporte como pendiente
+                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+                    currentHReport.DateApprovalSystem = DateTime.Now;
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
 
-                    //Se marca como aprobada N1 para el aprobador N1
-                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
-                    currentAssignment.TipoAssignment = "Employee";
+                    //Se marca como atendida por el empleado
+                    currentAssignment.State = 1;
+                    currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
+                    currentAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                    currentAssignment.Nivel = 1;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
-
-                    //Crea su history N1 al empleado
+                    //Crea asignacion para el N2
                     var assignmentN1 = new CreateAssignmentReportModel();
                     assignmentN1.IdAssignmentReport = Guid.NewGuid();
-                    assignmentN1.UserEntityId = Guid.Parse(modelAprobador.EmpleadoUserEntityId.ToString());
-                    assignmentN1.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
-                    assignmentN1.Employee = currentAssignment.Employee;
-                    assignmentN1.TipoAssignment = "Employee";
+                    assignmentN1.UserEntityId = Guid.Parse(modelAprobador.Aprobador2UserEntityId.ToString());
                     assignmentN1.HorusReportEntityId = modelAprobador.HorusReportEntityId;
+                    assignmentN1.State = 0;
                     assignmentN1.Description = modelAprobador.Description;
-                    assignmentN1.DateApprovalCancellation = DateTime.Now;
+                    assignmentN1.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
                     var entityN1 = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentN1);
                     await _dataBaseService.assignmentReports.AddAsync(entityN1);
                     await _dataBaseService.SaveAsync();
 
 
-
-                    //Crea asignacion para el N2
-                    var assignmentN2 = new CreateAssignmentReportModel();
-                    assignmentN2.IdAssignmentReport = Guid.NewGuid();
-                    assignmentN2.UserEntityId = Guid.Parse(modelAprobador.Aprobador2UserEntityId.ToString());
-                    assignmentN2.State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
-                    assignmentN2.Employee = currentAssignment.Employee;
-                    assignmentN2.TipoAssignment = "Approver";
-                    assignmentN2.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    assignmentN2.Description = modelAprobador.Description;
-                    assignmentN2.DateApprovalCancellation = DateTime.Now;
-
-                    var entityN2 = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentN2);
-                    await _dataBaseService.assignmentReports.AddAsync(entityN2);
-                    await _dataBaseService.SaveAsync();
-
-
-
-                }else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
+                }
+                else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                 {
-                    //Se indica aprobador N1 en horus
-                    currentHReport.ApproverId2 = modelAprobador.Aprobador2UserEntityId.ToString();
+                    //Se maerca reporte como aprobado N2
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                    currentHReport.DateApprovalSystem = DateTime.Now;
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
-                    await _dataBaseService.SaveAsync();
+                     await _dataBaseService.SaveAsync();
 
-                    //Se actualiza el estado a la asignacion del N2 
-                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
-                    currentAssignment.TipoAssignment = "Approver";
+                    //Se marca como atendida por el empleado
+                    currentAssignment.State = 1;
+                    currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                    currentAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.Nivel = 2;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
-
-                    //Crea su registro N2
-                    var assignmentN2 = new CreateAssignmentReportModel();
-                    assignmentN2.IdAssignmentReport = Guid.NewGuid();
-                    assignmentN2.UserEntityId = Guid.Parse(modelAprobador.EmpleadoUserEntityId.ToString());
-                    assignmentN2.State = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
-                    assignmentN2.Employee = currentAssignment.Employee;
-                    assignmentN2.TipoAssignment = "Employee";
-                    assignmentN2.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    assignmentN2.Description = modelAprobador.Description;
-                    assignmentN2.DateApprovalCancellation = DateTime.Now;
-
-                    var entityN2 = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentN2);
-                    await _dataBaseService.assignmentReports.AddAsync(entityN2);
-                    await _dataBaseService.SaveAsync();
-
-
                     
+
                 }
 
             }
@@ -174,84 +142,63 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 if (modelAprobador.roleAprobador == "Usuario estandar")
                 {
 
-                    //Se rechaza el reporte de hrs por el mismo empleado q el frontend manda como N1
-                    currentHReport.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString();
+                    //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentHReport.DateApprovalSystem = DateTime.Now;
+                    
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
-                    //Se marca como rechazada la asignacion del empleado
-                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
-                    currentAssignment.TipoAssignment = "Employee";
+                    //Se marca como atendida por el empleado
+                    currentAssignment.State = 1;
+                    currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.Nivel = 0;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
+
+                   
 
 
 
 
                 } else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
-                    //Se indica aprobador N1 en horus
-                    currentHReport.ApproverId = modelAprobador.Aprobador1UserEntityId.ToString();
+                    //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentHReport.DateApprovalSystem = DateTime.Now;
+                    
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
-                    //Se actualiza el estado a la asignacion del N1
-                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
-                    currentAssignment.TipoAssignment = "Approver";
+                    //Se marca como atendida por el empleado
+                    currentAssignment.State = 1;
+                    currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.Nivel = 1;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
-
-
-
-                    //se le crea al usuario su evidencia
-                    var assignmentN1 = new CreateAssignmentReportModel();
-                    assignmentN1.UserEntityId = Guid.Parse(modelAprobador.EmpleadoUserEntityId.ToString());
-                    assignmentN1.Employee = currentAssignment.Employee;
-                    assignmentN1.TipoAssignment = "Employee";
-                    assignmentN1.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    assignmentN1.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado; 
-                    assignmentN1.Description = modelAprobador.Description;
-                    assignmentN1.DateApprovalCancellation = DateTime.Now;
-                    
-                    assignmentN1.IdAssignmentReport = Guid.NewGuid();
-                    var entityN1 = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentN1);
-                    _dataBaseService.assignmentReports.Add(entityN1);
-                    await _dataBaseService.SaveAsync();
-
 
 
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                 {
-                    //Se indica aprobador N1 en horus
-                    currentHReport.ApproverId2 = modelAprobador.Aprobador2UserEntityId.ToString();
+                    //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentHReport.DateApprovalSystem = DateTime.Now;
+                    
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
-                    //Se actualiza el estado a la asignacion del N2
-                    currentAssignment.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
-                    currentAssignment.TipoAssignment = "Approver";
+                    //Se marca como atendida por el empleado
+                    currentAssignment.State = 1;
+                    currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
+                    currentAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                    currentAssignment.Description = modelAprobador.Description;
+                    currentAssignment.Nivel = 2;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
-                    await _dataBaseService.SaveAsync();
-
-
-                    //se le crea al usuario su evidencia
-                    var assignmentReport = new CreateAssignmentReportModel();
-                    assignmentReport.UserEntityId = Guid.Parse(modelAprobador.EmpleadoUserEntityId.ToString());
-                    assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
-                    assignmentReport.Employee = currentAssignment.Employee;
-                    assignmentReport.TipoAssignment = "Employee";
-                    assignmentReport.HorusReportEntityId = modelAprobador.HorusReportEntityId;
-                    
-                    assignmentReport.Description = modelAprobador.Description;
-                    assignmentReport.DateApprovalCancellation = DateTime.Now;
-                    assignmentReport.IdAssignmentReport = Guid.NewGuid();
-
-                    var entity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
-                    _dataBaseService.assignmentReports.Add(entity);
                     await _dataBaseService.SaveAsync();
                 }
             }

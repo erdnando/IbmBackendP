@@ -3003,13 +3003,33 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.NO_APLICA_X_LIMITE_HORAS_TSE = tseNoAplicaLimites.ToString();
                 summary.NO_APLICA_X_LIMITE_HORAS_STE = steNoAplicaXLimites.ToString();
 
+
+
+
+                //--------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 List<HorusReportEntity> rowsHorusNew = new();
                 HorusReportEntity rowAdd = new();
                 List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
                 Domain.Entities.AssignmentReport.AssignmentReport rowAddAssig = new();
 
-                //ARP
-                //--------------------------------------------------------------------------
                 var Maxen = 0;
                 try
                 {
@@ -3019,10 +3039,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     Maxen = 0;
                 }
-
-
+                //=======================================================================================================
                 //Inserting to PortalDB
-                //----------------------------------------------------------------------------
+                //=======================================================================================================
 
                 foreach (var itemARPNew in rowARPParameterGral)
                 {
@@ -3031,43 +3050,37 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
 
+                    //Generating HORUSREPORT
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
-                        CreationDate = DateTime.Now,
-                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen,//<--------------------
-                        StrReport=itemARPNew.Reporte,
-                        StartDate = fechaHoraOriginal,// DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
-                        StrStartDate = nuevaFechaHoraFormato,//itemARPNew.FECHA_REP,
+                        UserEntityId = userRow.IdUser,
+                        StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemARPNew.HoraInicio,
                         EndTime = itemARPNew.HoraFin,
-                        Description = itemARPNew.EstatusProceso + " Generado por proceso overtime",
-                        UserEntityId = userRow.IdUser,                                       //Report associated to Employee who reported their hours
                         ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
-                        TipoReporte = 2,
-                        Acitivity = 1,//overtime
+                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                         CountHours = itemARPNew.totalHoras,
-                        ApproverId = "",//userRow.IdUser.ToString(),
-                        ApproverId2 = "",
-                        Estado = 0,
-                        ARPLoadingId = idCarga
+                        StrReport = itemARPNew.Reporte,
+                        ARPLoadingId = idCarga,
+                        Acitivity = 1,//overtime
+                        NumberReport = Maxen,
+                        DateApprovalSystem = DateTime.Now,
+                        Estado= (byte)Enums.Enums.AprobacionPortalDB.Pendiente
                     };
                     rowsHorusNew.Add(rowAdd);
 
-                    //var UserRow = _dataBaseService.UserEntity.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
-
+                    
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
-                        HorusReportEntityId = rowAdd.IdHorusReport,
                         UserEntityId = userRow.IdUser,
-                        Employee = userRow.IdUser.ToString(),
-                        TipoAssignment = "Approver",
+                        HorusReportEntityId = rowAdd.IdHorusReport,
+                        State =0,
                         Description = "PROCESO_OVERTIME",
-                        State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
-
+                        strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                        Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        Nivel=0
                     };
                     rowAssignments.Add(rowAddAssig);
                 }
@@ -3086,26 +3099,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
-                        CreationDate = DateTime.Now,
-                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                    DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen,
-                        StrReport = itemTSENew.Reporte,
-                        StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        UserEntityId = userRow.IdUser,
                         StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemTSENew.HoraInicio,
                         EndTime = itemTSENew.HoraFin,
-                        Description = itemTSENew.EstatusProceso + " Generado por proceso overtime",
-                        UserEntityId = userRow.IdUser,
                         ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
-                        TipoReporte = 2,
-                        Acitivity = 1,//overtime
+                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                         CountHours = itemTSENew.totalHoras,
-                        ApproverId = "",//userRow.IdUser.ToString(),
-                        ApproverId2 = "",
-                        Estado=0,
-                        ARPLoadingId = idCarga
-
+                        StrReport = itemTSENew.Reporte,
+                        ARPLoadingId = idCarga,
+                        Acitivity = 1,//overtime
+                        NumberReport = Maxen,
+                        DateApprovalSystem = DateTime.Now,
+                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3114,13 +3120,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
-                        HorusReportEntityId = rowAdd.IdHorusReport,
                         UserEntityId = userRow.IdUser,
-                        Employee = userRow.IdUser.ToString(),
-                        TipoAssignment = "Approver",
+                        HorusReportEntityId = rowAdd.IdHorusReport,
+                        State = 0,
                         Description = "PROCESO_OVERTIME",
-                        State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
-
+                        strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                        Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        Nivel = 0
                     };
                     rowAssignments.Add(rowAddAssig);
                 }
@@ -3137,25 +3143,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     rowAdd = new()
                     {
                         IdHorusReport = Guid.NewGuid(),
-                        CreationDate = DateTime.Now,
-                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        DateApprovalSystem = DateTime.Now,
-                        NumberReport = Maxen,
-                        StrReport = itemSTENew.Reporte,
-                        StartDate = fechaHoraOriginal,//DateTimeOffset.Parse(nuevaFechaHoraFormato).Date,
+                        UserEntityId = userRow.IdUser,
                         StrStartDate = nuevaFechaHoraFormato,
                         StartTime = itemSTENew.HoraInicio,
                         EndTime = itemSTENew.HoraFin,
-                        Description = itemSTENew.EstatusProceso + " Generado por proceso overtime",
-                        UserEntityId = userRow.IdUser,
                         ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
-                        TipoReporte = 2,
-                        Acitivity = 1,//overtime
+                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                         CountHours = itemSTENew.totalHoras,
-                        ApproverId = "",//userRow.IdUser.ToString(),
-                        ApproverId2 = "",
-                        Estado = 0,
-                        ARPLoadingId = idCarga
+                        StrReport = itemSTENew.Reporte,
+                        ARPLoadingId = idCarga,
+                        Acitivity = 1,//overtime
+                        NumberReport = Maxen,
+                        DateApprovalSystem = DateTime.Now,
+                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3164,14 +3164,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
-                        HorusReportEntityId = rowAdd.IdHorusReport,
                         UserEntityId = userRow.IdUser,
-                        Employee = userRow.IdUser.ToString(),
-                        TipoAssignment = "Approver",
+                        HorusReportEntityId = rowAdd.IdHorusReport,
+                        State = 0,
                         Description = "PROCESO_OVERTIME",
-                        State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        DateApprovalCancellation = DateTime.Now,
-
+                        strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                        Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        Nivel = 0
                     };
                     rowAssignments.Add(rowAddAssig);
                 }

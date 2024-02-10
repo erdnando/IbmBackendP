@@ -16,6 +16,7 @@
             AprobadoN2 = 2,
             Rechazado = 3,
             Cerrada = 4,
+            AprobadoN0 = 5,
 
         }
 

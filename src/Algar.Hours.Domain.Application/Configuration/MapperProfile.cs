@@ -102,7 +102,7 @@ namespace Algar.Hours.Application.Configuration
 
 
             CreateMap<CreateHorusReportModel,HorusReportModel>()
-                .ForMember(x=> x.StartDate , 
+                .ForMember(x=> x.StrStartDate , 
                 opt => opt.MapFrom(src =>  DateTime.Parse(src.StartTime)));
            
 

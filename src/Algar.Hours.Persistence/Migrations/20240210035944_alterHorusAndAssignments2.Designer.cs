@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240210035944_alterHorusAndAssignments2")]
+    partial class alterHorusAndAssignments2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,21 +77,15 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<Guid>("HorusReportEntityId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Nivel")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Resultado")
-                        .HasColumnType("integer");
-
                     b.Property<int>("State")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("UserEntityId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("strFechaAtencion")
+                    b.Property<string>("TipoAssignment")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<Guid>("UserEntityId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("IdAssignmentReport");
 
@@ -274,9 +271,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Estado")
-                        .HasColumnType("integer");
-
                     b.Property<int>("NumberReport")
                         .HasColumnType("integer");
 
@@ -291,6 +285,9 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<string>("StrStartDate")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("TipoReporte")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("UserEntityId")
                         .HasColumnType("uuid");

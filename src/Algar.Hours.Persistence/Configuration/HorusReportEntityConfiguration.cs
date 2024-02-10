@@ -15,10 +15,10 @@ namespace Algar.Hours.Persistence.Configuration
 
             entityBuilder.HasKey(x => x.IdHorusReport);
             entityBuilder.Property(x => x.UserEntityId).IsRequired();
-            entityBuilder.Property(x => x.StartDate).IsRequired();  
+            entityBuilder.Property(x => x.StrStartDate).IsRequired();  
             entityBuilder.Property(x => x.EndTime).IsRequired();            
-            entityBuilder.Property(x => x.CreationDate).IsRequired();
-            entityBuilder.Property(x => x.TipoReporte).IsRequired();
+            entityBuilder.Property(x => x.strCreationDate).IsRequired();
+            //entityBuilder.Property(x => x.TipoReporte).IsRequired();
 
         
         } 

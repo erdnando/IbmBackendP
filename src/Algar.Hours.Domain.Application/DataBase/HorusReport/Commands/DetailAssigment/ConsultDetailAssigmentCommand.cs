@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.HorusReport.Commands.Create;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyModel;
 using NetTopologySuite.Index.HPRtree;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,10 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
         {
             var ListconsultDetailAssigment = new List<ConsultDetailAssigmentModel>();
 
+            var empleado = "";
             var aprobdaornivel1 = "";
             var aprobadornivel2 = "";
+            var observaciones = "";
             int estadoaprovadornivel1 = 0;
             int estadoaprovadornivel2 = 0;
 
@@ -35,103 +38,56 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
                     .Where(x => x.IdHorusReport == IdReport).FirstOrDefault();
 
             //obtiene ref a la list de assignments asociadas al reporte (horusreport)
-            /* var assignmentList = _dataBaseService.assignmentReports
+             var assignmentList = _dataBaseService.assignmentReports
                  .Include(a => a.UserEntity)
                  .Include(b=> b.HorusReportEntity)
-                 .Where(x => x.HorusReportEntityId == IdReport).ToList();*/
+                 .Where(x => x.HorusReportEntityId == IdReport).ToList();
 
 
             //Recorriendo los assignments encontrados
-            //foreach (var assig in assignmentList)
-            // {
-            /*     var detailAssigment = new ConsultDetailAssigmentModel();
+            foreach (var assig in assignmentList)
+            {
+               
 
-                 var aprobador = _dataBaseService.AprobadorUsuario
-                         .Include(a => a.UserEntity)
-                         .Include(a => a.Aprobador)
-                         .Where(x => x.UserEntityId == assig.UserEntityId).FirstOrDefault();
-
-                 if (aprobador == null) continue;
-
-                 if(aprobador.Aprobador.Nivel == 1) 
-                 {
-                     aprobdaornivel1 = aprobador.UserEntity.NameUser;
-                     estadoaprovadornivel1 = assig.State;
-                 }
-                 else if(aprobador.Aprobador.Nivel == 2) 
-                 {
-                     aprobadornivel2 = aprobador.UserEntity.NameUser;
-                     estadoaprovadornivel2 = assig.State;  
-                 }
+                if (assig.Nivel == 0)
+                {
+                    empleado = assig.UserEntity.NameUser +" "+ assig.UserEntity.surnameUser;
+                }else if (assig.Nivel == 1)
+                {
+                    aprobdaornivel1 = assig.UserEntity.NameUser + " " + assig.UserEntity.surnameUser;
+                }
+                else if (assig.Nivel == 2)
+                {
+                    aprobadornivel2 = assig.UserEntity.NameUser + " " + assig.UserEntity.surnameUser;
+                    observaciones = assig.Description;
+                }
 
 
-
-                 var cliente = _dataBaseService.ClientEntity.Where(x => x.IdClient == assig.HorusReportEntity.ClientEntityId).FirstOrDefault();
-                 var pais = _dataBaseService.CountryEntity.Where(x => x.IdCounty == assig.UserEntity.CountryEntityId).FirstOrDefault();
-
-                 detailAssigment.Numeroreporte = assig.HorusReportEntity.NumberReport;
-                 detailAssigment.strNumeroreporte = assig.HorusReportEntity.StrReport;
-                 detailAssigment.Horas = assig.HorusReportEntity.CountHours;
-                 detailAssigment.ClientEntity = cliente;
-                 detailAssigment.Fechaenvio = assig.HorusReportEntity.CreationDate;
-                 detailAssigment.Actividad = assig.HorusReportEntity.Acitivity;
-                 detailAssigment.Aprobaador1 = aprobdaornivel1;
-                 detailAssigment.EstadoAprobadorNIvel1 = estadoaprovadornivel1;
-                 detailAssigment.Aprobaador2 = aprobadornivel2;
-                 detailAssigment.EstadoAprobadorNIvel2 = estadoaprovadornivel2;
-                 detailAssigment.Observaciones = assig.Description;
-                 detailAssigment.Pais = pais;
-
-                 ListconsultDetailAssigment.Add(detailAssigment);
-
-               */
-            //}
+                
+            }
 
             var detailAssigment = new ConsultDetailAssigmentModel();
-
-            var userSystema = _dataBaseService.ClientEntity.Where(x => x.IdClient == currentHReport.ClientEntityId).FirstOrDefault();
+            var cliente = _dataBaseService.ClientEntity.Where(x => x.IdClient == currentHReport.ClientEntityId).FirstOrDefault();
             var pais = _dataBaseService.CountryEntity.Where(x => x.IdCounty == currentHReport.UserEntity.CountryEntityId).FirstOrDefault();
 
             detailAssigment.Numeroreporte = currentHReport.NumberReport;
-            detailAssigment.strNumeroreporte = currentHReport.StrReport;// assig.HorusReportEntity.NumberReport;
+            detailAssigment.strNumeroreporte = currentHReport.StrReport;
             detailAssigment.Horas = currentHReport.CountHours;
-            detailAssigment.ClientEntity = userSystema;
-            detailAssigment.Fechaenvio = currentHReport.CreationDate;
+            detailAssigment.ClientEntity = cliente;
+            detailAssigment.UserEntity = currentHReport.UserEntity;
+            detailAssigment.Fechaenvio = currentHReport.strCreationDate;
             detailAssigment.Actividad = currentHReport.Acitivity;
-            //detailAssigment.Aprobaador1 = currentHReport.ApproverId;
-            detailAssigment.EstadoAprobadorNIvel1 = currentHReport.ApproverId == "" ? 0 : currentHReport.Estado;
-           // detailAssigment.Aprobaador2 = currentHReport.ApproverId2;
-            detailAssigment.EstadoAprobadorNIvel2 = currentHReport.ApproverId2=="" ? 0 :currentHReport.Estado;
-            detailAssigment.Observaciones = currentHReport.Description;
             detailAssigment.Pais = pais;
-
-
-            if (currentHReport.ApproverId != "")
-            {
-                var ApproverId1 = _dataBaseService.UserEntity
-             .Where(x => x.IdUser == Guid.Parse(currentHReport.ApproverId)).FirstOrDefault();
-
-                if (ApproverId1 != null)
-                    detailAssigment.Aprobaador1 = ApproverId1.NameUser + " " + ApproverId1.surnameUser;
-            }
-
-            if (currentHReport.ApproverId2 != "")
-            {
-                var ApproverId2 = _dataBaseService.UserEntity
-            .Where(x => x.IdUser == Guid.Parse(currentHReport.ApproverId2)).FirstOrDefault();
-
-
-
-                if (ApproverId2 != null)
-                    detailAssigment.Aprobaador2 = ApproverId2.NameUser + " " + ApproverId2.surnameUser;
-            }
-
-
-
-
+            detailAssigment.Aprobaador1 = aprobdaornivel1;
+            detailAssigment.Aprobaador2 = aprobadornivel2;
+            detailAssigment.EstadoReporte = currentHReport.Estado;
+            
+            detailAssigment.Observaciones = currentHReport.Estado==2||currentHReport.Estado==3?observaciones:"";//observacion final
+            
 
 
             ListconsultDetailAssigment.Add(detailAssigment);
+
 
 
 

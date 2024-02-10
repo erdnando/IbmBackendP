@@ -55,7 +55,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var StandByRep = await (from us in _dataBaseService.UserEntity
                                     join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                    where (us.EmployeeCode == usuario && hor.Acitivity == 1)
+                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0)
                                     select new
                                     {
                                         fechaRep = hor.DateApprovalSystem,
@@ -65,7 +65,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var OverTimeRep = await (from us in _dataBaseService.UserEntity
                                      join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                     where (us.EmployeeCode == usuario && hor.Acitivity == 0)
+                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1)
                                      select new
                                      {
                                          fechaRep = hor.DateApprovalSystem,
@@ -76,7 +76,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 1)
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0)
                                         select new
                                         {
                                             Mes = hor.DateApprovalSystem.Month,
@@ -86,7 +86,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var OverTimeRepGraf = await (from us in _dataBaseService.UserEntity
                                          join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                         where (us.EmployeeCode == usuario && hor.Acitivity == 0)
+                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1)
                                          select new
                                          {
                                              Mes = hor.DateApprovalSystem.Month,
@@ -264,7 +264,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             // 
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 1  && hor.DateApprovalSystem.Year == anio)
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0  && hor.DateApprovalSystem.Year == anio)
                                         select new
                                         {
                                             Mes = hor.DateApprovalSystem.Month,
@@ -274,7 +274,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var OverTimeRepGraf = await (from us in _dataBaseService.UserEntity
                                          join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                         where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.DateApprovalSystem.Year == anio)
+                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.DateApprovalSystem.Year == anio)
                                          select new
                                          {
                                              Mes = hor.DateApprovalSystem.Month,

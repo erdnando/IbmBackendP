@@ -41,7 +41,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var horusModel = _mapper.Map<HorusReportModel>(model);
          
             horusModel.IdHorusReport = Guid.NewGuid();
-            horusModel.CreationDate = DateTime.Now;
+            //horusModel.StrCreationDate = DateTime.Now;
             horusModel.strCreationDate= DateTime.Now.ToString("dd/MM/yyyy HH:mm"); 
             horusModel.DateApprovalSystem = DateTime.Now;
             Boolean canSendAgainHours = false;
@@ -63,7 +63,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             //obtine datos para validar si existe un registro previo (OVERLAPPING)
             var data = _dataBaseService.HorusReportEntity
-                .Where(h => h.StartDate == DateTime.Parse(nuevaFechaHoraFormato) && h.UserEntityId== model.UserEntityId)
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId== model.UserEntityId)
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, model.StartTime, model.EndTime) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -134,14 +134,14 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             entity.NumberReport = Maxen + 1;
             entity.StrReport = (Maxen + 1).ToString();
-            entity.StartDate = DateTime.Parse(nuevaFechaHoraFormato).Date;
+            entity.StrStartDate = nuevaFechaHoraFormato;// DateTime.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             await _dataBaseService.SaveAsync();
 
             CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
             assignmentReport.IdAssignmentReport = Guid.NewGuid();
             assignmentReport.HorusReportEntityId = entity.IdHorusReport;
-            assignmentReport.UserEntityId = Guid.Parse(entity.ApproverId);
+            //assignmentReport.UserEntityId = Guid.Parse(entity.ApproverId);
             assignmentReport.Description = horusModel.Description;
             assignmentReport.State = (byte)Enums.Enums.Aprobacion.Pendiente;
 
@@ -166,8 +166,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var horusModel = _mapper.Map<HorusReportModel>(model);
             
 
-            horusModel.IdHorusReport = Guid.NewGuid();
-            horusModel.CreationDate = DateTime.Now;
+            horusModel.IdHorusReport = Guid.NewGuid();//ok
+            //horusModel.strCreationDate = DateTime.Now.ToString();
             horusModel.strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
             horusModel.DateApprovalSystem = DateTime.Now;
             Boolean canSendAgainHours = false;
@@ -180,7 +180,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
-            horusModel.StartDate = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            horusModel.StrStartDate = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).ToString();
 
 
             //TODO
@@ -242,10 +242,10 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
             var listExeptios = _dataBaseService.UsersExceptions.ToList();
-            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.ToString("dd/MM/yyyy") == horusModel.StartDate.ToString("dd/MM/yyyy"));
+            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.ToString("dd/MM/yyyy") == horusModel.StrStartDate);
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
             var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").
-                Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StrStartDate == horusModel.StartDate.ToString("dd/MM/yyyy 00:00:00")   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
+                Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StrStartDate == horusModel.StrStartDate   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
 
             //var HorasPortalDB = _dataBaseService.HorusReportEntity.Where(co => co.StartDate == DateTime.Parse(horusModel.StartDate.ToString() && co.State == 0 || co.State == 1).ToList();
 
@@ -309,8 +309,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
 
             var entity = _mapper.Map<HorusReportEntity>(horusModel);
-
             var horusreporcount = _dataBaseService.HorusReportEntity.Count();
+
+
+
+
             var Maxen = 0;
 
             if (horusreporcount > 0)
@@ -326,21 +329,25 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             entity.NumberReport = Maxen + 1;
             entity.StrReport = (Maxen + 1).ToString();
             entity.StrStartDate = nuevaFechaHoraFormato;
-            entity.StartDate = DateTimeOffset.Parse(nuevaFechaHoraFormato).Date;
-            entity.ApproverId = horusModel.ApproverId;
-            entity.ApproverId2 = "";
-            entity.Estado = 1;
+            entity.ARPLoadingId = "0";
+            entity.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+            
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             //await _dataBaseService.SaveAsync();
 
-            CreateAssignmentReportModel assignmentReport = new CreateAssignmentReportModel();
+
+            //ASIGNMENT
+            //=================================================================================
+            var assignmentReport = new CreateAssignmentReportModel();
             assignmentReport.IdAssignmentReport = Guid.NewGuid();
             assignmentReport.HorusReportEntityId = entity.IdHorusReport;
-            assignmentReport.UserEntityId = Guid.Parse(entity.ApproverId);
-            assignmentReport.Employee = entity.ApproverId;
+            assignmentReport.UserEntityId = Guid.Parse(horusModel.ApproverId);
             assignmentReport.TipoAssignment = "Approver";
             assignmentReport.Description = horusModel.Description;
-            assignmentReport.State = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+            assignmentReport.State = 0;
+            assignmentReport.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+            assignmentReport.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+            assignmentReport.Nivel = 0;
 
             var assigmentreportentity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
             _dataBaseService.assignmentReports.Add(assigmentreportentity);
