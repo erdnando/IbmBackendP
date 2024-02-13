@@ -311,7 +311,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersARP.Festivo = "N";
                     parametersARP.Estado = "";
                     parametersARP.Reporte = arpx.DOC_NUM;
-
+                    parametersARP.EstatusOrigen = arpx.ESTADO.Trim().ToUpper();
 
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
 
@@ -844,7 +844,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse.Festivo = "N";
                             parametersTse.Estado = "";
                             parametersTse.Reporte = registrox.WorkOrder;
-
+                            parametersTse.EstatusOrigen = registrox.Status.Trim().ToUpper();
 
                         //valida pais
                         if (paisRegistro == null)
@@ -2158,34 +2158,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.SessionEmployeeSerialNumber.Substring(registrox.SessionEmployeeSerialNumber.Length - 3));
 
-                    var parametersTse = new ParametersSteInitialEntity();
-                    parametersTse.IdParamSTEInitialId = Guid.NewGuid();
-                    parametersTse.EstatusProceso = "";
-                    parametersTse.FECHA_REP = registrox.FechaRegistro==null ? currentDateTime.ToString(): registrox.FechaRegistro;
-                    parametersTse.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
-                    parametersTse.totalHoras = registrox.TotalDuration;
-                    parametersTse.HorasInicio = 0;
-                    parametersTse.HorasFin = 0;
-                    parametersTse.EmployeeCode = registrox.SessionEmployeeSerialNumber;
-                    parametersTse.IdCarga = new Guid(model.IdCarga);
-                    parametersTse.HoraInicio = "0";
-                    parametersTse.HoraFin = "0";
-                    parametersTse.OutIme = "N";
-                    parametersTse.Semana = 0;
-                    parametersTse.HoraInicioHoraio = "0";
-                    parametersTse.HoraFinHorario = "0";
-                    parametersTse.OverTime = "N";
-                    parametersTse.Anio = semanahorario.Year.ToString();
-                    parametersTse.Festivo = "N";
-                    parametersTse.Estado = "";
-                    parametersTse.Reporte = registrox.NumeroCaso;
+                    var parametersSte = new ParametersSteInitialEntity();
+                    parametersSte.IdParamSTEInitialId = Guid.NewGuid();
+                    parametersSte.EstatusProceso = "";
+                    parametersSte.FECHA_REP = registrox.FechaRegistro==null ? currentDateTime.ToString(): registrox.FechaRegistro;
+                    parametersSte.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
+                    parametersSte.totalHoras = registrox.TotalDuration;
+                    parametersSte.HorasInicio = 0;
+                    parametersSte.HorasFin = 0;
+                    parametersSte.EmployeeCode = registrox.SessionEmployeeSerialNumber;
+                    parametersSte.IdCarga = new Guid(model.IdCarga);
+                    parametersSte.HoraInicio = "0";
+                    parametersSte.HoraFin = "0";
+                    parametersSte.OutIme = "N";
+                    parametersSte.Semana = 0;
+                    parametersSte.HoraInicioHoraio = "0";
+                    parametersSte.HoraFinHorario = "0";
+                    parametersSte.OverTime = "N";
+                    parametersSte.Anio = semanahorario.Year.ToString();
+                    parametersSte.Festivo = "N";
+                    parametersSte.Estado = "";
+                    parametersSte.Reporte = registrox.NumeroCaso;
+                    parametersSte.EstatusOrigen = "STE";
 
                     //valida pais
                     if (paisRegistro == null)
                     {
                         //PAIS no valido
-                        parametersTse.EstatusProceso = "NO_APLICA_X_PAIS";
-                        listParametersInitialEntity.Add(parametersTse);
+                        parametersSte.EstatusProceso = "NO_APLICA_X_PAIS";
+                        listParametersInitialEntity.Add(parametersSte);
                         continue;
                     }
                     
@@ -2193,16 +2194,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (ste.EndDateTime == null )
                     {
-                        parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
-                        listParametersInitialEntity.Add(parametersTse);
+                        parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                        listParametersInitialEntity.Add(parametersSte);
                         continue;
 
                     }
 
                     if ( ste.StartDateTime == null)
                     {
-                        parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
-                        listParametersInitialEntity.Add(parametersTse);
+                        parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                        listParametersInitialEntity.Add(parametersSte);
                         continue;
 
                     }
@@ -2218,13 +2219,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     
 
-                    parametersTse.EstatusProceso = "EN_OVERTIME";
-                    parametersTse.FECHA_REP = ste.StartDateTime;
-                    parametersTse.Anio = semanahorario.Year.ToString();
-                    parametersTse.Festivo = esfestivo != null ? "Y" : "N";
-                    parametersTse.HoraInicio = ste.StartHours;
-                    parametersTse.HoraFin = ste.EndHours;
-                    parametersTse.Semana = Semana;
+                    parametersSte.EstatusProceso = "EN_OVERTIME";
+                    parametersSte.FECHA_REP = ste.StartDateTime;
+                    parametersSte.Anio = semanahorario.Year.ToString();
+                    parametersSte.Festivo = esfestivo != null ? "Y" : "N";
+                    parametersSte.HoraInicio = ste.StartHours;
+                    parametersSte.HoraFin = ste.EndHours;
+                    parametersSte.Semana = Semana;
                     
 
 
@@ -2245,26 +2246,26 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if (horario != null)
                     {
 
-                        parametersTse.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
-                        parametersTse.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
-                        parametersTse.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
+                        parametersSte.HoraInicioHoraio = horario.HoraInicio == null ? "0" : horario.HoraInicio;
+                        parametersSte.HoraFinHorario = horario.HoraFin == null ? "0" : horario.HoraFin;
+                        parametersSte.Estado = horario.HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
 
                         //Para STE, no aplica la politica por overtime
 
-                        parametersTse.HorasInicio = previosAndPos[0];
+                        parametersSte.HorasInicio = previosAndPos[0];
 
                         //agregar validacion para horasFin
-                        parametersTse.HorasFin = previosAndPos[1];
-                        parametersTse.Reporte = ste.NumeroCaso;
+                        parametersSte.HorasFin = previosAndPos[1];
+                        parametersSte.Reporte = ste.NumeroCaso;
 
                     }
                     else
                     {
                         //NO hay horario
 
-                        parametersTse.EstatusProceso = "NO_APLICA_X_HORARIO";
-                        parametersTse.Reporte = ste.NumeroCaso;
-                        listParametersInitialEntity.Add(parametersTse);
+                        parametersSte.EstatusProceso = "NO_APLICA_X_HORARIO";
+                        parametersSte.Reporte = ste.NumeroCaso;
+                        listParametersInitialEntity.Add(parametersSte);
                         continue;
 
                     }
@@ -2272,7 +2273,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                    
 
                   
-                    listParametersInitialEntity.Add(parametersTse);
+                    listParametersInitialEntity.Add(parametersSte);
                 }
 
              
@@ -3066,7 +3067,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Acitivity = 1,//overtime
                         NumberReport = Maxen,
                         DateApprovalSystem = DateTime.Now,
-                        Estado= (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        EstatusOrigen = itemARPNew.EstatusOrigen,
+                        EstatusFinal = "",
+
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3111,7 +3115,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Acitivity = 1,//overtime
                         NumberReport = Maxen,
                         DateApprovalSystem = DateTime.Now,
-                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        EstatusOrigen = itemTSENew.EstatusOrigen,
+                        EstatusFinal = ""
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3155,7 +3161,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Acitivity = 1,//overtime
                         NumberReport = Maxen,
                         DateApprovalSystem = DateTime.Now,
-                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente
+                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                        EstatusOrigen = itemSTENew.EstatusOrigen,
+                        EstatusFinal=""
                     };
                     rowsHorusNew.Add(rowAdd);
 

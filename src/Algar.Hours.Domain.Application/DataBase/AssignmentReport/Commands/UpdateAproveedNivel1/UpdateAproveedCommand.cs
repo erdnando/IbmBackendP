@@ -50,9 +50,10 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 if (modelAprobador.roleAprobador == "Usuario estandar")
                 {
 
-                    //Se maerca reporte como pendiente
+                    //Se maerca reporte como pendiente y en progreso en el flujo de aprobacion
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
                     currentHReport.DateApprovalSystem = DateTime.Now;
+                    currentHReport.EstatusFinal = "ENPROGRESO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
@@ -87,6 +88,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     //Se maerca reporte como pendiente
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
                     currentHReport.DateApprovalSystem = DateTime.Now;
+                    currentHReport.EstatusFinal = "ENPROGRESO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
@@ -119,6 +121,18 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     //Se maerca reporte como aprobado N2
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
                     currentHReport.DateApprovalSystem = DateTime.Now;
+
+                    switch (currentHReport.EstatusOrigen)
+                    {
+                        case "FINAL": currentHReport.EstatusFinal = "PREAPROBADO"; break;
+                        case "SUBMITTED": currentHReport.EstatusFinal = "PREAPROBADO"; break;
+                        case "EXTRACTED": currentHReport.EstatusFinal = "APROBADO"; break;
+                        case "STANDBY": currentHReport.EstatusFinal = "APROBADO"; break;
+                        case "STE": currentHReport.EstatusFinal = "APROBADO"; break;
+                        default: currentHReport.EstatusFinal = "ENPROGRESO"; break;
+                    }
+
+                    
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                      await _dataBaseService.SaveAsync();
 
@@ -145,7 +159,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentHReport.DateApprovalSystem = DateTime.Now;
-                    
+                    currentHReport.EstatusFinal = "RECHAZADO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
@@ -168,7 +182,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentHReport.DateApprovalSystem = DateTime.Now;
-                    
+                    currentHReport.EstatusFinal = "RECHAZADO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
@@ -188,7 +202,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentHReport.DateApprovalSystem = DateTime.Now;
-                    
+                    currentHReport.EstatusFinal = "RECHAZADO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 

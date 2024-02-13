@@ -27,12 +27,8 @@ namespace Algar.Hours.Domain.Entities.HorusReport
         public DateTime DateApprovalSystem { get; set; }
         public int NumberReport { get; set; }
         public int Estado { get; set; }
-        /* public string Employee { get; set; }
-         public string Description { get; set; }
-         public string ApproverId { get; set; }
-         public string ApproverId2 { get; set; }
-         */
-
+        public string EstatusOrigen { get; set; }
+        public string EstatusFinal { get; set; }
 
 
     }

@@ -133,7 +133,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             }
 
             entity.NumberReport = Maxen + 1;
-            entity.StrReport = (Maxen + 1).ToString();
+            entity.StrReport = "STANDBY00" + (Maxen + 1).ToString();
             entity.StrStartDate = nuevaFechaHoraFormato;// DateTime.Parse(nuevaFechaHoraFormato).Date;
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             await _dataBaseService.SaveAsync();
@@ -247,9 +247,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").
                 Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StrStartDate == horusModel.StrStartDate   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
 
-            //var HorasPortalDB = _dataBaseService.HorusReportEntity.Where(co => co.StartDate == DateTime.Parse(horusModel.StartDate.ToString() && co.State == 0 || co.State == 1).ToList();
-
-            //
+            
 
             var HorasPortalDBT = infoQuery.Select(x => double.Parse(x.HorusReportEntity.CountHours)).Sum();
             if ((tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada))
@@ -327,11 +325,14 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             }
             entity.Acitivity = 0;//standby
             entity.NumberReport = Maxen + 1;
-            entity.StrReport = (Maxen + 1).ToString();
+            entity.StrReport = "STANDBY00"+(Maxen + 1).ToString();
             entity.StrStartDate = nuevaFechaHoraFormato;
             entity.ARPLoadingId = "0";
             entity.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
-            
+            entity.EstatusOrigen = "STANDBY";
+            entity.EstatusFinal = "";
+
+
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             //await _dataBaseService.SaveAsync();
 
