@@ -16,6 +16,7 @@
     <Compile Remove="DataBase\Rol\Commands\GetlistRol\**" />
     <Compile Remove="DataBase\Rol\Commands\UpdateRol\**" />
     <Compile Remove="DataBase\Rol\Queries\**" />
+    <Compile Remove="DataBase\UserSession\Commands\GetList\**" />
     <Compile Remove="DataBase\User\Commands\UpdateUser\**" />
     <Compile Remove="DataBase\User\Queries\**" />
     <EmbeddedResource Remove="DataBase\Client\Commands\Delete\**" />
@@ -27,6 +28,7 @@
     <EmbeddedResource Remove="DataBase\Rol\Commands\GetlistRol\**" />
     <EmbeddedResource Remove="DataBase\Rol\Commands\UpdateRol\**" />
     <EmbeddedResource Remove="DataBase\Rol\Queries\**" />
+    <EmbeddedResource Remove="DataBase\UserSession\Commands\GetList\**" />
     <EmbeddedResource Remove="DataBase\User\Commands\UpdateUser\**" />
     <EmbeddedResource Remove="DataBase\User\Queries\**" />
     <None Remove="DataBase\Client\Commands\Delete\**" />
@@ -38,6 +40,7 @@
     <None Remove="DataBase\Rol\Commands\GetlistRol\**" />
     <None Remove="DataBase\Rol\Commands\UpdateRol\**" />
     <None Remove="DataBase\Rol\Queries\**" />
+    <None Remove="DataBase\UserSession\Commands\GetList\**" />
     <None Remove="DataBase\User\Commands\UpdateUser\**" />
     <None Remove="DataBase\User\Queries\**" />
   </ItemGroup>
@@ -93,6 +96,7 @@
     <Folder Include="DataBase\Menu\Queries\" />
     <Folder Include="DataBase\Parameters\Commands\GetParameters\" />
     <Folder Include="DataBase\Parameters\Queries\" />
+    <Folder Include="DataBase\UserSession\Queries\" />
     <Folder Include="DataBase\User\Commands\GetList\" />
     <Folder Include="DataBase\User\Queries\" />
     <Folder Include="DataBase\WorkingHorus\Commands\GetList\" />

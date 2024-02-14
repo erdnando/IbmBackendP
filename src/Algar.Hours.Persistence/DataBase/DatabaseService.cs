@@ -35,9 +35,6 @@ namespace Algar.Hours.Persistence.DataBase
         
         public DatabaseService(DbContextOptions options) : base(options)
         {
-            
-            //, DbContext dbContext
-            // _dbContext = dbContext;
 
         }
 
@@ -72,6 +69,7 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<PaisRelacionGMTEntity> PaisRelacionGMTEntity { get; set; }
         public DbSet<PortalDBEntity> PortalDBEntity { get; set; }
         public DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
+        public DbSet<UserSessionEntity> UserSessionEntity { get; set; }
 
         public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
         {
@@ -132,7 +130,7 @@ namespace Algar.Hours.Persistence.DataBase
             new PaisRelacionGMTEntityConfiguration(modelBuilder.Entity<PaisRelacionGMTEntity>());
             new PortalDBEntityConfiguration(modelBuilder.Entity<PortalDBEntity>());
             new PortalDBAproveHistoryEntityConfiguration(modelBuilder.Entity<PortalDBAproveHistoryEntity>());
-
+            new UserSessionConfiguration(modelBuilder.Entity<UserSessionEntity>());
 
         }
 
