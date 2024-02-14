@@ -163,6 +163,11 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
+                    //TODO
+                    //Evaluar si esta en excepcion de reportes extracted
+                    // if it is EXTRACTED, please move it to APPROVED!!!!
+                    //Asegurarse q en el historial (currentAssignment) aparezca q fue rechazado y despues agregar q fue promovido a APROBADO
+
                     //Se marca como atendida por el empleado
                     currentAssignment.State = 1;
                     currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
