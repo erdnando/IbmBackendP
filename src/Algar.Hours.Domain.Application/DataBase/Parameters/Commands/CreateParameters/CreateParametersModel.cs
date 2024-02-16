@@ -15,6 +15,8 @@ namespace Algar.Hours.Application.DataBase.Parameters.Commands.CreateParameters
         public double TargetHourYear { get; set; }
         public int TypeHours { get; set; }
         public virtual Guid CountryEntityId { get; set; }
+        public virtual string empleadoUserEntityId { get; set; }
+        
 
     }
 }

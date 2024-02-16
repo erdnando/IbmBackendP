@@ -11,10 +11,10 @@ namespace Algar.Hours.Persistence.Configuration
         {
 
             entityBuilder.HasKey(x => x.IdSession);
-            entityBuilder.Property(x=> x.UserEntityId).IsRequired();
+           // entityBuilder.Property(x=> x.UserEntityId).IsRequired();
             entityBuilder.Property(x=> x.LogDateEvent).IsRequired();
-            entityBuilder.Property(x=> x.eventAlias).IsRequired();
-            entityBuilder.Property(x=> x.tag).IsRequired();
+           // entityBuilder.Property(x=> x.eventAlias).IsRequired();
+            //entityBuilder.Property(x=> x.tag).IsRequired();
 
 
     }

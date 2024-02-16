@@ -14,7 +14,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         Task<string> LoadARP(LoadJsonPais model);
         Task<string> LoadTSE(LoadJsonPais model);
         Task<SummaryLoad> LoadSTE(LoadJsonPais model);
-        Task<bool> NotificacionesProceso1(string model);
+        Task<bool> NotificacionesProceso1(string model,string idUserEntiyId);
         Task<SummaryPortalDB> ValidaLimitesExcepcionesOverlapping(string idCarga);
         Task<CountsCarga> CargaAvance(string idCarga);
 

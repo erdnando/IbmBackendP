@@ -1,4 +1,5 @@
-﻿using Algar.Hours.Domain.Entities.Festivos;
+﻿using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using Algar.Hours.Domain.Entities.Festivos;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,17 +15,19 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateFestivoCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateFestivoCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
-
+            _logCommand = logCommand;
         }
 
         public async Task<Boolean> Execute(List<CreateFestivoModel> model)
         {
             bool existe = false;
+            var idUserEntiyId = "";
             if (model != null && model.Count > 0)
             {
                 foreach (var item in model)
@@ -51,11 +54,16 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                         entity.IdFestivo = Guid.NewGuid();
                     }
 
+                    idUserEntiyId = item.idUserEntiyId;
+
                     await _dataBaseService.FestivosEntity.AddAsync(entity);
                 }
            
                 await _dataBaseService.SaveAsync();
-                if(existe)
+
+                await _logCommand.Log(idUserEntiyId, "Modifica festivos", model);
+
+                if (existe)
                 {
                     return false;
                 }

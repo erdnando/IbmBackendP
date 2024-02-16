@@ -83,7 +83,7 @@ namespace Algar.Hours.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> NotificacionesProceso1([FromBody] Loadnotificaciones requestData, [FromServices] ILoadHoursReport loadHoursReport)
         {
-            loadHoursReport.NotificacionesProceso1(requestData.IdCarga);
+            loadHoursReport.NotificacionesProceso1(requestData.IdCarga,requestData.idUserEntiyId);
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, true));
         }

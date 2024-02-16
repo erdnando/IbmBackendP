@@ -1,5 +1,6 @@
 ﻿using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.Parameters;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -17,15 +18,16 @@ namespace Algar.Hours.Application.DataBase.Parameters.Commands.UpdateParameters
         private readonly IMapper _mapper;
         private IEmailCommand _emailCommand;
         private IGetListUsuarioCommand _usuarioCommand;
+        private ICreateLogCommand _logCommand;
 
 
-
-        public UpdtaeParametersCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
+        public UpdtaeParametersCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand,ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
             _emailCommand = emailCommand;
             _usuarioCommand = usuarioCommand;
+            _logCommand = logCommand;
         }
 
         public async Task<bool> Execute(UpdateParametersModel model)
@@ -47,15 +49,9 @@ namespace Algar.Hours.Application.DataBase.Parameters.Commands.UpdateParameters
 
 
                 //---------------------------------------------
-                try
-                {
-                    _emailCommand.SendEmail(new EmailModel { To = (await _usuarioCommand.GetByUsuarioId(model.EmpleadoUserEntityId)).Email, Plantilla = "6" });
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-
+                await _logCommand.Log(model.EmpleadoUserEntityId.ToString(), "Modifica paramtros", model);
+                _emailCommand.SendEmail(new EmailModel { To = (await _usuarioCommand.GetByUsuarioId(model.EmpleadoUserEntityId)).Email, Plantilla = "6" });
+               //here
 
 
 

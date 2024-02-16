@@ -10,7 +10,8 @@ namespace Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog
 {
     public interface ICreateLogCommand
     {
-        Task<CreateLogModel> Execute(CreateLogModel model);
-        Task<UserSessionEntity> ExecuteId(CreateLogModel model);
+        Task<bool> Log(string idUserEntiyId, string operation, object model);
+
+
     }
 }

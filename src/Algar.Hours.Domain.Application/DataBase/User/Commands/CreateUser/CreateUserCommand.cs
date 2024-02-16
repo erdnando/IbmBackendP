@@ -1,4 +1,5 @@
-﻿using Algar.Hours.Domain.Entities.User;
+﻿using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using Algar.Hours.Domain.Entities.User;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,13 @@ namespace Algar.Hours.Application.DataBase.User.Commands.CreateUser
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateUserCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateUserCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
-
+            _logCommand = logCommand;
         }
 
         public async Task<CreateUserModelc> Execute(CreateUserModelc model)
@@ -27,8 +29,10 @@ namespace Algar.Hours.Application.DataBase.User.Commands.CreateUser
             {
                 entity.IdUser = Guid.NewGuid();
             }
-            await _dataBaseService.UserEntity.AddAsync(entity);
+             _dataBaseService.UserEntity.AddAsync(entity);
             await _dataBaseService.SaveAsync();
+
+            await _logCommand.Log(model.idUserEntiyId, "Crea usuario", model);
             return model;
         }
 

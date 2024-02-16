@@ -13,6 +13,7 @@ namespace Algar.Hours.Application.DataBase.Country.Commands
         public int ZonaHoraria { get; set; }
         public string Descripcion { get; set; }
         public string CodigoPais { get; set; }
+        public string idUserEntiyId { get; set; }
 
     }
 }

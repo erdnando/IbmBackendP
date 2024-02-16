@@ -1,6 +1,8 @@
 ﻿using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.User;
 using AutoMapper;
+using NetTopologySuite.Operation.Valid;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,28 +23,33 @@ namespace Algar.Hours.Application.DataBase.UserSession.Commands.CreateUserSessio
 
         }
 
-        public async Task<CreateLogModel> Execute(CreateLogModel model)
+        public async Task<bool> Log(string idUserEntiyId, string operation, object model)
         {
-            var entity = _mapper.Map<UserSessionEntity>(model);
-            if (entity.IdSession == Guid.Empty)
+            try
             {
-                entity.IdSession = Guid.NewGuid();
+                var aux = new UserSessionEntity();
+
+                aux.IdSession = Guid.NewGuid();
+                aux.LogDateEvent = DateTime.Now;
+
+                aux.operation = operation;
+                aux.parameters= JsonConvert.SerializeObject(model);
+                aux.parameters = aux.parameters.Length > 3000 ? aux.parameters.Substring(0, 3000) : aux.parameters;
+                aux.sUserEntityId= idUserEntiyId;
+
+                 _dataBaseService.UserSessionEntity.Add(aux);
+                await _dataBaseService.SaveAsync();
+
+                return true;
             }
-            await _dataBaseService.UserSessionEntity.AddAsync(entity);
-            await _dataBaseService.SaveAsync();
-            return model;
+            catch (Exception)
+            {
+
+                return false;
+            }
+           
         }
 
-        public async Task<UserSessionEntity> ExecuteId(CreateLogModel model)
-        {
-            var entity = _mapper.Map<UserSessionEntity>(model);
-            if (entity.IdSession == Guid.Empty)
-            {
-                entity.IdSession = Guid.NewGuid();
-            }
-            await _dataBaseService.UserSessionEntity.AddAsync(entity);
-            await _dataBaseService.SaveAsync();
-            return entity;
-        }
+       
     }
 }

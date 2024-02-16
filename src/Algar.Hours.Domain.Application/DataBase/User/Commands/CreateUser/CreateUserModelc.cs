@@ -19,7 +19,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.CreateUser
         public string Password { get; set; }
         public Guid RoleEntityId { get; set; }
         public Guid CountryEntityId { get; set; }
-
+        public string idUserEntiyId { get; set; }
 
     }
 }

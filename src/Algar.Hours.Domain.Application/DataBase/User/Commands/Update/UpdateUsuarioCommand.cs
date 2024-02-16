@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.Aprobador.Commands.Consult;
 using Algar.Hours.Application.DataBase.Aprobador.Commands.Create;
 using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.AprobadorUsuario;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Models;
@@ -18,10 +19,12 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Update
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
-        public UpdateUsuarioCommand(IDataBaseService dataBaseService, IMapper mapper)
+        private ICreateLogCommand _logCommand;
+        public UpdateUsuarioCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         { 
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
         }
 
         public async Task<Boolean> Update(CreateUserModelc createUserModel)
@@ -72,7 +75,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Update
                     _dataBaseService.AprobadorUsuario.Add(entity);
                     await _dataBaseService.SaveAsync();
             }
-
+            await _logCommand.Log(createUserModel.idUserEntiyId, "Actualiza usuario", createUserModel);
 
             return true;
         }

@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.Menu.Commands.Consult;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.RolMenu;
 using Algar.Hours.Domain.Models;
 using AutoMapper;
@@ -15,10 +16,13 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.Update
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
-        public UpdateRolCommand(IDataBaseService dataBaseService, IMapper mapper)
+        private ICreateLogCommand _logCommand;
+
+        public UpdateRolCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
         }
 
         public async Task<Boolean> Update(RolModel model)
@@ -48,6 +52,9 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.Update
                 _dataBaseService.RoleMenuEntity.Add(rolMenu);
             }
             await _dataBaseService.SaveAsync();
+
+            await _logCommand.Log(model.idUserEntiyId, "Actualiza Rol", model);
+
             return true;
         }
     }

@@ -81,11 +81,6 @@ namespace Algar.Hours.Persistence.DataBase
         }
 
 
-        /* public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
-         {
-             _dbContext.BulkInsert(records);
-         }*/
-
         public async Task<bool> SaveAsync()
         {
             return await SaveChangesAsync() > 0;

@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Domain.Entities.ParametrosInicial;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
     public class LoadJsonPais
     {
+        [JsonIgnore]
         public JsonArray Data { get; set; }
         public string PaisSel { get; set; }
         public string IdCarga { get; set; }
+        public string idUserEntiyId { get; set; }
 
     }
     public class LoadGenericDTO
@@ -90,7 +93,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
     {
 
         public string IdCarga { get; set; }
-
+        public string idUserEntiyId { get; set; }
+        
     }
 
     public class Carga
