@@ -4,7 +4,9 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -32,17 +34,20 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
             {
                 foreach (var item in model)
                 {
-                   /* var dia =item.DiaFestivo.Day;
-                    var mes = item.DiaFestivo.Month;
-                    var anio = item.DiaFestivo.Year;
-                    var newDate = new DateTime(anio, dia, mes);
+                    /* var dia =item.DiaFestivo.Day;
+                     var mes = item.DiaFestivo.Month;
+                     var anio = item.DiaFestivo.Year;
+                     var newDate = new DateTime(anio, dia, mes);
 
-                    item.DiaFestivo = newDate;*/
+                     item.DiaFestivo = newDate;*/
 
+                    
                     var entity = _mapper.Map<FestivosEntity>(item);
 
+                    //var existingEntity = await _dataBaseService.FestivosEntity
+                       // .FirstOrDefaultAsync(e => e.DiaFestivo == item.DiaFestivo && e.CountryId == entity.CountryId);
                     var existingEntity = await _dataBaseService.FestivosEntity
-                        .FirstOrDefaultAsync(e => e.DiaFestivo == item.DiaFestivo && e.CountryId == entity.CountryId);
+                        .FirstOrDefaultAsync(e => e.sDiaFestivo == item.sDiaFestivo && e.CountryId == entity.CountryId);
 
                     if (existingEntity != null)
                     {
@@ -55,6 +60,17 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                     }
 
                     idUserEntiyId = item.idUserEntiyId;
+                    // entity.DiaFestivo = DateTime.Parse(item.sDiaFestivo);
+                    try
+                    {
+                        entity.DiaFestivo = DateTime.ParseExact(item.sDiaFestivo, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    }
+                    catch (Exception)
+                    {
+
+                        
+                    }
+                    
 
                     await _dataBaseService.FestivosEntity.AddAsync(entity);
                 }
