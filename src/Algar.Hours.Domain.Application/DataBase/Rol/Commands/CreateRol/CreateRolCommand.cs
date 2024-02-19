@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.Menu.Commands.Consult;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.Menu;
 using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
@@ -11,11 +12,13 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.CreateRol
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateRolCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateRolCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
         }
 
         public async Task<CreateRolModel> Execute(CreateRolModel model)
@@ -40,6 +43,10 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands.CreateRol
             }
 
             await _dataBaseService.SaveAsync();
+
+
+            await _logCommand.Log(model.idUserEntiyId, "Crea Rol", model);
+
             return model;
 
         }

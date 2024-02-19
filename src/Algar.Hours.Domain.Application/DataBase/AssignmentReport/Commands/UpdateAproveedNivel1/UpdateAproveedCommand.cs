@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.AssignmentReport.Commands.ListUserAproveed;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.AssignmentReport;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +21,13 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
         private readonly IMapper _mapper;
         private IEmailCommand _emailCommand;
         private IGetListUsuarioCommand _usuarioCommand;
+        private ICreateLogCommand _logCommand;
 
-        public UpdateAproveedCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
+        public UpdateAproveedCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
-
+            _logCommand = logCommand;
             _emailCommand = emailCommand;
             _usuarioCommand = usuarioCommand;
         }
@@ -77,10 +79,10 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     assignmentN1.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
                     var entityN1 = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentN1);
-                    await _dataBaseService.assignmentReports.AddAsync(entityN1);
+                     _dataBaseService.assignmentReports.AddAsync(entityN1);
                     await _dataBaseService.SaveAsync();
 
-
+                    await _logCommand.Log(modelAprobador.UserId.ToString(), "ESTANDAR Aprueba reporte", modelAprobador);
 
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
@@ -115,6 +117,8 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     await _dataBaseService.assignmentReports.AddAsync(entityN1);
                     await _dataBaseService.SaveAsync();
 
+                    await _logCommand.Log(modelAprobador.UserId.ToString(), "N1 Aprueba reporte", modelAprobador);
+
 
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
@@ -146,8 +150,8 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
-                    
 
+                    await _logCommand.Log(modelAprobador.UserId.ToString(), "N2 Aprueba reporte", modelAprobador);
                 }
 
             }
@@ -173,6 +177,10 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
+                    await _logCommand.Log(modelAprobador.UserId.ToString(), "ESTANDAR Rechaza reporte", modelAprobador);
+
+
+
 
                 } else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
@@ -192,6 +200,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
 
+                    await _logCommand.Log(modelAprobador.UserId.ToString(), "N1 Rechaza reporte", modelAprobador);
 
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
@@ -271,40 +280,21 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
                     {
                         //TODO validar correo
-                        /*try
-                        {
-                            _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
-                        }
-                        catch(Exception ex)
-                        {
-
-                        }*/
+                        /*
+                         * _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.Aprobador2UserEntityId).Result).Email, Plantilla = "5" });
+                       */
                         
                     }
 
-                    try
-                    {
+                   
                         _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "5" });
-                    }
-                    catch (Exception exx)
-                    {
-
-                     
-                    }
+                    
                     
                 }
                 else
                 {
-                    try
-                    {
-                        _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "3" });
-                    }
-                    catch (Exception exc)
-                    {
-
-                        
-                    }
                     
+                        _emailCommand.SendEmail(new EmailModel { To = (_usuarioCommand.GetByUsuarioId(modelAprobador.EmpleadoUserEntityId).Result).Email, Plantilla = "3" }); 
                 }
 
 

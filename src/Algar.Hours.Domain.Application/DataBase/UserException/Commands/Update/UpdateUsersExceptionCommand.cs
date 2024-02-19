@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.UserException.Commands.Create;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -13,10 +14,13 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Update
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
-        public UpdateUsersExceptionCommand(IDataBaseService dataBaseService, IMapper mapper)
+        private ICreateLogCommand _logCommand;
+
+        public UpdateUsersExceptionCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
         }
 
         public async Task<Boolean> Update(UsersExceptionsModelC model)
@@ -35,7 +39,9 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Update
             usersE.Description = model.Description;
 
             _dataBaseService.UsersExceptions.Update(usersE);
-            _dataBaseService.SaveAsync();
+            await _dataBaseService.SaveAsync();
+
+            await _logCommand.Log(model.UserId.ToString(), "Actualiza excepcion", model);
 
             return true;
         }

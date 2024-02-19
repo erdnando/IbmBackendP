@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.Aprobador.Commands.Consult;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Models;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,14 @@ namespace Algar.Hours.Application.DataBase.Aprobador.Commands.Update
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
-        public UpdateAprobadorCommand(IDataBaseService dataBaseService, IMapper mapper)
+        private ICreateLogCommand _logCommand;
+
+        public UpdateAprobadorCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
+
         }
 
         public async Task<bool> Update(AprobadorModel model)
@@ -35,6 +40,8 @@ namespace Algar.Hours.Application.DataBase.Aprobador.Commands.Update
 
             _dataBaseService.Aprobador.Update(aprobador);
             await _dataBaseService.SaveAsync();
+
+            await _logCommand.Log(model.idUserEntiyId, "Actualiza aprobador", model);
 
             return true;
         }

@@ -1,9 +1,12 @@
-﻿using Algar.Hours.Domain.Entities.Festivos;
+﻿using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using Algar.Hours.Domain.Entities.Festivos;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -14,32 +17,37 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateFestivoCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateFestivoCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
-
+            _logCommand = logCommand;
         }
 
         public async Task<Boolean> Execute(List<CreateFestivoModel> model)
         {
             bool existe = false;
+            var idUserEntiyId = "";
             if (model != null && model.Count > 0)
             {
                 foreach (var item in model)
                 {
-                   /* var dia =item.DiaFestivo.Day;
-                    var mes = item.DiaFestivo.Month;
-                    var anio = item.DiaFestivo.Year;
-                    var newDate = new DateTime(anio, dia, mes);
+                    /* var dia =item.DiaFestivo.Day;
+                     var mes = item.DiaFestivo.Month;
+                     var anio = item.DiaFestivo.Year;
+                     var newDate = new DateTime(anio, dia, mes);
 
-                    item.DiaFestivo = newDate;*/
+                     item.DiaFestivo = newDate;*/
 
+                    
                     var entity = _mapper.Map<FestivosEntity>(item);
 
+                    //var existingEntity = await _dataBaseService.FestivosEntity
+                       // .FirstOrDefaultAsync(e => e.DiaFestivo == item.DiaFestivo && e.CountryId == entity.CountryId);
                     var existingEntity = await _dataBaseService.FestivosEntity
-                        .FirstOrDefaultAsync(e => e.DiaFestivo == item.DiaFestivo && e.CountryId == entity.CountryId);
+                        .FirstOrDefaultAsync(e => e.sDiaFestivo == item.sDiaFestivo && e.CountryId == entity.CountryId);
 
                     if (existingEntity != null)
                     {
@@ -51,11 +59,27 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                         entity.IdFestivo = Guid.NewGuid();
                     }
 
+                    idUserEntiyId = item.idUserEntiyId;
+                    // entity.DiaFestivo = DateTime.Parse(item.sDiaFestivo);
+                    try
+                    {
+                        entity.DiaFestivo = DateTime.ParseExact(item.sDiaFestivo, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                    }
+                    catch (Exception)
+                    {
+
+                        
+                    }
+                    
+
                     await _dataBaseService.FestivosEntity.AddAsync(entity);
                 }
            
                 await _dataBaseService.SaveAsync();
-                if(existe)
+
+                await _logCommand.Log(idUserEntiyId, "Modifica festivos", model);
+
+                if (existe)
                 {
                     return false;
                 }

@@ -17,6 +17,7 @@ using static Algar.Hours.Application.Enums.Enums;
 using System.Diagnostics;
 using System.Linq;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 
 namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 {
@@ -26,13 +27,15 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
         private IEmailCommand _emailCommand;
         private IGetListUsuarioCommand _usuarioCommand;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateHorusReportCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
+        public CreateHorusReportCommand(IDataBaseService dataBaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
             _emailCommand = emailCommand;
             _usuarioCommand = usuarioCommand;
+            _logCommand = logCommand;
         }
 
         public async Task<HorusReportModel> Execute(CreateHorusReportModel model)
@@ -357,7 +360,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
 
 
-
+            await _logCommand.Log(model.UserEntityId.ToString(), "Crea Reporte STANDBY", model);
 
 
             return returnPortalDB;

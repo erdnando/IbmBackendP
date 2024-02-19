@@ -4,6 +4,7 @@ using Algar.Hours.Application.DataBase.Country.Commands.Consult;
 using Algar.Hours.Application.DataBase.PortalDB.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
 using Algar.Hours.Application.DataBase.User.Commands.GetManager;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Entities.Aprobador;
 using Algar.Hours.Domain.Entities.AssignmentReport;
 using Algar.Hours.Domain.Entities.Country;
@@ -18,6 +19,7 @@ using Algar.Hours.Domain.Entities.QueuesAcceptance;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
+using Azure;
 using EFCore.BulkExtensions;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
@@ -64,7 +66,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
     public class LoadHoursReport : ILoadHoursReport
     {
-
+       
         private readonly IDataBaseService _dataBaseService;
         private readonly IConfiguration _configuration;
 
@@ -72,15 +74,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         private readonly IMapper _mapper;
         private IConsultCountryCommand _consultCountryCommand;
         private IEmailCommand _emailCommand;
+        private ICreateLogCommand _logCommand;
 
-        public LoadHoursReport(IDataBaseService dataBaseService, IMapper mapper, IConsultCountryCommand consultCountryCommand, IEmailCommand emailCommand, IConfiguration configuration)
+        public LoadHoursReport(IDataBaseService dataBaseService, IMapper mapper, IConsultCountryCommand consultCountryCommand, IEmailCommand emailCommand, IConfiguration configuration, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _configuration = configuration;
             _mapper = mapper;
             _consultCountryCommand = consultCountryCommand;
             _emailCommand = emailCommand;
-           
+            _logCommand = logCommand;
         }
 
         ARPLoadDetailEntity validaFormatosFecha(ARPLoadDetailEntity arp)
@@ -232,8 +235,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<string> LoadARP(LoadJsonPais model)
         {
+            await _logCommand.Log(model.idUserEntiyId,"Ejecuta carga OVERTIME ARP",model);
+
             await updateCargaStatus(model.IdCarga, "Procesando ARP...");
-            try { 
+
+
+
+            try
+            {
 
                 Int64 counter = 0;
                 List<ParametersArpInitialEntity> listParametersInitialEntity = new();
@@ -245,14 +254,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Serializa la carga completa del excel
                 List<ARPLoadDetailEntity> datosARPExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
-               
-                
+
+
                 //Remueve duplicados 
-                var datosARPExcel = datosARPExcelFull.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO,m.HORA_FIN }).ToList();
+                var datosARPExcel = datosARPExcelFull.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO, m.HORA_FIN }).ToList();
 
                 //Setting duplicados metrica en ARP
-                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.ARPOmitidosXDuplicidad = (datosARPExcelFull.Count()- datosARPExcel.Count()).ToString() );
-                 await _dataBaseService.SaveAsync();
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.ARPOmitidosXDuplicidad = (datosARPExcelFull.Count() - datosARPExcel.Count()).ToString());
+                await _dataBaseService.SaveAsync();
 
 
                 //Set metrica de la carga en ARPLoadEntity
@@ -261,21 +270,21 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //SEt metrica de omitidos en ARPLoadEntity
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == Guid.Parse(model.IdCarga)).ToList().
-                                              ForEach(x => x.ARPOmitidos = (datosARPExcelFull.Count - datosARPExcel.Count).ToString() );
+                                              ForEach(x => x.ARPOmitidos = (datosARPExcelFull.Count - datosARPExcel.Count).ToString());
 
                 await _dataBaseService.SaveAsync();
 
                 //Obteniendo politicas overtime
                 List<string> politicaOvertime = new() { "Vacations", "Absence", "Holiday", "Stand By" };
 
-               
+
                 //Obteniendo listado de paises
                 var listaCountries = await _consultCountryCommand.List();
-                
+
 
                 //Para ARP, busca festivos de Colombia solamente
                 esfestivos = _dataBaseService.FestivosEntity.Where(x => x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
-               var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e=>e.NameCountrySelected==model.PaisSel).ToListAsync();
+                var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
 
 
                 //Busca horarios configurados para este empleado en la semana y dia obtenido del excel de carga
@@ -323,7 +332,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         continue;
                     }
 
-                   
+
                     if (arpx.FECHA_REP == null)
                     {
                         parametersARP.EstatusProceso = "NO_APLICA_X_FALTA_DATOS";
@@ -340,13 +349,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         parametersARP.EstatusProceso = "NO_APLICA_X_FORMATO_FECHA";
                         listParametersInitialEntity.Add(parametersARP);
                         continue;
                     }
-                    
+
 
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 
@@ -363,7 +372,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersARP.Anio = semanahorario.Year.ToString();
                     parametersARP.Festivo = esfestivo != null ? "Y" : "N";
                     parametersARP.Semana = Semana;
-                   
+
 
 
                     var previosAndPos = new List<double>();
@@ -407,13 +416,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     listParametersInitialEntity.Add(parametersARP);
                 }
 
-               
-               int PAGE_SIZE = listParametersInitialEntity.Count()/20;
+
+                int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
                 List<List<ParametersArpInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE);
                 Int64 countElements = 0;
                 for (int i = 0; i < partitions.Count(); i++)
                 {
-                    var endpoint= i % 2 == 0 ? "1" : "2";
+                    var endpoint = i % 2 == 0 ? "1" : "2";
                     try
                     {
                         countElements += partitions[i].Count();
@@ -427,25 +436,27 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     {
                         LoadGeneric(partitions[i], endpoint);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         var error = ex.Message;
                     }
-                    
+
                 }
 
                 await updateCargaStatus(model.IdCarga, "ARP terminado...");
                 return model.IdCarga.ToString();
 
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 await updateCargaStatus(model.IdCarga, "Error carga en ARP..." + ex.Message);
                 return "00000000-0000-0000-0000-000000000000";
             }
-            
+
         }
 
         
+
 
         private async Task<bool> LoadGenericTse(List<ParametersTseInitialEntity> partition, string endpoint)
         {
@@ -761,6 +772,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<string> LoadTSE(LoadJsonPais model)
         {
+            await _logCommand.Log(model.idUserEntiyId, "Ejecuta carga OVERTIME TSE", model);
+
             await updateCargaStatus(model.IdCarga, "Procesando TSE...");
             int counter = 0;
 
@@ -2101,6 +2114,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<SummaryLoad> LoadSTE(LoadJsonPais model)
         {
+
+            await _logCommand.Log(model.idUserEntiyId, "Ejecuta carga OVERTIME STE", model);
+
             await updateCargaStatus(model.IdCarga, "Procesando STE...");
             var semanahorario = new DateTimeOffset();
 
@@ -2666,8 +2682,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             return convert;
         }
 
-        public async Task<bool> NotificacionesProceso1(string idCarga)
+        public async Task<bool> NotificacionesProceso1(string idCarga, string idUserEntiyId)
         {
+            await _logCommand.Log(idUserEntiyId, "Acepta carga OVERTIME", idCarga);
 
             var usersTLS = _dataBaseService.UserEntity.ToList();
 

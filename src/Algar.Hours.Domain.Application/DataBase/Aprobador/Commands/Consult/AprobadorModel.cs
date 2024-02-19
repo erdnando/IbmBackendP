@@ -13,6 +13,8 @@ namespace Algar.Hours.Application.DataBase.Aprobador.Commands.Consult
         public Guid IdAprobador { get; set; }
         public string Descripcion { get; set; }
         public int Nivel { get; set; }
+        public string idUserEntiyId { get; set; }
+        
 
     }
 }

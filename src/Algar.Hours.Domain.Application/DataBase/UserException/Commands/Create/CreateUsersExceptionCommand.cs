@@ -1,4 +1,5 @@
-﻿using Algar.Hours.Domain.Entities.UsersExceptions;
+﻿using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,13 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Create
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateUsersExceptionCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateUsersExceptionCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
         }
 
         public async Task<UsersExceptions> Execute(UsersExceptionsModelC createUsersException)
@@ -27,6 +30,9 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Create
             await _dataBaseService.UsersExceptions.AddAsync(entity);
 
             await _dataBaseService.SaveAsync();
+
+
+            await _logCommand.Log(createUsersException.UserId.ToString(), "Crea excepcion", createUsersException);
 
             return entity;
         }

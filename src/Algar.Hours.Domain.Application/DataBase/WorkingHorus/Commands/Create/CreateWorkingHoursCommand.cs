@@ -71,14 +71,9 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                 //------------------------------------------------------------------------
                 if (entityList.Count > 0)
                 {
-                    try
-                    {
+                   
                         _emailCommand.SendEmail(new EmailModel{To = (await _usuarioCommand.GetByUsuarioId(entityList[0].UserEntityId)).Email,Plantilla = "6"});
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
+                   
                 }
                 
 

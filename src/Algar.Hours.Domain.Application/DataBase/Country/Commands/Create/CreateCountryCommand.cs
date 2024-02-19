@@ -1,4 +1,5 @@
-﻿using Algar.Hours.Domain.Entities.Country;
+﻿using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using Algar.Hours.Domain.Entities.Country;
 using Algar.Hours.Domain.Entities.Rol;
 using AutoMapper;
 using System;
@@ -13,11 +14,14 @@ namespace Algar.Hours.Application.DataBase.Country.Commands.Create
     {
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
+        private ICreateLogCommand _logCommand;
 
-        public CreateCountryCommand(IDataBaseService dataBaseService, IMapper mapper)
+        public CreateCountryCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
         {
             _dataBaseService = dataBaseService;
             _mapper = mapper;
+            _logCommand = logCommand;
+
         }
 
         public async Task<CountryModel> Execute(CountryModel model)
@@ -29,8 +33,10 @@ namespace Algar.Hours.Application.DataBase.Country.Commands.Create
                 {
                     entity.IdCounty = Guid.NewGuid();
                 }
-                await _dataBaseService.CountryEntity.AddAsync(entity);
+                 _dataBaseService.CountryEntity.AddAsync(entity);
                 await _dataBaseService.SaveAsync();
+
+                await _logCommand.Log(model.idUserEntiyId, "Crea pais", model);
                 return model;
             }
             else

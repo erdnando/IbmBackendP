@@ -22,6 +22,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Algar.Hours.Domain.Entities.Rol;
 using Microsoft.AspNetCore.Authorization;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 
 
 namespace Algar.Hours.Api.Controllers
@@ -54,6 +55,7 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }
+
         [HttpGet("Consult")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Consult(
@@ -97,6 +99,9 @@ namespace Algar.Hours.Api.Controllers
                 surnameUser= data == null ? "" : data.surnameUser,
                 token= token
             };
+
+
+
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, responseLogin));
 
         }
@@ -170,8 +175,6 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
 
             // 3. DONE!
-            
-            //if (samlResponse.IsValid()) 
              try{
                 
                 var codeEmployee = samlResponse.GetCustomAttribute("uid");
@@ -313,6 +316,26 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                 return "xxxx";
             }
            
+
+        }
+
+        [HttpPost("log")]
+        //[Authorize(Roles = "standard")]
+        public async Task<IActionResult> Log(
+            string userEntityId,string operation,string parameters, [FromServices] ICreateLogCommand createLogCommand)
+        {
+            var data = await createLogCommand.Log(userEntityId, operation,parameters);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+
+        }
+
+        [HttpGet("log")]
+        //[Authorize(Roles = "standard")]
+        public async Task<IActionResult> gLog(
+           string userEntityId, string operation, string parameters, [FromServices] ICreateLogCommand createLogCommand)
+        {
+            var data = await createLogCommand.Log(userEntityId, operation, parameters);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }
     }

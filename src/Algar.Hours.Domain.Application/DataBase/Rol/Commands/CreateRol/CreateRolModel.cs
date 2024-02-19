@@ -14,5 +14,7 @@ namespace Algar.Hours.Application.DataBase.Rol.Commands
         public Guid IdRole { get; set; }
         public string NameRole { get; set; }
         public List<MenuModelc> MenuEntity { get; set; }
+        public string idUserEntiyId { get; set; }
+        
     }
 }

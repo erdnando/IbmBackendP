@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.Country.Commands;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Domain.Models;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ namespace Algar.Hours.Application.DataBase.Country.Commands.Update
 	{
 		private readonly IDataBaseService _dataBaseService;
 		private readonly IMapper _mapper;
-		public UpdateCountryCommand(IDataBaseService dataBaseService, IMapper mapper)
+        private ICreateLogCommand _logCommand;
+        public UpdateCountryCommand(IDataBaseService dataBaseService, IMapper mapper, ICreateLogCommand logCommand)
 		{
 			_dataBaseService = dataBaseService;
 			_mapper = mapper;
-		}
+            _logCommand = logCommand;
+        }
 
 		public async Task<Boolean> Update(CountryModel model)
 		{
@@ -32,9 +35,11 @@ namespace Algar.Hours.Application.DataBase.Country.Commands.Update
 			cliente.NameCountry = model.NameCountry;
 
 			_dataBaseService.CountryEntity.Update(cliente);
-			_dataBaseService.SaveAsync();
+			await _dataBaseService.SaveAsync();
 
-			return true;
+            await _logCommand.Log(model.idUserEntiyId, "Actualiza pais", model);
+
+            return true;
 		}
 	}
 }

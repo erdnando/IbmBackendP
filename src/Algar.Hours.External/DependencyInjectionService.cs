@@ -19,24 +19,27 @@ namespace Algar.Hours.External
             // services.AddDbContext<DatabaseService>(options =>
             //options.UseNpgsql(configuration["SQLConnectionStringsPost"]));
 
-           /* services.AddDbContext<DatabaseService>(options =>
-            {
-                options.UseNpgsql(configuration["SQLConnectionStringsPost"],
-                    providerOptions =>
-                    {
-                        providerOptions
-                            .EnableRetryOnFailure(
-                                maxRetryCount: 5,
-                                maxRetryDelay: TimeSpan.FromSeconds(30),
-                                errorCodesToAdd:null
-                                )
-                            .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                    });
-                options.EnableSensitiveDataLogging();
-                options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
-            });
-            */
-             services.AddDbContext<DatabaseService>(options => options.UseNpgsql(configuration["SQLConnectionStringsPost"],providerOptions => providerOptions.EnableRetryOnFailure() ));
+            /* services.AddDbContext<DatabaseService>(options =>
+             {
+                 options.UseNpgsql(configuration["SQLConnectionStringsPost"],
+                     providerOptions =>
+                     {
+                         providerOptions
+                             .EnableRetryOnFailure(
+                                 maxRetryCount: 5,
+                                 maxRetryDelay: TimeSpan.FromSeconds(30),
+                                 errorCodesToAdd:null
+                                 )
+                             .UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                     });
+                 options.EnableSensitiveDataLogging();
+                 options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+             });
+             */
+
+
+            services.AddDbContext<DatabaseService>(options => options.UseNpgsql(configuration["SQLConnectionStringsPost"],providerOptions => providerOptions.EnableRetryOnFailure() ));
+
             services.AddTransient<DatabaseService>();
 
             services.AddScoped<IDataBaseService, DatabaseService>();

@@ -59,6 +59,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<PaisRelacionGMTEntity> PaisRelacionGMTEntity { get; set; }
         DbSet<PortalDBEntity> PortalDBEntity { get; set; }
         DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
+        DbSet<UserSessionEntity> UserSessionEntity { get; set; }
 
         Task<bool> SaveAsync();
 

@@ -56,6 +56,8 @@ using Algar.Hours.Application.DataBase.ReportException.Commands.Consult;
 using Algar.Hours.Application.DataBase.ReportException.Commands.Update;
 using Algar.Hours.Application.DataBase.ReportException.Commands.Create;
 using Algar.Hours.Application.DataBase.ReportException.Commands.Delete;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateUserSession;
 
 namespace Algar.Hours.Application
 {
@@ -122,6 +124,8 @@ namespace Algar.Hours.Application
             services.AddTransient<IReporte1Command, Reporte1Command>();
             services.AddTransient<IEmailCommand, EmailCommand>();
             services.AddTransient<ILoadGeneric, LoadGeneric>();
+            services.AddTransient<ICreateLogCommand, CreateLogCommand>();
+            
 
             #region AssigmentReportCommand
             services.AddTransient<ICreateAssignmentReportCommand, CreateAssignmentReportCommand>();

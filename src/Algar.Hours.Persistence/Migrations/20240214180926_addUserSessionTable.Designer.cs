@@ -3,6 +3,7 @@ using System;
 using Algar.Hours.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Algar.Hours.Persistence.Migrations
 {
     [DbContext(typeof(DatabaseService))]
-    partial class DatabaseServiceModelSnapshot : ModelSnapshot
+    [Migration("20240214180926_addUserSessionTable")]
+    partial class addUserSessionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -157,10 +160,6 @@ namespace Algar.Hours.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ano")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("sDiaFestivo")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -1406,6 +1405,16 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Property<DateTime>("LogDateEvent")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("RoleEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserEntityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("eventAlias")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("operation")
                         .IsRequired()
                         .HasColumnType("text");
@@ -1414,11 +1423,19 @@ namespace Algar.Hours.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("sUserEntityId")
+                    b.Property<string>("resultOperation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("tag")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("IdSession");
+
+                    b.HasIndex("RoleEntityId");
+
+                    b.HasIndex("UserEntityId");
 
                     b.ToTable("UserSessionEntity");
                 });
@@ -1689,6 +1706,25 @@ namespace Algar.Hours.Persistence.Migrations
                     b.Navigation("CountryEntity");
 
                     b.Navigation("RoleEntity");
+                });
+
+            modelBuilder.Entity("Algar.Hours.Domain.Entities.User.UserSessionEntity", b =>
+                {
+                    b.HasOne("Algar.Hours.Domain.Entities.Rol.RoleEntity", "RoleEntity")
+                        .WithMany()
+                        .HasForeignKey("RoleEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Algar.Hours.Domain.Entities.User.UserEntity", "UserEntity")
+                        .WithMany()
+                        .HasForeignKey("UserEntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RoleEntity");
+
+                    b.Navigation("UserEntity");
                 });
 
             modelBuilder.Entity("Algar.Hours.Domain.Entities.UsersExceptions.UsersExceptions", b =>
