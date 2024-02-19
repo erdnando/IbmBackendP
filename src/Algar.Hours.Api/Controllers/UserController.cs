@@ -47,7 +47,7 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpPost("create")]
-        [Authorize(Roles = "standard")]
+      //  [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
            [FromBody] CreateUserModelc model, [FromServices] ICreateUserCommand createUserCommand)
         {
