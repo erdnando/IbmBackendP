@@ -19,6 +19,7 @@ using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
+using Algar.Hours.Domain.Entities.ReportException;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -37,6 +38,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<RoleMenuEntity> RoleMenuEntity { get; set; }
         DbSet<UserEntity> UserEntity { get; set; }
         DbSet<UsersExceptions> UsersExceptions { get; set; }
+        DbSet<ReportExceptionEntity> ReportExceptionEntity { get; set; }
         DbSet<Domain.Entities.Aprobador.Aprobador> Aprobador { get; set; }
         DbSet<AprobadorUsuario> AprobadorUsuario { get; set; }
         DbSet<ARPLoadDetailEntity> ARPLoadDetailEntity { get; set; }

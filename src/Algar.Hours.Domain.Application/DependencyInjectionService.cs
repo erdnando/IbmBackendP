@@ -52,6 +52,10 @@ using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
 using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Create;
+using Algar.Hours.Application.DataBase.ReportException.Commands.Consult;
+using Algar.Hours.Application.DataBase.ReportException.Commands.Update;
+using Algar.Hours.Application.DataBase.ReportException.Commands.Create;
+using Algar.Hours.Application.DataBase.ReportException.Commands.Delete;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateUserSession;
 
@@ -110,6 +114,10 @@ namespace Algar.Hours.Application
             services.AddTransient<IConsultUserExceptionCommand, ConsultUserExceptionCommand>();
             services.AddTransient<IUpdateUsersExceptionCommand, UpdateUsersExceptionCommand>();
             services.AddTransient<ICreateUsersExceptionCommand, CreateUsersExceptionCommand>();
+            services.AddTransient<IConsultReportExceptionCommand, ConsultReportExceptionCommand>();
+            services.AddTransient<IUpdateReportExceptionCommand, UpdateReportExceptionCommand>();
+            services.AddTransient<ICreateReportExceptionCommand, CreateReportExceptionCommand>();
+            services.AddTransient<IDeleteReportExceptionCommand, DeleteReportExceptionCommand>();
             services.AddTransient<ILoadWorkingHoursCommand, LoadWorkingHoursCommand>();
             services.AddTransient<ILoadHorusReportManagerCommand, LoadHoursReportManagerCommand>();
             services.AddTransient<ICreateHorusReportManagerCommand, CreateHorusReportManagerCommand>();

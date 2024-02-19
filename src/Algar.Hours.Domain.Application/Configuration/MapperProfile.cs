@@ -51,6 +51,9 @@ using Algar.Hours.Domain.Entities.PortalDB;
 using Algar.Hours.Application.DataBase.PortalDB.Commands.Create;
 using Algar.Hours.Application.DataBase.PortalDB.Commands;
 using Algar.Hours.Application.DataBase.PortalDBAproveHistory.Commands.Create;
+using Algar.Hours.Application.DataBase.ReportException.Commands.Create;
+using Algar.Hours.Domain.Entities.ReportException;
+using Algar.Hours.Application.DataBase.ReportException.Commands.Consult;
 
 namespace Algar.Hours.Application.Configuration
 {
@@ -92,7 +95,9 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<AssignmentReport, ModelAproveed>().ReverseMap();
             CreateMap<ARPLoadEntity, ARPLoadEntityc>().ReverseMap();
             CreateMap<UsersExceptions, UserExceptionModel>().ReverseMap();
-            CreateMap<UsersExceptions, UsersExceptionsModelC>().ReverseMap();
+            CreateMap<ReportExceptionEntity, ReportExceptionModel>().ReverseMap();
+            CreateMap<ReportExceptionModel, ReportExceptionModelC>().ReverseMap();
+            CreateMap<ReportExceptionEntity, ReportExceptionModelC>().ReverseMap();
             CreateMap<ParametersTseInitialEntity, ParametersTseInitialEntityC>().ReverseMap();
             CreateMap<HorusReportManagerEntity, CreateHorusReportManagerModel>().ReverseMap();
             CreateMap<PortalDBEntity, CreatePortalDBModel>().ReverseMap();
@@ -100,11 +105,9 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<PortalDBEntity, PortalDBModel>().ReverseMap();
             CreateMap<PortalDBAproveHistoryEntity, CreatePortalDBAproveHistoryModel>().ReverseMap();
 
-
             CreateMap<CreateHorusReportModel,HorusReportModel>()
                 .ForMember(x=> x.StrStartDate , 
                 opt => opt.MapFrom(src =>  DateTime.Parse(src.StartTime)));
-           
 
         }
 
