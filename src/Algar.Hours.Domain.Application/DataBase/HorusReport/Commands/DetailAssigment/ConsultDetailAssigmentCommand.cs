@@ -44,11 +44,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
                 .Include(a => a.UserEntity.RoleEntity)
                 .Include(b => b.HorusReportEntity)
                 .Where(x => x.HorusReportEntityId == IdReport)
-                .OrderBy(x => x.Nivel);
-
-            if (currentHReport.EstatusOrigen == "STANDBY") {
-                assignmentQuery.Where(x => x.UserEntity.RoleEntity.IdRole != Guid.Parse("5a0ab2a2-f790-4f96-9dee-da0b9111f7c7"));
-            }
+                .AsEnumerable()
+                .OrderBy(x => DateTime.ParseExact(x.strFechaAtencion, "dd/MM/yyyy HH:mm", null));
 
             var assignmentList = assignmentQuery.ToList();
             var assignments = new List<Domain.Entities.AssignmentReport.AssignmentReport>();
