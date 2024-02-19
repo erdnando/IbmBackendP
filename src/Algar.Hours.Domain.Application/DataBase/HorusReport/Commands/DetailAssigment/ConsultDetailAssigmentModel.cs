@@ -13,14 +13,15 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
     {
         public int Numeroreporte { get; set; }
         public string strNumeroreporte { get; set; }
-        
-        public string Horas  { get; set; }
+
+        public string Horas { get; set; }
         public ClientEntity ClientEntity { get; set; }
         public UserEntity UserEntity { get; set; }
         public string Fechaenvio { get; set; }
         public int Actividad { get; set; }
         public string Aprobaador1 { get; set; }
         public string Aprobaador2 { get; set; }
+        public List<Domain.Entities.AssignmentReport.AssignmentReport> Assignments { get; set; }
         public int EstadoReporte { get; set; }
         public string Observaciones { get; set; }
         public CountryEntity Pais { get; set; }

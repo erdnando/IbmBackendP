@@ -18,6 +18,7 @@ using Algar.Hours.Domain.Entities.Parameters;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
 using Algar.Hours.Domain.Entities.PortalDB;
 using Algar.Hours.Domain.Entities.QueuesAcceptance;
+using Algar.Hours.Domain.Entities.ReportException;
 using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
 using Algar.Hours.Domain.Entities.User;
@@ -51,6 +52,7 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<RoleMenuEntity> RoleMenuEntity { get; set; }
         public DbSet<UserEntity> UserEntity { get; set; }
         public DbSet<UsersExceptions> UsersExceptions { get; set; }
+        public DbSet<ReportExceptionEntity> ReportExceptionEntity { get; set; }
         public DbSet<Aprobador> Aprobador { get; set; }
         public DbSet<AprobadorUsuario> AprobadorUsuario { get; set; }
         public DbSet<ARPLoadDetailEntity> ARPLoadDetailEntity { get; set; }
@@ -112,6 +114,7 @@ namespace Algar.Hours.Persistence.DataBase
             new RolMenuEntityConfiguration(modelBuilder.Entity<RoleMenuEntity>());
             new UserConfiguration(modelBuilder.Entity<UserEntity>());
             new UserExceptionsConfiguration(modelBuilder.Entity<UsersExceptions>());
+            new ReportExceptionEntityConfiguration(modelBuilder.Entity<ReportExceptionEntity>());
             new AprobadorConfiguration(modelBuilder.Entity<Aprobador>());
             new AprobadorUsuarioConfiguration(modelBuilder.Entity<AprobadorUsuario>());
             new ARPLoadDetailConfiguration(modelBuilder.Entity<ARPLoadDetailEntity>());

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ubiety.Dns.Core.Records;
 
 namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAproveedNivel1
 {
@@ -163,11 +164,6 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
-                    //TODO
-                    //Evaluar si esta en excepcion de reportes extracted
-                    // if it is EXTRACTED, please move it to APPROVED!!!!
-                    //Asegurarse q en el historial (currentAssignment) aparezca q fue rechazado y despues agregar q fue promovido a APROBADO
-
                     //Se marca como atendida por el empleado
                     currentAssignment.State = 1;
                     currentAssignment.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
@@ -176,10 +172,6 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     currentAssignment.Nivel = 0;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
-
-                   
-
-
 
 
                 } else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
@@ -219,6 +211,40 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     currentAssignment.Nivel = 2;
                     _dataBaseService.assignmentReports.Update(currentAssignment);
                     await _dataBaseService.SaveAsync();
+                }
+
+                // Excepciones de Reportes EXTRACTED
+                if ((modelAprobador.roleAprobador == "Usuario Aprobador N1" || modelAprobador.roleAprobador == "Usuario Aprobador N2"))
+                {
+                    var reportException = _dataBaseService.ReportExceptionEntity.
+                        Where(x => x.Report == currentHReport.StrReport)
+                        .FirstOrDefault();
+
+                    if (reportException != null)
+                    {
+                        currentHReport.EstatusFinal = "APROBADO";
+                        currentHReport.Estado = currentAssignment.Nivel == 1 ? (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 : (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                        _dataBaseService.HorusReportEntity.Update(currentHReport);
+                        await _dataBaseService.SaveAsync();
+
+                        reportException.ExceptionDate = DateTime.Now;
+                        reportException.ExceptionUserEntityId = currentAssignment.UserEntityId;
+                        _dataBaseService.ReportExceptionEntity.Update(reportException);
+                        await _dataBaseService.SaveAsync();
+
+                        var newAssignment = new Domain.Entities.AssignmentReport.AssignmentReport();
+                        newAssignment.IdAssignmentReport = Guid.NewGuid();
+                        newAssignment.UserEntityId = Guid.Parse("53765c41-411f-4add-9034-7debaf04f276");
+                        newAssignment.HorusReportEntityId = currentHReport.IdHorusReport;
+                        newAssignment.State = 1;
+                        newAssignment.Resultado = currentAssignment.Nivel == 1? (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 : (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                        newAssignment.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                        newAssignment.Description = "APROBADO POR EXCEPCION";
+                        newAssignment.Nivel = currentAssignment.Nivel;
+                        _dataBaseService.assignmentReports.Add(newAssignment);
+                        await _dataBaseService.SaveAsync();
+                    }
+
                 }
             }
 
