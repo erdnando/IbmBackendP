@@ -257,7 +257,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                 //Remueve duplicados 
-                var datosARPExcel = datosARPExcelFull.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO, m.HORA_FIN }).ToList();
+                var datosARPExcel = datosARPExcelFull.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO, m.HORA_FIN,m.ESTADO }).ToList();
 
                 //Setting duplicados metrica en ARP
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.ARPOmitidosXDuplicidad = (datosARPExcelFull.Count() - datosARPExcel.Count()).ToString());
@@ -789,7 +789,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<TSELoadEntity> datosTSEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<TSELoadEntity>>(model.Data.ToJsonString());
                
                 //Remueve duplicados 
-                var datosTSEExcel = datosTSEExcelFull.DistinctBy(m => new { m.NumeroEmpleado, m.StartTime, m.EndTime }).ToList();
+                var datosTSEExcel = datosTSEExcelFull.DistinctBy(m => new { m.NumeroEmpleado, m.StartTime, m.EndTime,m.Status }).ToList();
 
                 //Setting duplicados metrica en TSE
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.TSEOmitidosXDuplicidad = (datosTSEExcelFull.Count() - datosTSEExcel.Count()).ToString());
@@ -2931,90 +2931,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                 }
 
-                //NO_APLICA_X_LIMITE_HORAS (valida aquellas que rebasen el limite de manera individual)
-                //=======================================================================================================================
-                /*
-                foreach (var itemARP in rowARPParameter)
-                {
-
-                    TimeSpan tsReportado = DateTimeOffset.Parse(itemARP.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemARP.HoraInicio).TimeOfDay;
-                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARP.EmployeeCode);
-
-                    if (UserRow != null)
-                    {
-                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemARP.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                        var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-
-                        var HorasARP = listHorusReport.Where(co => co.StrStartDate == itemARP.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
-
-                        var HorasARPGral = HorasARP.Select(x => double.Parse(x.CountHours)).Sum();
-
-                        if ((tsReportado.TotalHours + HorasARPGral) > (HorasLimiteDia + horasExceptuada))
-                        {
-                            itemARP.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
-                        }
-                    }
-                    else
-                    {
-                        itemARP.EstatusProceso = "NO_APLICA_NO_USUARIO";
-                    }
-                }
-
-                foreach (var itemTSE in rowTSEParameter)
-                {
-                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemTSE.EmployeeCode.Substring(itemTSE.EmployeeCode.Length - 3));
-                    var limitesCountryTSE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
-                    var HorasLimiteDiaTSE = limitesCountryTSE.TargetTimeDay;
-                    TimeSpan tsReportadoTSE = DateTimeOffset.Parse(itemTSE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemTSE.HoraInicio).TimeOfDay;
-                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
-                    if (UserRow != null)
-                    {
-
-                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                        var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-
-                        //ok
-                        var HorasTSE = listHorusReport.Where(co => co.StrStartDate == itemTSE.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
-
-                        var HorasTSEGral = HorasTSE.Select(x => double.Parse(x.CountHours)).Sum();
-
-                        if ((tsReportadoTSE.TotalHours + HorasTSEGral) > (HorasLimiteDia + horasExceptuada))
-                        {
-                            itemTSE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
-                        }
-                    }
-                    else
-                    {
-                        itemTSE.EstatusProceso = "NO_APLICA_NO_USUARIO";
-                    }
-                }
-
-                foreach (var itemSTE in rowSTEParameter)
-                {
-                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == itemSTE.EmployeeCode.Substring(itemSTE.EmployeeCode.Length - 3));
-                    var limitesCountrySTE = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == paisRegistro.IdCounty);
-                    var HorasLimiteDiaSTE = limitesCountrySTE.TargetTimeDay;
-                    TimeSpan tsReportadoSTE = DateTimeOffset.Parse(itemSTE.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(itemSTE.HoraInicio).TimeOfDay;
-                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
-                    if (UserRow != null)
-                    {
-                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                        var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-
-                        var HorasSTE = listHorusReport.Where(co => co.StrStartDate == itemSTE.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
-                        var HorasSTEGral = HorasSTE.Select(x => double.Parse(x.CountHours)).Sum();
-                        if ((tsReportadoSTE.TotalHours + HorasSTEGral) > (HorasLimiteDia + horasExceptuada))
-                        {
-                            itemSTE.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
-                        }
-                    }
-                    else
-                    {
-                        itemSTE.EstatusProceso = "NO_APLICA_NO_USUARIO";
-                    }
-                }*/
-
-                //await _dataBaseService.SaveAsync();
+               
                 //=======================================================================================================================
 
 
@@ -3206,7 +3123,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemARPNew.EstatusOrigen,
-                        EstatusFinal = "",
+                        EstatusFinal = "ENPROGRESO",
 
                     };
                     rowsHorusNew.Add(rowAdd);
@@ -3254,7 +3171,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemTSENew.EstatusOrigen,
-                        EstatusFinal = ""
+                        EstatusFinal = "ENPROGRESO"
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3300,7 +3217,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemSTENew.EstatusOrigen,
-                        EstatusFinal=""
+                        EstatusFinal= "ENPROGRESO"
                     };
                     rowsHorusNew.Add(rowAdd);
 

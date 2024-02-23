@@ -333,7 +333,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             entity.ARPLoadingId = "0";
             entity.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
             entity.EstatusOrigen = "STANDBY";
-            entity.EstatusFinal = "";
+            entity.EstatusFinal = "ENPROGRESO";
 
 
             _dataBaseService.HorusReportEntity.AddAsync(entity);
