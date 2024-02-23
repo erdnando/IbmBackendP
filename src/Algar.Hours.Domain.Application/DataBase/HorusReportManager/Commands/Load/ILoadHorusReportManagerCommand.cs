@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,6 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
     public interface ILoadHorusReportManagerCommand
     {
-        Task<bool> LoadExcel(JsonArray model);
+        Task<FileStreamResult> LoadExcel(JsonArray model);
     }
 }

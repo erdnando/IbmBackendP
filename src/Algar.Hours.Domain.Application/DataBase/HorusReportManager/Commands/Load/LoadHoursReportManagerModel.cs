@@ -11,12 +11,16 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
     {
         public long UserEntityManagerId { get; set; }
         [JsonProperty("Employee ID")]
-        public long EmployeeID { get; set; }
+        public string EmployeeID { get; set; }
         public string Worker { get; set; }
         [JsonProperty("Reported Date")]
         public DateTime ReportedDate { get; set; }
         [JsonProperty("Calculated Quantity")]
         public double Quantity { get; set; }
         public string Status { get; set; }
+        [JsonProperty("In Time")]
+        public string StartTime { get; set; }
+        [JsonProperty("Out Time")]
+        public string EndTime { get; set; }
     }
 }
