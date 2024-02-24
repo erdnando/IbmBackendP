@@ -23,6 +23,7 @@ using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
+using Algar.Hours.Domain.Entities.WorkdayException;
 using Algar.Hours.Persistence.Configuration;
 using EFCore.BulkExtensions;
 using Google.Protobuf.WellKnownTypes;
@@ -50,6 +51,7 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<UserEntity> UserEntity { get; set; }
         public DbSet<UsersExceptions> UsersExceptions { get; set; }
         public DbSet<ReportExceptionEntity> ReportExceptionEntity { get; set; }
+        public DbSet<WorkdayExceptionEntity> WorkdayExceptionEntity { get; set; }
         public DbSet<Aprobador> Aprobador { get; set; }
         public DbSet<AprobadorUsuario> AprobadorUsuario { get; set; }
         public DbSet<ARPLoadDetailEntity> ARPLoadDetailEntity { get; set; }

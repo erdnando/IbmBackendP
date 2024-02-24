@@ -81,10 +81,9 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                     .AsEnumerable()
                     .Where(x => x.UserEntity.EmployeeCode == loadWorkdayModel.EmployeeID && DateTime.ParseExact(x.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == loadWorkdayModel.ReportedDate && x.StartTime == startTime && x.EndTime == endTime)
                     .FirstOrDefault();
-                if (entity != null)
-                {
+                if (entity != null) {
                     /*var modeloHorario = await CreateModeloHorario(convert);*/
-                    var statusFinal = (entity.EstatusFinal == "FINAL" || entity.EstatusFinal == "SUBMITED") ? "EN PROCESO" : entity.EstatusFinal;
+                    var statusFinal = (entity.EstatusFinal == "FINAL" || entity.EstatusFinal == "SUBMITED") ? "ENPROCESO" : "APROBADO";
                     worksheet.Cell(currentRow, 1).Value = loadWorkdayModel.EmployeeID;
                     worksheet.Cell(currentRow, 2).Value = loadWorkdayModel.ReportedDate;
                     worksheet.Cell(currentRow, 3).Value = entity.EstatusOrigen;
@@ -94,12 +93,26 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                     
                 }
                 else {
+                    var exception = _dataBaseService.WorkdayExceptionEntity
+                    .Include(x => x.UserEntity)
+                    .AsEnumerable()
+                    .Where(x => x.Active == true && x.EmployeeCode == loadWorkdayModel.EmployeeID && x.RealDate.ToString("dd/MM/yyyy") == loadWorkdayModel.ReportedDate.ToString("dd/MM/yyyy") && x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime)
+                    .FirstOrDefault();
+
                     worksheet.Cell(currentRow, 1).Value = loadWorkdayModel.EmployeeID;
                     worksheet.Cell(currentRow, 2).Value = loadWorkdayModel.ReportedDate;
-                    worksheet.Cell(currentRow, 3).Value = "";
                     worksheet.Cell(currentRow, 4).Value = loadWorkdayModel.Quantity;
-                    worksheet.Cell(currentRow, 5).Value = "RECHAZADO";
                     worksheet.Cell(currentRow, 6).Value = "";
+
+                    if (exception != null) {
+                        worksheet.Cell(currentRow, 3).Value = exception.ReportType;
+                        worksheet.Cell(currentRow, 5).Value = "APROBADO POR EXCEPCION";
+                    }
+                    else {
+                        worksheet.Cell(currentRow, 3).Value = "";
+                        worksheet.Cell(currentRow, 5).Value = "RECHAZADO";
+                    }
+
                 }
 
                 currentRow++;

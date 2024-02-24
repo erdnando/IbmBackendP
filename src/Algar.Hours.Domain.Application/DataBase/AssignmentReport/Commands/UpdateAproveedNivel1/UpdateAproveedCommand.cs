@@ -222,15 +222,13 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     await _dataBaseService.SaveAsync();
                 }
 
-                // Excepciones de Reportes EXTRACTED
-                if ((modelAprobador.roleAprobador == "Usuario Aprobador N1" || modelAprobador.roleAprobador == "Usuario Aprobador N2"))
-                {
+                // Excepciones de Reportes
+                /*if ((modelAprobador.roleAprobador == "Usuario Aprobador N1" || modelAprobador.roleAprobador == "Usuario Aprobador N2")) {
                     var reportException = _dataBaseService.ReportExceptionEntity.
                         Where(x => x.Report == currentHReport.StrReport)
                         .FirstOrDefault();
 
-                    if (reportException != null)
-                    {
+                    if (reportException != null) {
                         currentHReport.EstatusFinal = "APROBADO";
                         currentHReport.Estado = currentAssignment.Nivel == 1 ? (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 : (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
                         _dataBaseService.HorusReportEntity.Update(currentHReport);
@@ -254,7 +252,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                         await _dataBaseService.SaveAsync();
                     }
 
-                }
+                }*/
             }
 
 

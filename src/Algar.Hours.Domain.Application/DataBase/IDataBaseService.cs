@@ -21,6 +21,7 @@ using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using Algar.Hours.Domain.Entities.ReportException;
 using Microsoft.EntityFrameworkCore;
+using Algar.Hours.Domain.Entities.WorkdayException;
 
 
 namespace Algar.Hours.Application.DataBase
@@ -39,6 +40,7 @@ namespace Algar.Hours.Application.DataBase
         DbSet<UserEntity> UserEntity { get; set; }
         DbSet<UsersExceptions> UsersExceptions { get; set; }
         DbSet<ReportExceptionEntity> ReportExceptionEntity { get; set; }
+        DbSet<WorkdayExceptionEntity> WorkdayExceptionEntity { get; set; }
         DbSet<Domain.Entities.Aprobador.Aprobador> Aprobador { get; set; }
         DbSet<AprobadorUsuario> AprobadorUsuario { get; set; }
         DbSet<ARPLoadDetailEntity> ARPLoadDetailEntity { get; set; }

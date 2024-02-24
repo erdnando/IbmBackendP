@@ -58,6 +58,12 @@ using Algar.Hours.Application.DataBase.ReportException.Commands.Create;
 using Algar.Hours.Application.DataBase.ReportException.Commands.Delete;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateUserSession;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Consult;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Update;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Create;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Delete;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Activate;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Deactivate;
 
 namespace Algar.Hours.Application
 {
@@ -118,6 +124,12 @@ namespace Algar.Hours.Application
             services.AddTransient<IUpdateReportExceptionCommand, UpdateReportExceptionCommand>();
             services.AddTransient<ICreateReportExceptionCommand, CreateReportExceptionCommand>();
             services.AddTransient<IDeleteReportExceptionCommand, DeleteReportExceptionCommand>();
+            services.AddTransient<IConsultWorkdayExceptionCommand, ConsultWorkdayExceptionCommand>();
+            services.AddTransient<IUpdateWorkdayExceptionCommand, UpdateWorkdayExceptionCommand>();
+            services.AddTransient<ICreateWorkdayExceptionCommand, CreateWorkdayExceptionCommand>();
+            services.AddTransient<IDeleteWorkdayExceptionCommand, DeleteWorkdayExceptionCommand>();
+            services.AddTransient<IActivateWorkdayExceptionCommand, ActivateWorkdayExceptionCommand>();
+            services.AddTransient<IDeactivateWorkdayExceptionCommand, DeactivateWorkdayExceptionCommand>();
             services.AddTransient<ILoadWorkingHoursCommand, LoadWorkingHoursCommand>();
             services.AddTransient<ILoadHorusReportManagerCommand, LoadHoursReportManagerCommand>();
             services.AddTransient<ICreateHorusReportManagerCommand, CreateHorusReportManagerCommand>();

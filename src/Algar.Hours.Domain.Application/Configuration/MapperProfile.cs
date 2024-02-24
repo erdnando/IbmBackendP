@@ -54,6 +54,9 @@ using Algar.Hours.Application.DataBase.PortalDBAproveHistory.Commands.Create;
 using Algar.Hours.Application.DataBase.ReportException.Commands.Create;
 using Algar.Hours.Domain.Entities.ReportException;
 using Algar.Hours.Application.DataBase.ReportException.Commands.Consult;
+using Algar.Hours.Domain.Entities.WorkdayException;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Consult;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Create;
 
 namespace Algar.Hours.Application.Configuration
 {
@@ -98,6 +101,9 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<ReportExceptionEntity, ReportExceptionModel>().ReverseMap();
             CreateMap<ReportExceptionModel, ReportExceptionModelC>().ReverseMap();
             CreateMap<ReportExceptionEntity, ReportExceptionModelC>().ReverseMap();
+            CreateMap<WorkdayExceptionEntity, WorkdayExceptionModel>().ReverseMap();
+            CreateMap<WorkdayExceptionModel, WorkdayExceptionModelC>().ReverseMap();
+            CreateMap<WorkdayExceptionEntity, WorkdayExceptionModelC>().ReverseMap();
             CreateMap<ParametersTseInitialEntity, ParametersTseInitialEntityC>().ReverseMap();
             CreateMap<HorusReportManagerEntity, CreateHorusReportManagerModel>().ReverseMap();
             CreateMap<PortalDBEntity, CreatePortalDBModel>().ReverseMap();
