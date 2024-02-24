@@ -246,6 +246,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 Int64 counter = 0;
                 List<ParametersArpInitialEntity> listParametersInitialEntity = new();
+                List<HorusReportEntity> listARPHorusReportEntity = new();
                 var semanahorario = new DateTimeOffset();
                 CultureInfo cul = CultureInfo.CurrentCulture;
                 List<HorarioReturn> fueraH = new List<HorarioReturn>();
@@ -254,7 +255,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Serializa la carga completa del excel
                 List<ARPLoadDetailEntity> datosARPExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ARPLoadDetailEntity>>(model.Data.ToJsonString());
-
 
                 //Remueve duplicados 
                 var datosARPExcel = datosARPExcelFull.DistinctBy(m => new { m.ID_EMPLEADO, m.FECHA_REP, m.HORA_INICIO, m.HORA_FIN,m.ESTADO }).ToList();
@@ -2818,7 +2818,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var HoursTotEMp = 0.0;
 
                 //Integrar datos de las 3 cargas
-                var listIntegrados= new List<ParametersArpInitialEntity>();
+                var listIntegrados = new List<ParametersArpInitialEntity>();
                 foreach (var item in rowARPParameter)
                 {
                     listIntegrados.Add(item);
@@ -2830,11 +2830,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     itemTse.IdParametersInitialEntity = item.IdParamTSEInitialId;
                     itemTse.OverTime = item.OverTime;
                     itemTse.OutIme = item.OutIme;
-                    itemTse.Anio= item.Anio;
-                    itemTse.HoraInicio= item.HoraInicio;
-                    itemTse.HoraInicioHoraio= item.HoraInicioHoraio;
-                    itemTse.HoraFinHorario= item.HoraFinHorario;
-                    itemTse.totalHoras= item.totalHoras;
+                    itemTse.Anio = item.Anio;
+                    itemTse.HoraInicio = item.HoraInicio;
+                    itemTse.HoraInicioHoraio = item.HoraInicioHoraio;
+                    itemTse.HoraFinHorario = item.HoraFinHorario;
+                    itemTse.totalHoras = item.totalHoras;
                     itemTse.HorasFin = item.HorasFin;
                     itemTse.HoraFin = item.HoraFin;
                     itemTse.EmployeeCode = item.EmployeeCode;
@@ -2842,11 +2842,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     itemTse.EstatusOrigen = item.EstatusOrigen;
                     itemTse.EstatusProceso = item.EstatusProceso;
                     itemTse.Reporte = item.Reporte;
-                    itemTse.FECHA_REP= item.FECHA_REP;
-                    itemTse.Festivo= item.Festivo;
-                    itemTse.IdCarga= item.IdCarga;
-                    itemTse.Semana= item.Semana;
-                    itemTse.TOTAL_MINUTOS= item.TOTAL_MINUTOS;
+                    itemTse.FECHA_REP = item.FECHA_REP;
+                    itemTse.Festivo = item.Festivo;
+                    itemTse.IdCarga = item.IdCarga;
+                    itemTse.Semana = item.Semana;
+                    itemTse.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
 
 
                     listIntegrados.Add(itemTse);
@@ -2903,7 +2903,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
 
-                        if ((tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB+ horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
+                        if ((tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
                         {
                             item.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
                             //=====================================================================
@@ -2924,14 +2924,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             horasAcumuladasEmployee += tsReportado.TotalHours;
                         }
 
-                        
+
 
 
 
                     }
                 }
 
-               
+
                 //=======================================================================================================================
 
 
@@ -2944,93 +2944,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //NO_APLICA_X_OVERLAPING
                 //=======================================================================================================================
-                foreach (var itemARPp in rowARPParameterFinal)
-                {
-                    //------------------------------------------------------------------------------------------------------------------
-                    var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
-
-
-
-                    var startTime = DateTime.Parse(itemARPp.HoraInicio);
-                    var endTime = DateTime.Parse(itemARPp.HoraFin);
-
-                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
-
-
-                    var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
-                        .AsEnumerable()
-                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
-                        (TimeInRange(h.StartTime, startTime, endTime) &&
-                        TimeInRange(h.EndTime, startTime, endTime)))
-                        .ToList();
-
-
-
-
-                    if (data.Count > 0)
-                    {
-                        itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-
-                    }
-                    //------------------------------------------------------------------------------------------------------------------
-                }
-
-                foreach (var itemTSEp in rowTSEParameterFinal)
-                {
-                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSEp.EmployeeCode);
-
-
-
-                    var startTime = DateTime.Parse(itemTSEp.HoraInicio);
-                    var endTime = DateTime.Parse(itemTSEp.HoraFin);
-
-                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
-
-                    var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == UserRow.IdUser)
-                        .AsEnumerable()
-                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSEp.HoraInicio, itemTSEp.HoraFin) ||
-                        (TimeInRange(h.StartTime, startTime, endTime) &&
-                        TimeInRange(h.EndTime, startTime, endTime)))
-                        .ToList();
-
-
-
-
-
-                    if (data.Count > 0)
-                    {
-                        itemTSEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-
-                    }
-                }
-
-                foreach (var itemSTEp in rowSTEParameterFinal)
-                {
-                    var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTEp.EmployeeCode);
-
-                    var startTime = DateTime.Parse(itemSTEp.HoraInicio);
-                    var endTime = DateTime.Parse(itemSTEp.HoraFin);
-
-                    DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTEp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
-
-                    var data = _dataBaseService.HorusReportEntity
-                        .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == UserRow.IdUser)
-                        .AsEnumerable()
-                        .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTEp.HoraInicio, itemSTEp.HoraFin) ||
-                        (TimeInRange(h.StartTime, startTime, endTime) &&
-                        TimeInRange(h.EndTime, startTime, endTime)))
-                        .ToList();
-
-                    if (data.Count > 0)
-                    {
-                        itemSTEp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    }
-                }
+                PreaprobadosARP(UserLst, rowARPParameterFinal);
+                PreaprobadosTSE(UserLst, rowTSEParameterFinal);
+                PreaprobadosSTE(UserLst, rowSTEParameterFinal);
 
                 await _dataBaseService.SaveAsync();
                 //=======================================================================================================================
@@ -3059,27 +2975,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.NO_APLICA_X_LIMITE_HORAS_STE = steNoAplicaXLimites.ToString();
 
 
-
-
-                //=======================================================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 List<HorusReportEntity> rowsHorusNew = new();
                 HorusReportEntity rowAdd = new();
                 List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
@@ -3094,10 +2989,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     Maxen = 0;
                 }
+
                 //=======================================================================================================
                 //Inserting to PortalDB
                 //=======================================================================================================
-
                 foreach (var itemARPNew in rowARPParameterGral)
                 {
                     Maxen++;
@@ -3124,21 +3019,22 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemARPNew.EstatusOrigen,
                         EstatusFinal = "ENPROGRESO",
+                        DetalleEstatusFinal =""
 
                     };
                     rowsHorusNew.Add(rowAdd);
 
-                    
+
                     rowAddAssig = new()
                     {
                         IdAssignmentReport = Guid.NewGuid(),
                         UserEntityId = userRow.IdUser,
                         HorusReportEntityId = rowAdd.IdHorusReport,
-                        State =0,
+                        State = 0,
                         Description = "PROCESO_OVERTIME",
                         strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
                         Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        Nivel=0
+                        Nivel = 0
                     };
                     rowAssignments.Add(rowAddAssig);
                 }
@@ -3171,7 +3067,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemTSENew.EstatusOrigen,
-                        EstatusFinal = "ENPROGRESO"
+                        EstatusFinal = "ENPROGRESO",
+                        DetalleEstatusFinal = ""
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3217,7 +3114,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         DateApprovalSystem = DateTime.Now,
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemSTENew.EstatusOrigen,
-                        EstatusFinal= "ENPROGRESO"
+                        EstatusFinal = "ENPROGRESO",
+                        DetalleEstatusFinal = ""
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3247,7 +3145,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                 //finishing load process
-                await updateCargaStatus(idCarga,"carga terminada...");
+                await updateCargaStatus(idCarga, "carga terminada...");
 
             }
             catch (Exception ex)
@@ -3261,6 +3159,337 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
             return summary;
         }
+
+        private void PreaprobadosARP(List<UserEntity> UserLst, List<ParametersArpInitialEntity> rowParameterFinal)
+        {
+            foreach (var itemARPp in rowParameterFinal)
+            {
+                //------------------------------------------------------------------------------------------------------------------
+                var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
+
+
+
+                var startTime = DateTime.Parse(itemARPp.HoraInicio);
+                var endTime = DateTime.Parse(itemARPp.HoraFin);
+
+                DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
+
+                //Escenario coincidencia 100%
+                //=================================================================
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                    .AsEnumerable()
+                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
+                    (TimeInRange(h.StartTime, startTime, endTime) &&
+                    TimeInRange(h.EndTime, startTime, endTime)))
+                    .Where(h => h.StrReport == itemARPp.Reporte)
+                    .ToList();
+
+
+
+
+                if (_horusCoincidencia.Count > 0)
+                {
+                    EscenarioCoincidenciaTotalARP(itemARPp, _horusCoincidencia);
+                }
+                else
+                {
+                    EscenarioCoincidenciaParcialARP(itemARPp, userRow, startTime, endTime, nuevaFechaHoraFormato, _horusCoincidencia);
+                }
+
+            }
+        }
+
+        private void EscenarioCoincidenciaParcialARP(ParametersArpInitialEntity? itemARPp, UserEntity? userRow, DateTime startTime, DateTime endTime, string nuevaFechaHoraFormato, List<HorusReportEntity> _horusCoincidencia)
+        {
+            //------------------------------------------------------------------------------------------------------------------
+
+            //Escenario coincidencia Parcial
+            //=================================================================
+            var _horusCoincidenciaParcial = _dataBaseService.HorusReportEntity
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                .AsEnumerable()
+                .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
+                (TimeInRange(h.StartTime, startTime, endTime) &&
+                TimeInRange(h.EndTime, startTime, endTime)))
+                .Where(h => h.StrReport == itemARPp.Reporte)
+                .ToList();
+
+
+
+
+            if (_horusCoincidenciaParcial.Count > 0)
+            {
+
+                if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemARPp.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemARPp.HoraFin)
+                {
+                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemARPp.HoraFin))
+                {
+                    itemARPp.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED y Horas Diferentes";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime == itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemARPp.HoraFin))
+                {
+                    itemARPp.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED y Horas Iguales";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime != itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemARPp.HoraFin))
+                {
+                    itemARPp.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a (FINAL/SUBMITTED) y Horas Diferentes";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime == itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemARPp.HoraFin))
+                {
+                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                }
+            }
+            //------------------------------------------------------------------------------------------------------------------
+        }
+
+        private static void EscenarioCoincidenciaTotalARP(ParametersArpInitialEntity? itemARPp, List<HorusReportEntity> _horusCoincidencia)
+        {
+            if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
+            {
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+            }
+            else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
+            {
+                itemARPp.EstatusProceso = "EN_OVERTIME";
+                _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED";
+            }
+            else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
+            {
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+            }
+        }
+
+        private void PreaprobadosTSE(List<UserEntity> UserLst, List<ParametersTseInitialEntity> rowTSEParameterFinal)
+        {
+            foreach (var itemTSE in rowTSEParameterFinal)
+            {
+                //------------------------------------------------------------------------------------------------------------------
+                var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
+
+
+
+                var startTime = DateTime.Parse(itemTSE.HoraInicio);
+                var endTime = DateTime.Parse(itemTSE.HoraFin);
+
+                DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
+
+                //Escenario coincidencia 100%
+                //=================================================================
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                    .AsEnumerable()
+                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
+                    (TimeInRange(h.StartTime, startTime, endTime) &&
+                    TimeInRange(h.EndTime, startTime, endTime)))
+                    .Where(h => h.StrReport == itemTSE.Reporte)
+                    .ToList();
+
+
+
+
+                if (_horusCoincidencia.Count > 0)
+                {
+                    EscenarioCoincidenciaTotalTSE(itemTSE, _horusCoincidencia);
+                }
+                else
+                {
+                    EscenarioCoincidenciaParcialTSE(itemTSE, userRow, startTime, endTime, nuevaFechaHoraFormato, _horusCoincidencia);
+                }
+
+            }
+        }        
+
+        private void EscenarioCoincidenciaParcialTSE(ParametersTseInitialEntity? itemTSE, UserEntity? userRow, DateTime startTime, DateTime endTime, string nuevaFechaHoraFormato, List<HorusReportEntity> _horusCoincidencia)
+        {
+            //------------------------------------------------------------------------------------------------------------------
+
+            //Escenario coincidencia Parcial
+            //=================================================================
+            var _horusCoincidenciaParcial = _dataBaseService.HorusReportEntity
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                .AsEnumerable()
+                .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
+                (TimeInRange(h.StartTime, startTime, endTime) &&
+                TimeInRange(h.EndTime, startTime, endTime)))
+                .Where(h => h.StrReport == itemTSE.Reporte)
+                .ToList();
+
+
+
+
+            if (_horusCoincidenciaParcial.Count > 0)
+            {
+
+                if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemTSE.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin)
+                {
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemTSE.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED y Horas Diferentes";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemTSE.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED y Horas Iguales";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemTSE.EstatusOrigen == "FINAL" || itemTSE.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime != itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a (FINAL/SUBMITTED) y Horas Diferentes";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemTSE.EstatusOrigen == "FINAL" || itemTSE.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                }
+            }
+            //------------------------------------------------------------------------------------------------------------------
+        }
+
+        private static void EscenarioCoincidenciaTotalTSE(ParametersTseInitialEntity? itemARPp, List<HorusReportEntity> _horusCoincidencia)
+        {
+            if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
+            {
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+            }
+            else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
+            {
+                itemARPp.EstatusProceso = "EN_OVERTIME";
+                _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED";
+            }
+            else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
+            {
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+            }
+        }
+
+        private void PreaprobadosSTE(List<UserEntity> UserLst, List<ParametersSteInitialEntity> rowTSEParameterFinal)
+        {
+            foreach (var itemSTE in rowTSEParameterFinal)
+            {
+                //------------------------------------------------------------------------------------------------------------------
+                var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
+
+
+
+                var startTime = DateTime.Parse(itemSTE.HoraInicio);
+                var endTime = DateTime.Parse(itemSTE.HoraFin);
+
+                DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
+
+                //Escenario coincidencia 100%
+                //=================================================================
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                    .AsEnumerable()
+                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTE.HoraInicio, itemSTE.HoraFin) ||
+                    (TimeInRange(h.StartTime, startTime, endTime) &&
+                    TimeInRange(h.EndTime, startTime, endTime)))
+                    .Where(h => h.StrReport == itemSTE.Reporte)
+                    .ToList();
+
+
+
+
+                if (_horusCoincidencia.Count > 0)
+                {
+                    EscenarioCoincidenciaTotalSTE(itemSTE, _horusCoincidencia);
+                }
+                else
+                {
+                    EscenarioCoincidenciaParcialSTE(itemSTE, userRow, startTime, endTime, nuevaFechaHoraFormato, _horusCoincidencia);
+                }
+
+            }
+        }
+
+        private void EscenarioCoincidenciaParcialSTE(ParametersSteInitialEntity? itemTSE, UserEntity? userRow, DateTime startTime, DateTime endTime, string nuevaFechaHoraFormato, List<HorusReportEntity> _horusCoincidencia)
+        {
+            //------------------------------------------------------------------------------------------------------------------
+
+            //Escenario coincidencia Parcial
+            //=================================================================
+            var _horusCoincidenciaParcial = _dataBaseService.HorusReportEntity
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                .AsEnumerable()
+                .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
+                (TimeInRange(h.StartTime, startTime, endTime) &&
+                TimeInRange(h.EndTime, startTime, endTime)))
+                .Where(h => h.StrReport == itemTSE.Reporte)
+                .ToList();
+
+
+
+
+            if (_horusCoincidenciaParcial.Count > 0)
+            {
+
+                if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemTSE.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin)
+                {
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemTSE.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED y Horas Diferentes";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemTSE.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED y Horas Iguales";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemTSE.EstatusOrigen == "FINAL" || itemTSE.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime != itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "EN_OVERTIME";
+                    _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                    _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a (FINAL/SUBMITTED) y Horas Diferentes";
+                }
+                else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemTSE.EstatusOrigen == "FINAL" || itemTSE.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin))
+                {
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                }
+            }
+            //------------------------------------------------------------------------------------------------------------------
+        }
+
+        private static void EscenarioCoincidenciaTotalSTE(ParametersSteInitialEntity? itemARPp, List<HorusReportEntity> _horusCoincidencia)
+        {
+            if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
+            {
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+            }
+            else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
+            {
+                itemARPp.EstatusProceso = "EN_OVERTIME";
+                _horusCoincidencia[0].EstatusFinal = "DESCARTADO";
+                _horusCoincidencia[0].DetalleEstatusFinal = "Actualización de ESTATUS (FINAL/SUBMITTED) a EXTRACTED";
+            }
+            else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
+            {
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+            }
+        }
+
 
         private async Task updateCargaStatus(string idCarga,string message)
         {
