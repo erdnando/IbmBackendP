@@ -24,17 +24,25 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Create
 
         public async Task<UsersExceptions> Execute(UsersExceptionsModelC createUsersException)
         {
-            var entity = _mapper.Map<UsersExceptions>(createUsersException);
-            entity.IdUsersExceptions = Guid.NewGuid();
+            UsersExceptions newUserTemp = new() {
+                UserId = createUsersException.UserId,
+                AssignedUserId = createUsersException.AssignedUserId,
+                Description = createUsersException.Description,
+                horas= createUsersException.horas,
+                IdUsersExceptions = Guid.NewGuid(),
+                StartDate = createUsersException.StartDate,
+            };
+            //var entity = _mapper.Map<UsersExceptions>(createUsersException);
+            //entity.IdUsersExceptions = Guid.NewGuid();
 
-            await _dataBaseService.UsersExceptions.AddAsync(entity);
+            await _dataBaseService.UsersExceptions.AddAsync(newUserTemp);
 
             await _dataBaseService.SaveAsync();
 
 
             await _logCommand.Log(createUsersException.UserId.ToString(), "Crea excepcion", createUsersException);
 
-            return entity;
+            return newUserTemp;
         }
     }
 }
