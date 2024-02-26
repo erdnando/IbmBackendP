@@ -2703,8 +2703,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
                     //notificar al admin
-                    
-                    ////_emailCommand.SendEmail(new EmailModel { To = "pruebasportaltls@gmail.com", Plantilla = "11" });
+                    //*p0rtaltlsx*
+                    _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
                     Thread.Sleep(300);
                     continue;
                 }
@@ -2736,7 +2736,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
                     //notificar al admin
-                    //_emailCommand.SendEmail(new EmailModel { To = "pruebasportaltls@gmail.com", Plantilla = "11" });
+                    _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
                     Thread.Sleep(300);
                     continue;
                 }
@@ -2768,7 +2768,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
                     //notificar al admin
-                    //_emailCommand.SendEmail(new EmailModel { To = "pruebasportaltls@gmail.com", Plantilla = "11" });
+                    _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
                     Thread.Sleep(300);
                     continue;
                 }

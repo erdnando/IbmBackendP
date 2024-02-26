@@ -186,7 +186,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Email
             try
             {
                 //just to test, please remove afte finishing your test process!!!!
-                model.To = "pruebasportaltls@gmail.com";
+                //model.To = "pruebasportaltls@gmail.com";
 
                 smtpClient.Send("notifications@cognos.ibm.com", model.To, GetSubject(model), GetBody(model));
                 
