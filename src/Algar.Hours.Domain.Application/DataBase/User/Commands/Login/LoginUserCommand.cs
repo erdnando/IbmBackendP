@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using AutoMapper;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -37,8 +38,32 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Login
                 .Include(e => e.RoleEntity)
                 .Where(x => x.Email.ToLower().Trim() == model.UserName.ToLower().Trim() && x.Password == model.Password).FirstOrDefault();
             var ModelUser = _mapper.Map<CreateUserModel>(entity);
+            var RowGralFS = _databaseService.HorusReportEntity.Where(op => (op.EstatusOrigen == "FINAL" || op.EstatusOrigen == "SUBMITTED") && op.EstatusFinal != "DESCARTADO").ToList();
+            var RowGralFS10 = RowGralFS.Where(op =>(DateTime.Now - DateTime.Parse(op.strCreationDate)).Days > 10).ToList();
+            List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
+            foreach (var item10 in RowGralFS10)
+            {
+                item10.EstatusFinal = "DESCARTADO";
+                item10.DetalleEstatusFinal = "Su reporte no ha podido ser actualizado a EXTRACTED debido a que han pasado 10 dias sin tener alguna actualizacion. Por lo cual pasa es estatus DESCARTADO. Por favor contacte a su gerente para mas informacion";
+                Domain.Entities.AssignmentReport.AssignmentReport rowAddAssig = new();
+                rowAddAssig = new()
+                {
+                    IdAssignmentReport = Guid.NewGuid(),
+                    UserEntityId = new Guid("53765c41-411f-4add-9034-7debaf04f276"),
+                    HorusReportEntityId = item10.IdHorusReport,
+                    State = 1,
+                    Description = "DESCARTADO, debido a que han pasado 10 dias sin tener alguna actualizacion ",
+                    strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                    Resultado = (byte)Enums.Enums.AprobacionPortalDB.Descartado,
+                    Nivel = 2
+                };
+                rowAssignments.Add(rowAddAssig);
+                await _logCommand.Log("53765c41-411f-4add-9034-7debaf04f276", "DESCARTA REGISTRO", item10);
+            }
+            _databaseService.assignmentReports.AddRangeAsync(rowAssignments);
+            await _databaseService.SaveAsync();
 
-            if(entity != null)
+            if (entity != null)
             {
                 await _logCommand.Log(entity.IdUser.ToString(), "Log In al sistema", model);
             }

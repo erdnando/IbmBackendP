@@ -17,6 +17,7 @@
             Rechazado = 3,
             Cerrada = 4,
             AprobadoN0 = 5,
+            Descartado = 6,
 
         }
 
