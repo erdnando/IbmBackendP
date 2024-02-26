@@ -39,7 +39,10 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Login
                 .Where(x => x.Email.ToLower().Trim() == model.UserName.ToLower().Trim() && x.Password == model.Password).FirstOrDefault();
             var ModelUser = _mapper.Map<CreateUserModel>(entity);
             var RowGralFS = _databaseService.HorusReportEntity.Where(op => (op.EstatusOrigen == "FINAL" || op.EstatusOrigen == "SUBMITTED") && op.EstatusFinal != "DESCARTADO").ToList();
-            var RowGralFS10 = RowGralFS.Where(op =>(DateTime.Now - DateTime.Parse(op.strCreationDate)).Days > 10).ToList();
+            //var RowGralFS10 = RowGralFS.Where(op =>(DateTime.Now - DateTime.Parse(op.strCreationDate)).Days > 10).ToList();
+           // var RowGralFS10 = RowGralFS.Where(op => (DateTime.Now - DateTime.Parse(op.strCreationDate.Substring(0, 10))).Days > 10).ToList();
+           /*
+
             List<Domain.Entities.AssignmentReport.AssignmentReport> rowAssignments = new();
             foreach (var item10 in RowGralFS10)
             {
@@ -61,7 +64,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Login
                 await _logCommand.Log("53765c41-411f-4add-9034-7debaf04f276", "DESCARTA REGISTRO", item10);
             }
             _databaseService.assignmentReports.AddRangeAsync(rowAssignments);
-            await _databaseService.SaveAsync();
+            await _databaseService.SaveAsync();*/
 
             if (entity != null)
             {
