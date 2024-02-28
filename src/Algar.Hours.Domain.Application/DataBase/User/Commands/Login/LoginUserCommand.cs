@@ -76,6 +76,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Login
             foreach (var item10 in RowGralFS10)
             {
                 item10.EstatusFinal = "DESCARTADO";
+                item10.Estado= (int)Enums.Enums.AprobacionPortalDB.Descartado;
                 item10.DetalleEstatusFinal = "Su reporte no ha podido ser actualizado a EXTRACTED debido a que han pasado 10 dias sin tener alguna actualizacion. Por lo cual pasa es estatus DESCARTADO. Por favor contacte a su gerente para mas informacion";
                 Domain.Entities.AssignmentReport.AssignmentReport rowAddAssig = new();
                 rowAddAssig = new()

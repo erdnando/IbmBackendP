@@ -2697,102 +2697,102 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
            
             
 
-            foreach (var evento in ARPGral)
-            {
-                var userData = usersTLS.FirstOrDefault(e => e.EmployeeCode == evento.EmployeeCode);
-                if (userData == null)
-                {
-                    //no se pudo enviar el correo, por q no hay datos registrados en el sistema
+            //foreach (var evento in ARPGral)
+            //{
+            //    var userData = usersTLS.FirstOrDefault(e => e.EmployeeCode == evento.EmployeeCode);
+            //    if (userData == null)
+            //    {
+            //        //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
-                    //notificar al admin
-                    //*p0rtaltlsx*
-                    _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
-                    Thread.Sleep(300);
-                    continue;
-                }
+            //        //notificar al admin
+            //        //*p0rtaltlsx*
+            //        _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
+            //        Thread.Sleep(300);
+            //        continue;
+            //    }
                 
-                try
-                {
-                    //TODO Definir plantilla de correo
-                    switch (evento.EstatusProceso)
-                    {
-                        case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "8" });break;
-                        case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "9" }); break;
-                        case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "10" }); break;
-                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "12" }); break;
-                        default: break; 
-                    }
+            //    try
+            //    {
+            //        //TODO Definir plantilla de correo
+            //        switch (evento.EstatusProceso)
+            //        {
+            //            case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "8" });break;
+            //            case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "9" }); break;
+            //            case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "10" }); break;
+            //            case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userData!.Email, Plantilla = "12" }); break;
+            //            default: break; 
+            //        }
                    
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-            }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex.ToString());
+            //    }
+            //}
 
-            foreach (var eventoSTE in STEGral)
-            {
-                var userDataSte = usersTLS.FirstOrDefault(e => e.EmployeeCode == eventoSTE.EmployeeCode);
-                if (userDataSte == null)
-                {
-                    //no se pudo enviar el correo, por q no hay datos registrados en el sistema
+            //foreach (var eventoSTE in STEGral)
+            //{
+            //    var userDataSte = usersTLS.FirstOrDefault(e => e.EmployeeCode == eventoSTE.EmployeeCode);
+            //    if (userDataSte == null)
+            //    {
+            //        //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
-                    //notificar al admin
-                    _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
-                    Thread.Sleep(300);
-                    continue;
-                }
+            //        //notificar al admin
+            //        _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
+            //        Thread.Sleep(300);
+            //        continue;
+            //    }
 
-                try
-                {
-                    //TODO Definir plantilla de correo
-                    switch (eventoSTE.EstatusProceso)
-                    {
-                        case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "8" }); break;
-                        case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "9" }); break;
-                        case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "10" }); break;
-                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "12" }); break;
-                        default: break;
-                    }
+            //    try
+            //    {
+            //        //TODO Definir plantilla de correo
+            //        switch (eventoSTE.EstatusProceso)
+            //        {
+            //            case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "8" }); break;
+            //            case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "9" }); break;
+            //            case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "10" }); break;
+            //            case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userDataSte!.Email, Plantilla = "12" }); break;
+            //            default: break;
+            //        }
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-            }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex.ToString());
+            //    }
+            //}
 
-            foreach (var eventoTSE in TSEGral)
-            {
-                var userDataTse = usersTLS.FirstOrDefault(e => e.EmployeeCode == eventoTSE.EmployeeCode);
-                if (userDataTse == null)
-                {
-                    //no se pudo enviar el correo, por q no hay datos registrados en el sistema
+            //foreach (var eventoTSE in TSEGral)
+            //{
+            //    var userDataTse = usersTLS.FirstOrDefault(e => e.EmployeeCode == eventoTSE.EmployeeCode);
+            //    if (userDataTse == null)
+            //    {
+            //        //no se pudo enviar el correo, por q no hay datos registrados en el sistema
 
-                    //notificar al admin
-                    _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
-                    Thread.Sleep(300);
-                    continue;
-                }
+            //        //notificar al admin
+            //        _emailCommand.SendEmail(new EmailModel { To = "portaltlsx@gmail.com", Plantilla = "11" });
+            //        Thread.Sleep(300);
+            //        continue;
+            //    }
 
-                try
-                {
-                    //TODO Definir plantilla de correo
-                    switch (eventoTSE.EstatusProceso)
-                    {
-                        case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "8" }); break;
-                        case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "9" }); break;
-                        case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "10" }); break;
-                        case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "12" }); break;
-                        default: break;
-                    }
+            //    try
+            //    {
+            //        //TODO Definir plantilla de correo
+            //        switch (eventoTSE.EstatusProceso)
+            //        {
+            //            case "NO_APLICA_X_HORARIO": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "8" }); break;
+            //            case "NO_APLICA_X_OVERTIME": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "9" }); break;
+            //            case "NO_APLICA_X_OVERLAPING": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "10" }); break;
+            //            case "NO_APLICA_X_FALTA_DATOS_INICIO_FIN": _emailCommand.SendEmail(new EmailModel { To = userDataTse!.Email, Plantilla = "12" }); break;
+            //            default: break;
+            //        }
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-            }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex.ToString());
+            //    }
+            //}
 
 
             return true;
@@ -2905,7 +2905,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
 
-                        if ((tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
+                        if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
                         {
                             item.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
                             //=====================================================================
