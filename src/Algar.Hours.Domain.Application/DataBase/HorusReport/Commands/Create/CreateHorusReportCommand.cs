@@ -253,7 +253,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             
 
             var HorasPortalDBT = infoQuery.Select(x => double.Parse(x.HorusReportEntity.CountHours)).Sum();
-            if ((tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada))
+            if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada))
             {
                 //Se ha superado el límite de horas para StandBy
                 // agregar notificacion email

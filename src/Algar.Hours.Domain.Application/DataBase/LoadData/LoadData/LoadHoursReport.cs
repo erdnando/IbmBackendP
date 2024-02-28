@@ -2903,7 +2903,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
 
-                        if ((tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
+                        if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
                         {
                             item.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
                             //=====================================================================
