@@ -241,7 +241,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
 
             var parametrosCountry = _dataBaseService.UserEntity.Include("CountryEntity").FirstOrDefault(x => x.IdUser == horusModel.UserEntityId);
-            var limitesCountry = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == parametrosCountry.CountryEntityId);
+
+            var limitesCountry = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == parametrosCountry.CountryEntityId && x.TypeHours==0);
             var HorasLimiteDia = limitesCountry.TargetTimeDay;
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
@@ -275,7 +276,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             //obtine datos para validar si existe un registro previo (OVERLAPPING)
             var data = _dataBaseService.HorusReportEntity
-                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == model.UserEntityId)
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == model.UserEntityId && h.EstatusFinal!="RECHAZADO")
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, model.StartTime, model.EndTime) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
