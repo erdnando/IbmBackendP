@@ -858,6 +858,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse.Estado = "";
                             parametersTse.Reporte = registrox.WorkOrder;
                             parametersTse.EstatusOrigen = registrox.Status.Trim().ToUpper();
+                            
 
                         //valida pais
                         if (paisRegistro == null)
@@ -2195,7 +2196,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSte.Festivo = "N";
                     parametersSte.Estado = "";
                     parametersSte.Reporte = registrox.NumeroCaso;
-                    parametersSte.EstatusOrigen = "STE";
+                    parametersSte.EstatusOrigen = "STE"; //STE no maneja estatus
+                    
 
                     //valida pais
                     if (paisRegistro == null)
@@ -2903,7 +2905,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
 
-                        if ((tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
+                        if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
                         {
                             item.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
                             //=====================================================================
@@ -3019,7 +3021,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemARPNew.EstatusOrigen,
                         EstatusFinal = "ENPROGRESO",
-                        DetalleEstatusFinal =""
+                        DetalleEstatusFinal = "",
+                        Origen = "ARP",
+                        Semana = getWeek(nuevaFechaHoraFormato)
 
                     };
                     rowsHorusNew.Add(rowAdd);
@@ -3068,7 +3072,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemTSENew.EstatusOrigen,
                         EstatusFinal = "ENPROGRESO",
-                        DetalleEstatusFinal = ""
+                        DetalleEstatusFinal = "",
+                        Origen = "TSE",
+                        Semana = getWeek(nuevaFechaHoraFormato)
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3115,7 +3121,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
                         EstatusOrigen = itemSTENew.EstatusOrigen,
                         EstatusFinal = "ENPROGRESO",
-                        DetalleEstatusFinal = ""
+                        DetalleEstatusFinal = "",
+                        Origen = "STE",
+                        Semana = getWeek(nuevaFechaHoraFormato)
                     };
                     rowsHorusNew.Add(rowAdd);
 
@@ -3158,6 +3166,26 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
             }
             return summary;
+        }
+
+        private string getWeek(string strStartDate)
+        {
+            try
+            {
+                CultureInfo cul = CultureInfo.CurrentCulture;
+                var semanahorario = new DateTimeOffset();
+
+                semanahorario = DateTimeOffset.ParseExact(strStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+
+
+                return cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString();
+            }
+            catch (Exception)
+            {
+
+                return "0";
+            }
+
         }
 
         private void PreaprobadosARP(List<UserEntity> UserLst, List<ParametersArpInitialEntity> rowParameterFinal)

@@ -30,6 +30,8 @@ namespace Algar.Hours.Domain.Entities.HorusReport
         public string EstatusOrigen { get; set; }
         public string EstatusFinal { get; set; }
         public string DetalleEstatusFinal { get; set; }
+        public string Origen { get; set; }
+        public string Semana { get; set; }
 
     }
 }

@@ -43,50 +43,19 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
 
-            var arp = await (from p in _dataBaseService.ParametersArpInitialEntity
-                            // join a in _dataBaseService.ARPLoadDetailEntity
-                            // on p.ARPLoadDetailEntityId equals a.IdDetail
-                             where (p.Semana == semana && p.EmployeeCode == usuario)
-                             select new
-                             {
-                                 fechaRep = p.FECHA_REP,
-                                 totalMinutos = p.TOTAL_MINUTOS
-                             }).Distinct().ToListAsync();
-
-            var StandByRep = await (from us in _dataBaseService.UserEntity
-                                    join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0)
-                                    select new
-                                    {
-                                        fechaRep = hor.DateApprovalSystem,
-                                        totalHoras = hor.CountHours
-                                    }
-                              ).Distinct().ToListAsync();
-
-            var OverTimeRep = await (from us in _dataBaseService.UserEntity
-                                     join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1)
-                                     select new
-                                     {
-                                         fechaRep = hor.DateApprovalSystem,
-                                         totalHoras = hor.CountHours
-                                     }
-            ).Distinct().ToListAsync();
-
-
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0)
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal != "RECHAZADO")
                                         select new
                                         {
                                             Mes = hor.DateApprovalSystem.Month,
                                             totalHoras = hor.CountHours
                                         }
-                              ).Distinct().ToListAsync();
+                             ).ToListAsync();
 
             var OverTimeRepGraf = await (from us in _dataBaseService.UserEntity
                                          join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1)
+                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.EstatusFinal != "RECHAZADO")
                                          select new
                                          {
                                              Mes = hor.DateApprovalSystem.Month,
@@ -94,25 +63,75 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                                          }
                               ).Distinct().ToListAsync();
 
-            var tse = await (from p in _dataBaseService.ParametersTseInitialEntity
-                            // join a in _dataBaseService.TSELoadEntity
-                            // on p.TSELoadEntityIdTSELoad equals a.IdTSELoad
-                             where (p.Semana == semana && p.EmployeeCode == usuario)
-                             select new
-                             {
-                                 fechaRep = p.FECHA_REP,
-                                 totalMinutos = p.TOTAL_MINUTOS
-                             }).Distinct().ToListAsync();
 
-            var ste = await (from p in _dataBaseService.ParametersSteInitialEntity
-                            // join a in _dataBaseService.STELoadEntity
-                            // on p.STELoadEntityId equals a.IdSTELoad
-                             where (p.Semana == semana && p.EmployeeCode == usuario)
+            var StandByRep = await (from us in _dataBaseService.UserEntity
+                                    join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
+                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal != "RECHAZADO")
+                                    select new
+                                    {
+                                        fechaRep = hor.DateApprovalSystem,
+                                        totalHoras = hor.CountHours
+                                    }
+                              ).ToListAsync();
+
+         
+
+            //===============================================================================================================================
+
+            var OverTimeRep = await (from us in _dataBaseService.UserEntity
+                                     join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
+                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.EstatusFinal != "RECHAZADO")
+                                     select new
+                                     {
+                                         fechaRep = hor.DateApprovalSystem,
+                                         totalHoras = hor.CountHours
+                                     }
+            ).ToListAsync();
+
+
+            
+
+            
+
+            //========================================================================================================================
+
+           
+
+
+            var arp = await (from us in _dataBaseService.UserEntity
+                            join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
+                            where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.Origen=="ARP" && hor.Semana== semana.ToString() && hor.EstatusFinal != "RECHAZADO")
+                            select new
+                            {
+                                fechaRep = hor.StrStartDate,
+                                totalMinutos = (double.Parse(hor.CountHours)*60).ToString()
+                            }
+                            ).ToListAsync();
+
+
+            var tse = await (from us in _dataBaseService.UserEntity
+                             join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
+                             where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.Origen == "TSE" && hor.Semana == semana.ToString() && hor.EstatusFinal != "RECHAZADO")
                              select new
                              {
-                                 fechaRep = p.FECHA_REP,
-                                 totalMinutos = p.TOTAL_MINUTOS
-                             }).Distinct().ToListAsync();
+                                 fechaRep = hor.StrStartDate,
+                                 totalMinutos = (double.Parse(hor.CountHours) * 60).ToString()
+                             }
+                             ).ToListAsync();
+
+
+            var ste = await (from us in _dataBaseService.UserEntity
+                             join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
+                             where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.Origen == "STE" && hor.Semana == semana.ToString() && hor.EstatusFinal != "RECHAZADO")
+                             select new
+                             {
+                                 fechaRep = hor.StrStartDate,
+                                 totalMinutos = (double.Parse(hor.CountHours) * 60).ToString()
+                             }
+                             ).ToListAsync();
+
+           
+            //========================================================================================================================
 
 
             ReporteHorasTLS repHorarp = new()
@@ -152,11 +171,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             foreach (var a in allWeekDays)
             {
-                /* var restARP = arp.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
-                 var restStanBy = StandByRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}")));
-                 var restOverTime = OverTimeRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}")));
-                 var restTSE = tse.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
-                 var restSTE = ste.Where(op => op.fechaRep == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));*/
+               
 
                 var restARP = arp.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
                 var restStanBy = StandByRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}")));
@@ -256,6 +271,26 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
         }
 
+        private int getWeek(string strStartDate)
+        {
+            try
+            {
+                CultureInfo cul = CultureInfo.CurrentCulture;
+                var semanahorario = new DateTimeOffset();
+
+                semanahorario = DateTimeOffset.ParseExact(strStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+
+
+                return cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
+            }
+            catch (Exception)
+            {
+
+                return 0;
+            }
+           
+        }
+
         public async Task<GralReporteHorasMesTLS> ReporteGraficas(int anio, string usuario)
         {
             GralReporteHorasMesTLS GralReportes = new();
@@ -264,23 +299,23 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             // 
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0  && hor.DateApprovalSystem.Year == anio)
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0  && hor.DateApprovalSystem.Year == anio && hor.EstatusFinal != "RECHAZADO")
                                         select new
                                         {
                                             Mes = hor.DateApprovalSystem.Month,
                                             totalHoras = hor.CountHours
                                         }
-                              ).Distinct().ToListAsync();
+                              ).ToListAsync();
 
             var OverTimeRepGraf = await (from us in _dataBaseService.UserEntity
                                          join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.DateApprovalSystem.Year == anio)
+                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.DateApprovalSystem.Year == anio && hor.EstatusFinal != "RECHAZADO")
                                          select new
                                          {
                                              Mes = hor.DateApprovalSystem.Month,
                                              totalHoras = hor.CountHours
                                          }
-                              ).Distinct().ToListAsync();
+                              ).ToListAsync();
 
 
             ReporteHorasMesTLS repHorStanBy = new()

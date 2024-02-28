@@ -165,6 +165,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentHReport.DateApprovalSystem = DateTime.Now;
                     currentHReport.EstatusFinal = "RECHAZADO";
+                    currentHReport.DetalleEstatusFinal = "RECHAZADO POR EL EMPLEADO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
@@ -188,6 +189,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentHReport.DateApprovalSystem = DateTime.Now;
                     currentHReport.EstatusFinal = "RECHAZADO";
+                    currentHReport.DetalleEstatusFinal = "RECHAZADO POR N1";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
@@ -209,6 +211,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
                     currentHReport.DateApprovalSystem = DateTime.Now;
                     currentHReport.EstatusFinal = "RECHAZADO";
+                    currentHReport.DetalleEstatusFinal = "RECHAZADO POR N2";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
                     await _dataBaseService.SaveAsync();
 
