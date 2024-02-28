@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Linq;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using DocumentFormat.OpenXml.Presentation;
 
 namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 {
@@ -336,6 +337,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             entity.EstatusFinal = "ENPROGRESO";
             entity.DetalleEstatusFinal = "";
 
+            entity.Origen = "STANDBY";
+            entity.Semana = getWeek(nuevaFechaHoraFormato);
+
 
             _dataBaseService.HorusReportEntity.AddAsync(entity);
             //await _dataBaseService.SaveAsync();
@@ -366,6 +370,26 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             return returnPortalDB;
 
+
+        }
+
+        private string getWeek(string strStartDate)
+        {
+            try
+            {
+                CultureInfo cul = CultureInfo.CurrentCulture;
+                var semanahorario = new DateTimeOffset();
+
+                semanahorario = DateTimeOffset.ParseExact(strStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+
+
+                return cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString();
+            }
+            catch (Exception)
+            {
+
+                return "0";
+            }
 
         }
 
