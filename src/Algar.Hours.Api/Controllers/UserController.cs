@@ -216,23 +216,25 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
 
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
-                
-
-           //  return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
-             return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-           // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
 
 
-            }catch(Exception ex)
+                //  return Redirect("http://localhost:4200/dashboard/#/dashboard?uxm_erd=" + encodedStr);
+                //return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud/#/dashboard?uxm_erd=" + encodedStr);
+
+
+
+            }
+            catch(Exception ex)
             {
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML"+ex.Message));
-                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
+                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud/#/dashboard?uxm_erd=" + encodedStr);
             }
 
 
             // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
             return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-           // return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, samlResponse));
+
 
 
         }
