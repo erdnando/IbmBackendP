@@ -21,6 +21,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Algar.Hours.Domain.Entities.HorusReport;
 using MySqlX.XDevAPI.Common;
+using Npgsql;
 
 namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
@@ -63,7 +64,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
             var initialRow = 2;
             var currentRow = initialRow;
-            List<WorkdayExceptionEntity> exceptions = _dataBaseService.WorkdayExceptionEntity.Where(x => x.Active == true).ToList();
+            List<WorkdayExceptionEntity> exceptions = new List<WorkdayExceptionEntity>();
+            List<string> employeeCodes = new List<string>();
             List<WorkdayHourModel> whModels = new List<WorkdayHourModel>();
             List<WorkdayUserModel> wuModels = new List<WorkdayUserModel>();
 
@@ -81,9 +83,12 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 var model = models.users[i];
                 var loadWorkdayModel = Newtonsoft.Json.JsonConvert.DeserializeObject<WorkdayUserModel>(model.ToJsonString());
                 wuModels.Add(loadWorkdayModel);
+                employeeCodes.Add(loadWorkdayModel.HomeCNUM);
             }
 
-            var entities = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" WHERE TO_TIMESTAMP(\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')")
+            String employeeCodesIn = $"'{String.Join("','", employeeCodes.ToArray())}'";
+            exceptions = _dataBaseService.WorkdayExceptionEntity.FromSqlRaw($"SELECT * FROM \"WorkdayExceptionEntity\" WHERE \"Active\" = true AND \"EmployeeCode\" IN ({employeeCodesIn}) AND \"RealDate\" >= TO_DATE('{dateTime.ToString("dd/MM/yyyy")}', 'DD/MM/YYYY')").ToList();
+            var entities = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')")
                 .Include(x => x.UserEntity)
                 .ToList();
 
@@ -181,9 +186,6 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
             return modeloHorario;
         }*/
 
-        bool workdayWhere(WorkdayExceptionEntity exception) {
-            return false;
-        }
 
         private string FormatTime(string time)
         {
