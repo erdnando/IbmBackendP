@@ -8,7 +8,6 @@ using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -17,6 +16,11 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Net.Http.Headers;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
+using Algar.Hours.Domain.Entities.WorkdayException;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Algar.Hours.Domain.Entities.HorusReport;
+using MySqlX.XDevAPI.Common;
 
 namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
@@ -38,9 +42,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
         }
 
-        public async Task<FileStreamResult> LoadExcel(JsonArray models) {
-            List<LoadHoursReportManagerModel> foundedWorkdays = new List<LoadHoursReportManagerModel>();
-
+        public async Task<FileStreamResult> LoadExcel(LoadHoursReportManagerModel models) {
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Workday");
 
@@ -61,47 +63,65 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
             var initialRow = 2;
             var currentRow = initialRow;
-            for (var i = 0; i < models.Count(); i++) {
-                var model = models[i];
-                var loadWorkdayModel = Newtonsoft.Json.JsonConvert.DeserializeObject<LoadHoursReportManagerModel>(model.ToJsonString());
+            List<WorkdayExceptionEntity> exceptions = _dataBaseService.WorkdayExceptionEntity.Where(x => x.Active == true).ToList();
+            List<WorkdayHourModel> whModels = new List<WorkdayHourModel>();
+            List<WorkdayUserModel> wuModels = new List<WorkdayUserModel>();
 
-                var ampm = loadWorkdayModel.StartTime.Substring(6);
-                var startHour = Convert.ToInt32(loadWorkdayModel.StartTime.Substring(0, 2));
-                startHour += ampm == "PM"? 12 : 0;
+            DateTime dateTime = DateTime.Now;
+            for (var i = 0; i < models.hours.Count(); i++) {
+                var model = models.hours[i];
+                var loadWorkdayModel = Newtonsoft.Json.JsonConvert.DeserializeObject<WorkdayHourModel>(model.ToJsonString());
+                if (loadWorkdayModel.StartTime == null || loadWorkdayModel.EndTime == null) continue;
+                whModels.Add(loadWorkdayModel);
 
-                ampm = loadWorkdayModel.EndTime.Substring(6);
-                var endHour = Convert.ToInt32(loadWorkdayModel.EndTime.Substring(0, 2));
-                endHour += ampm == "PM" ? 12 : 0;
+                if (loadWorkdayModel.ReportedDate < dateTime) dateTime = loadWorkdayModel.ReportedDate;
+            }
 
-                var startTime = startHour.ToString("00") + loadWorkdayModel.StartTime.Substring(2, 3);
-                var endTime = endHour.ToString("00") + loadWorkdayModel.EndTime.Substring(2, 3);
+            for (var i = 0; i < models.users.Count(); i++) {
+                var model = models.users[i];
+                var loadWorkdayModel = Newtonsoft.Json.JsonConvert.DeserializeObject<WorkdayUserModel>(model.ToJsonString());
+                wuModels.Add(loadWorkdayModel);
+            }
 
-                var entity = _dataBaseService.HorusReportEntity
-                    .Include(x => x.UserEntity)
-                    .AsEnumerable()
-                    .Where(x => x.UserEntity.EmployeeCode == loadWorkdayModel.EmployeeID && DateTime.ParseExact(x.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == loadWorkdayModel.ReportedDate && x.StartTime == startTime && x.EndTime == endTime)
-                    .FirstOrDefault();
-                if (entity != null) {
-                    /*var modeloHorario = await CreateModeloHorario(convert);*/
-                    var statusFinal = (entity.EstatusFinal == "FINAL" || entity.EstatusFinal == "SUBMITED") ? "ENPROCESO" : "APROBADO";
-                    worksheet.Cell(currentRow, 1).Value = loadWorkdayModel.EmployeeID;
-                    worksheet.Cell(currentRow, 2).Value = loadWorkdayModel.ReportedDate;
-                    worksheet.Cell(currentRow, 3).Value = entity.EstatusOrigen;
-                    worksheet.Cell(currentRow, 4).Value = loadWorkdayModel.Quantity;
+            var entities = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" WHERE TO_TIMESTAMP(\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')")
+                .Include(x => x.UserEntity)
+                .ToList();
+
+            for (var i = 0; i < whModels.Count(); i++) {
+                WorkdayHourModel workdayHourModel = whModels[i];
+                WorkdayUserModel workdayUserModel = null;
+                foreach (var model in wuModels) {
+                    if (workdayHourModel.EmployeeID == model.EmployeeID) {
+                        workdayUserModel = model; break;
+                    }
+                }
+
+                if (workdayUserModel == null) continue;
+
+                var startTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8)).ToString("HH:mm");
+                var endTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8)).ToString("HH:mm");
+
+                HorusReportEntity horusReportEntity = null;
+                foreach (var entity in entities) {
+                    if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { horusReportEntity = entity; break; };
+                }
+
+                if (horusReportEntity != null) {
+                    var statusFinal = (horusReportEntity.EstatusFinal == "FINAL" || horusReportEntity.EstatusFinal == "SUBMITTED") ? "ENPROCESO" : "APROBADO";
+                    worksheet.Cell(currentRow, 1).Value = horusReportEntity.UserEntity.EmployeeCode;
+                    worksheet.Cell(currentRow, 2).Value = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy");
+                    worksheet.Cell(currentRow, 3).Value = horusReportEntity.EstatusOrigen;
+                    worksheet.Cell(currentRow, 4).Value = horusReportEntity.CountHours;
                     worksheet.Cell(currentRow, 5).Value = statusFinal;
                     worksheet.Cell(currentRow, 6).Value = "";
-                    
                 }
                 else {
-                    var exception = _dataBaseService.WorkdayExceptionEntity
-                    .Include(x => x.UserEntity)
-                    .AsEnumerable()
-                    .Where(x => x.Active == true && x.EmployeeCode == loadWorkdayModel.EmployeeID && x.RealDate.ToString("dd/MM/yyyy") == loadWorkdayModel.ReportedDate.ToString("dd/MM/yyyy") && x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime)
+                    var exception = exceptions.Where(x => x.EmployeeCode == workdayUserModel.HomeCNUM && x.RealDate.ToString("dd/MM/yyyy") == workdayHourModel.ReportedDate.ToString("dd/MM/yyyy") && x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime)
                     .FirstOrDefault();
 
-                    worksheet.Cell(currentRow, 1).Value = loadWorkdayModel.EmployeeID;
-                    worksheet.Cell(currentRow, 2).Value = loadWorkdayModel.ReportedDate;
-                    worksheet.Cell(currentRow, 4).Value = loadWorkdayModel.Quantity;
+                    worksheet.Cell(currentRow, 1).Value = workdayUserModel.EmployeeID;
+                    worksheet.Cell(currentRow, 2).Value = workdayHourModel.ReportedDate;
+                    worksheet.Cell(currentRow, 4).Value = workdayHourModel.Quantity;
                     worksheet.Cell(currentRow, 6).Value = "";
 
                     if (exception != null) {
@@ -116,8 +136,9 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 currentRow++;
+
             }
-            
+
             var stream = new MemoryStream();
             workbook.SaveAs(stream);
             stream.Position = 0;
@@ -125,7 +146,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
             
         }
 
-        private async Task<CreateHorusReportManagerModel> CreateModeloHorario(LoadHoursReportManagerModel convert)
+        /*private async Task<CreateHorusReportManagerModel> CreateModeloHorario(LoadHoursReportManagerModel convert)
         {
             var modeloHorario = new CreateHorusReportManagerModel();
             try
@@ -158,6 +179,10 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
 
             return modeloHorario;
+        }*/
+
+        bool workdayWhere(WorkdayExceptionEntity exception) {
+            return false;
         }
 
         private string FormatTime(string time)

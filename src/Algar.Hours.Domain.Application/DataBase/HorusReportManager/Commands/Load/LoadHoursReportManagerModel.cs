@@ -3,24 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
-    public class LoadHoursReportManagerModel
-    {
-        public long UserEntityManagerId { get; set; }
-        [JsonProperty("Employee ID")]
-        public string EmployeeID { get; set; }
-        public string Worker { get; set; }
-        [JsonProperty("Reported Date")]
-        public DateTime ReportedDate { get; set; }
-        [JsonProperty("Calculated Quantity")]
-        public double Quantity { get; set; }
-        public string Status { get; set; }
-        [JsonProperty("In Time")]
-        public string StartTime { get; set; }
-        [JsonProperty("Out Time")]
-        public string EndTime { get; set; }
+    public class LoadHoursReportManagerModel {
+        public JsonArray hours { get; set; }
+        public JsonArray users { get; set; }
     }
 }
