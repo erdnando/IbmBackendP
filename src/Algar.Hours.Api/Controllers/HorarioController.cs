@@ -77,7 +77,7 @@ namespace Algar.Hours.Api.Controllers
         [HttpPost("LoadExcelMan")]
         [Authorize(Roles = "standard")]
         public async Task<FileStreamResult> LoadExcelMan(
-                [FromBody] JsonArray model, [FromServices] ILoadHorusReportManagerCommand loadHorusReportManagerCommand)
+                [FromBody] LoadHoursReportManagerModel model, [FromServices] ILoadHorusReportManagerCommand loadHorusReportManagerCommand)
         {
             var data = await loadHorusReportManagerCommand.LoadExcel(model);
             return data;
