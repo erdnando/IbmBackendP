@@ -3637,45 +3637,91 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPNew.EmployeeCode);
 
-                    //Generating HORUSREPORT
-                    rowAdd = new()
+
+                    //Caso aprobacion directa por sistema
+                    if (userRow.RoleEntity.NameRole== "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
                     {
-                        IdHorusReport = Guid.NewGuid(),
-                        UserEntityId = userRow.IdUser,
-                        StrStartDate = nuevaFechaHoraFormato,
-                        StartTime = itemARPNew.HoraInicio,
-                        EndTime = itemARPNew.HoraFin,
-                        ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
-                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        CountHours = itemARPNew.totalHoras,
-                        StrReport = itemARPNew.Reporte,
-                        ARPLoadingId = idCarga,
-                        Acitivity = 1,//overtime
-                        NumberReport = Maxen,
-                        DateApprovalSystem = DateTime.Now,
-                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        EstatusOrigen = itemARPNew.EstatusOrigen,
-                        EstatusFinal = "ENPROGRESO",
-                        DetalleEstatusFinal = "",
-                        Origen = "ARP",
-                        Semana = getWeek(nuevaFechaHoraFormato)
+                        //Generating HORUSREPORT
+                        rowAdd = new()
+                        {
+                            IdHorusReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            StrStartDate = nuevaFechaHoraFormato,
+                            StartTime = itemARPNew.HoraInicio,
+                            EndTime = itemARPNew.HoraFin,
+                            ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
+                            strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            CountHours = itemARPNew.totalHoras,
+                            StrReport = itemARPNew.Reporte,
+                            ARPLoadingId = idCarga,
+                            Acitivity = 1,//overtime
+                            NumberReport = Maxen,
+                            DateApprovalSystem = DateTime.Now,
+                            Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2,
+                            EstatusOrigen = itemARPNew.EstatusOrigen,
+                            EstatusFinal = "APROBADO",
+                            DetalleEstatusFinal = "",
+                            Origen = "ARP",
+                            Semana = getWeek(nuevaFechaHoraFormato)
 
-                    };
-                    rowsHorusNew.Add(rowAdd);
+                        };
+                        rowsHorusNew.Add(rowAdd);
 
-
-                    rowAddAssig = new()
+                        rowAddAssig = new()
+                        {
+                            IdAssignmentReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            HorusReportEntityId = rowAdd.IdHorusReport,
+                            State = 1,
+                            Description = "(Aprobado por sistema)",
+                            strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2,
+                            Nivel = 2
+                        };
+                        rowAssignments.Add(rowAddAssig);
+                    }
+                    else
                     {
-                        IdAssignmentReport = Guid.NewGuid(),
-                        UserEntityId = userRow.IdUser,
-                        HorusReportEntityId = rowAdd.IdHorusReport,
-                        State = 0,
-                        Description = "PROCESO_OVERTIME",
-                        strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        Nivel = 0
-                    };
-                    rowAssignments.Add(rowAddAssig);
+                        //Generating HORUSREPORT
+                        rowAdd = new()
+                        {
+                            IdHorusReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            StrStartDate = nuevaFechaHoraFormato,
+                            StartTime = itemARPNew.HoraInicio,
+                            EndTime = itemARPNew.HoraFin,
+                            ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
+                            strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            CountHours = itemARPNew.totalHoras,
+                            StrReport = itemARPNew.Reporte,
+                            ARPLoadingId = idCarga,
+                            Acitivity = 1,//overtime
+                            NumberReport = Maxen,
+                            DateApprovalSystem = DateTime.Now,
+                            Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                            EstatusOrigen = itemARPNew.EstatusOrigen,
+                            EstatusFinal = "ENPROGRESO",
+                            DetalleEstatusFinal = "",
+                            Origen = "ARP",
+                            Semana = getWeek(nuevaFechaHoraFormato)
+
+                        };
+                        rowsHorusNew.Add(rowAdd);
+
+                        rowAddAssig = new()
+                        {
+                            IdAssignmentReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            HorusReportEntityId = rowAdd.IdHorusReport,
+                            State = 0,
+                            Description = "PROCESO_OVERTIME",
+                            strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                            Nivel = 0
+                        };
+                        rowAssignments.Add(rowAddAssig);
+                    }
+                   
                 }
 
                 //TSE
@@ -3689,44 +3735,88 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSENew.EmployeeCode);
 
-                    rowAdd = new()
+
+                    //Caso aprobacion directa por sistema
+                    if (userRow.RoleEntity.NameRole == "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
                     {
-                        IdHorusReport = Guid.NewGuid(),
-                        UserEntityId = userRow.IdUser,
-                        StrStartDate = nuevaFechaHoraFormato,
-                        StartTime = itemTSENew.HoraInicio,
-                        EndTime = itemTSENew.HoraFin,
-                        ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
-                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        CountHours = itemTSENew.totalHoras,
-                        StrReport = itemTSENew.Reporte,
-                        ARPLoadingId = idCarga,
-                        Acitivity = 1,//overtime
-                        NumberReport = Maxen,
-                        DateApprovalSystem = DateTime.Now,
-                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        EstatusOrigen = itemTSENew.EstatusOrigen,
-                        EstatusFinal = "ENPROGRESO",
-                        DetalleEstatusFinal = "",
-                        Origen = "TSE",
-                        Semana = getWeek(nuevaFechaHoraFormato)
-                    };
-                    rowsHorusNew.Add(rowAdd);
+                        //Generating HORUSREPORT
+                        rowAdd = new()
+                        {
+                            IdHorusReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            StrStartDate = nuevaFechaHoraFormato,
+                            StartTime = itemTSENew.HoraInicio,
+                            EndTime = itemTSENew.HoraFin,
+                            ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
+                            strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            CountHours = itemTSENew.totalHoras,
+                            StrReport = itemTSENew.Reporte,
+                            ARPLoadingId = idCarga,
+                            Acitivity = 1,//overtime
+                            NumberReport = Maxen,
+                            DateApprovalSystem = DateTime.Now,
+                            Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2,
+                            EstatusOrigen = itemTSENew.EstatusOrigen,
+                            EstatusFinal = "APROBADO",
+                            DetalleEstatusFinal = "",
+                            Origen = "TSE",
+                            Semana = getWeek(nuevaFechaHoraFormato)
+
+                        };
+                        rowsHorusNew.Add(rowAdd);
 
 
+                        rowAddAssig = new()
+                        {
+                            IdAssignmentReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            HorusReportEntityId = rowAdd.IdHorusReport,
+                            State = 1,
+                            Description = "(Aprobado por sistema)",
+                            strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2,
+                            Nivel = 2
+                        };
+                        rowAssignments.Add(rowAddAssig);
+                    }
+                    else { 
+                        rowAdd = new()
+                        {
+                            IdHorusReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            StrStartDate = nuevaFechaHoraFormato,
+                            StartTime = itemTSENew.HoraInicio,
+                            EndTime = itemTSENew.HoraFin,
+                            ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
+                            strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            CountHours = itemTSENew.totalHoras,
+                            StrReport = itemTSENew.Reporte,
+                            ARPLoadingId = idCarga,
+                            Acitivity = 1,//overtime
+                            NumberReport = Maxen,
+                            DateApprovalSystem = DateTime.Now,
+                            Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                            EstatusOrigen = itemTSENew.EstatusOrigen,
+                            EstatusFinal = "ENPROGRESO",
+                            DetalleEstatusFinal = "",
+                            Origen = "TSE",
+                            Semana = getWeek(nuevaFechaHoraFormato)
+                        };
+                        rowsHorusNew.Add(rowAdd);
 
-                    rowAddAssig = new()
-                    {
-                        IdAssignmentReport = Guid.NewGuid(),
-                        UserEntityId = userRow.IdUser,
-                        HorusReportEntityId = rowAdd.IdHorusReport,
-                        State = 0,
-                        Description = "PROCESO_OVERTIME",
-                        strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        Nivel = 0
-                    };
-                    rowAssignments.Add(rowAddAssig);
+                        rowAddAssig = new()
+                        {
+                            IdAssignmentReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            HorusReportEntityId = rowAdd.IdHorusReport,
+                            State = 0,
+                            Description = "PROCESO_OVERTIME",
+                            strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                            Nivel = 0
+                        };
+                        rowAssignments.Add(rowAddAssig);
+                    }
                 }
                 //STE
                 //------------------------------------------------------------------------
@@ -3738,44 +3828,88 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
                     var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTENew.EmployeeCode);
 
-                    rowAdd = new()
+
+                    //Caso aprobacion directa por sistema
+                    if (userRow.RoleEntity.NameRole == "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
                     {
-                        IdHorusReport = Guid.NewGuid(),
-                        UserEntityId = userRow.IdUser,
-                        StrStartDate = nuevaFechaHoraFormato,
-                        StartTime = itemSTENew.HoraInicio,
-                        EndTime = itemSTENew.HoraFin,
-                        ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
-                        strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        CountHours = itemSTENew.totalHoras,
-                        StrReport = itemSTENew.Reporte,
-                        ARPLoadingId = idCarga,
-                        Acitivity = 1,//overtime
-                        NumberReport = Maxen,
-                        DateApprovalSystem = DateTime.Now,
-                        Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        EstatusOrigen = itemSTENew.EstatusOrigen,
-                        EstatusFinal = "ENPROGRESO",
-                        DetalleEstatusFinal = "",
-                        Origen = "STE",
-                        Semana = getWeek(nuevaFechaHoraFormato)
-                    };
-                    rowsHorusNew.Add(rowAdd);
+                        //Generating HORUSREPORT
+                        rowAdd = new()
+                        {
+                            IdHorusReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            StrStartDate = nuevaFechaHoraFormato,
+                            StartTime = itemSTENew.HoraInicio,
+                            EndTime = itemSTENew.HoraFin,
+                            ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
+                            strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            CountHours = itemSTENew.totalHoras,
+                            StrReport = itemSTENew.Reporte,
+                            ARPLoadingId = idCarga,
+                            Acitivity = 1,//overtime
+                            NumberReport = Maxen,
+                            DateApprovalSystem = DateTime.Now,
+                            Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2,
+                            EstatusOrigen = itemSTENew.EstatusOrigen,
+                            EstatusFinal = "APROBADO",
+                            DetalleEstatusFinal = "",
+                            Origen = "STE",
+                            Semana = getWeek(nuevaFechaHoraFormato)
 
+                        };
+                        rowsHorusNew.Add(rowAdd);
 
-
-                    rowAddAssig = new()
+                        rowAddAssig = new()
+                        {
+                            IdAssignmentReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            HorusReportEntityId = rowAdd.IdHorusReport,
+                            State = 1,
+                            Description = "(Aprobado por sistema)",
+                            strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2,
+                            Nivel = 2
+                        };
+                        rowAssignments.Add(rowAddAssig);
+                    }
+                    else
                     {
-                        IdAssignmentReport = Guid.NewGuid(),
-                        UserEntityId = userRow.IdUser,
-                        HorusReportEntityId = rowAdd.IdHorusReport,
-                        State = 0,
-                        Description = "PROCESO_OVERTIME",
-                        strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                        Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
-                        Nivel = 0
-                    };
-                    rowAssignments.Add(rowAddAssig);
+                        rowAdd = new()
+                        {
+                            IdHorusReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            StrStartDate = nuevaFechaHoraFormato,
+                            StartTime = itemSTENew.HoraInicio,
+                            EndTime = itemSTENew.HoraFin,
+                            ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
+                            strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            CountHours = itemSTENew.totalHoras,
+                            StrReport = itemSTENew.Reporte,
+                            ARPLoadingId = idCarga,
+                            Acitivity = 1,//overtime
+                            NumberReport = Maxen,
+                            DateApprovalSystem = DateTime.Now,
+                            Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                            EstatusOrigen = itemSTENew.EstatusOrigen,
+                            EstatusFinal = "ENPROGRESO",
+                            DetalleEstatusFinal = "",
+                            Origen = "STE",
+                            Semana = getWeek(nuevaFechaHoraFormato)
+                        };
+                        rowsHorusNew.Add(rowAdd);
+
+                        rowAddAssig = new()
+                        {
+                            IdAssignmentReport = Guid.NewGuid(),
+                            UserEntityId = userRow.IdUser,
+                            HorusReportEntityId = rowAdd.IdHorusReport,
+                            State = 0,
+                            Description = "PROCESO_OVERTIME",
+                            strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+                            Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente,
+                            Nivel = 0
+                        };
+                        rowAssignments.Add(rowAddAssig);
+                    }
                 }
 
 

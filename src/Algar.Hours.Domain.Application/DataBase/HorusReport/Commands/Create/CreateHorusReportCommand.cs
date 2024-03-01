@@ -19,6 +19,7 @@ using System.Linq;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using DocumentFormat.OpenXml.Presentation;
+using Algar.Hours.Domain.Entities.AssignmentReport;
 
 namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 {
@@ -166,12 +167,12 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
         {
 
             PortalDBModel returnPortalDB = new();
-            //---------------------------heredado----------------------------------------------------------------
+
+            //---------------------------heredado------------------------------------------------------------------------------------
             var horusModel = _mapper.Map<HorusReportModel>(model);
             
 
             horusModel.IdHorusReport = Guid.NewGuid();//ok
-            //horusModel.strCreationDate = DateTime.Now.ToString();
             horusModel.strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
             horusModel.DateApprovalSystem = DateTime.Now;
             Boolean canSendAgainHours = false;
@@ -186,11 +187,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
             horusModel.StrStartDate = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).ToString();
 
-
-            //TODO
-            //Validar que el usuario tenga un horario existente
-            // Si no tiene horario, generar notificacion y se cancela el registro d ehoras
-            //------------------------------------------------------------------------------------
+            //--------------------------------------------------------------------------------------------------------------------------
 
 
             var fechaReportada = DateTimeOffset.Parse(model.StartDate.ToString());
@@ -213,7 +210,6 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 {
                     // State 100 es por que trata de asignar un standby durante horario laboral
                     // agregar notificacion email
-
                     returnPortalDB.State = 100;
                     _emailCommand.SendEmail(new EmailModel
                     {
@@ -304,21 +300,18 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
           
 
 
-            //------------------------------------------heredado final-----------------------------------------------------
+            //------------------------------------------Working on Horus report and assignment tables-----------------------------------------------------
             if (horusModel.ClientEntityId == Guid.Empty || string.IsNullOrEmpty(horusModel.ClientEntityId.ToString()))
             {
                 horusModel.ClientEntityId = Guid.Parse("DC606C5A-149E-4F9B-80B3-BA555C7689B9");
             }
 
 
-            var entity = _mapper.Map<HorusReportEntity>(horusModel);
+            var entityHorus = _mapper.Map<HorusReportEntity>(horusModel);
             var horusreporcount = _dataBaseService.HorusReportEntity.Count();
 
 
-
-
             var Maxen = 0;
-
             if (horusreporcount > 0)
             {
                 Maxen = _dataBaseService.HorusReportEntity.Max(x => x.NumberReport);
@@ -328,50 +321,89 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             {
                 Maxen = 1;
             }
-            entity.Acitivity = 0;//standby
-            entity.NumberReport = Maxen + 1;
-            entity.StrReport = "STANDBY00"+(Maxen + 1).ToString();
-            entity.StrStartDate = nuevaFechaHoraFormato;
-            entity.ARPLoadingId = "0";
-            entity.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
-            entity.EstatusOrigen = "STANDBY";
-            entity.EstatusFinal = "ENPROGRESO";
-            entity.DetalleEstatusFinal = "";
 
-            entity.Origen = "STANDBY";
-            entity.Semana = getWeek(nuevaFechaHoraFormato);
+            if (horusModel.ApproverId == "53765c41-411f-4add-9034-7debaf04f276")//sistema
+            {
+                //============Pase directo a aprobado=========================================
+                entityHorus.Acitivity = 0;//standby
+                entityHorus.NumberReport = Maxen + 1;
+                entityHorus.StrReport = "STANDBY00" + (Maxen + 1).ToString();
+                entityHorus.StrStartDate = nuevaFechaHoraFormato;
+                entityHorus.ARPLoadingId = "0";
+                entityHorus.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                entityHorus.EstatusOrigen = "STANDBY";
+                entityHorus.EstatusFinal = "APROBADO";
+                entityHorus.DetalleEstatusFinal = "";
+                entityHorus.Origen = "STANDBY";
+                entityHorus.Semana = getWeek(nuevaFechaHoraFormato);
+
+                _dataBaseService.HorusReportEntity.AddAsync(entityHorus);
 
 
-            _dataBaseService.HorusReportEntity.AddAsync(entity);
-            //await _dataBaseService.SaveAsync();
+                //ASIGNMENT
+                //=================================================================================
+                var assignmentReport = new CreateAssignmentReportModel();
+                assignmentReport.IdAssignmentReport = Guid.NewGuid();
+                assignmentReport.HorusReportEntityId = entityHorus.IdHorusReport;
+                assignmentReport.UserEntityId = Guid.Parse(horusModel.ApproverId);
+                assignmentReport.TipoAssignment = "Approver";
+                assignmentReport.Description = horusModel.Description + "(Aprobado por sistema)";
+                assignmentReport.State = 1;
+                assignmentReport.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                assignmentReport.Resultado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
+                assignmentReport.Nivel = 2;
 
 
-            //ASIGNMENT
-            //=================================================================================
-            var assignmentReport = new CreateAssignmentReportModel();
-            assignmentReport.IdAssignmentReport = Guid.NewGuid();
-            assignmentReport.HorusReportEntityId = entity.IdHorusReport;
-            assignmentReport.UserEntityId = Guid.Parse(horusModel.ApproverId);
-            assignmentReport.TipoAssignment = "Approver";
-            assignmentReport.Description = horusModel.Description;
-            assignmentReport.State = 0;
-            assignmentReport.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
-            assignmentReport.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
-            assignmentReport.Nivel = 0;
+                var assigmentreportentity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
+                _dataBaseService.assignmentReports.Add(assigmentreportentity);
 
-            var assigmentreportentity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
-            _dataBaseService.assignmentReports.Add(assigmentreportentity);
+                await _dataBaseService.SaveAsync();
+            }
+            else
+            {
+                entityHorus.Acitivity = 0;//standby
+                entityHorus.NumberReport = Maxen + 1;
+                entityHorus.StrReport = "STANDBY00" + (Maxen + 1).ToString();
+                entityHorus.StrStartDate = nuevaFechaHoraFormato;
+                entityHorus.ARPLoadingId = "0";
+                entityHorus.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+                entityHorus.EstatusOrigen = "STANDBY";
+                entityHorus.EstatusFinal = "ENPROGRESO";
+                entityHorus.DetalleEstatusFinal = "";
+                entityHorus.Origen = "STANDBY";
+                entityHorus.Semana = getWeek(nuevaFechaHoraFormato);
 
-            await _dataBaseService.SaveAsync();
+
+                _dataBaseService.HorusReportEntity.AddAsync(entityHorus);
+
+
+                //ASIGNMENT
+                //=================================================================================
+                var assignmentReport = new CreateAssignmentReportModel();
+                assignmentReport.IdAssignmentReport = Guid.NewGuid();
+                assignmentReport.HorusReportEntityId = entityHorus.IdHorusReport;
+                assignmentReport.UserEntityId = Guid.Parse(horusModel.ApproverId);
+                assignmentReport.TipoAssignment = "Approver";
+                assignmentReport.Description = horusModel.Description;
+                assignmentReport.State = 0;
+                assignmentReport.strFechaAtencion = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                assignmentReport.Resultado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+                assignmentReport.Nivel = 0;
+
+
+                var assigmentreportentity = _mapper.Map<Domain.Entities.AssignmentReport.AssignmentReport>(assignmentReport);
+                _dataBaseService.assignmentReports.Add(assigmentreportentity);
+
+                await _dataBaseService.SaveAsync();
+
+
+            }
 
 
 
             await _logCommand.Log(model.UserEntityId.ToString(), "Crea Reporte STANDBY", model);
 
-
             return returnPortalDB;
-
-
         }
 
         private string getWeek(string strStartDate)
