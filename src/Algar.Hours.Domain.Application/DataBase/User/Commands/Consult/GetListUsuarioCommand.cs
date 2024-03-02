@@ -54,10 +54,19 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
         }
         
 
-        public async Task<Guid> GetUserIdByEmployeeCode(string employeeCode, Guid countryId)
+        public async Task<Guid> GetUserIdByEmployeeCode(string employeeCode, Guid? countryId)
         {
-            var userEntity = await _dataBaseService.UserEntity
-                .FirstOrDefaultAsync(u => u.EmployeeCode == employeeCode && u.CountryEntityId == countryId);
+            UserEntity? userEntity = null;
+            if (countryId != null)
+            {
+                userEntity = await _dataBaseService.UserEntity
+                    .FirstOrDefaultAsync(u => u.EmployeeCode == employeeCode && u.CountryEntityId == countryId);
+            }
+            else {
+                userEntity = await _dataBaseService.UserEntity
+                    .FirstOrDefaultAsync(u => u.EmployeeCode == employeeCode);
+            }
+
             if (userEntity == null)
             {
                return Guid.Empty;
@@ -112,6 +121,13 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
             var userEntity = await _dataBaseService.UserEntity
                  .FirstOrDefaultAsync(u => u.IdUser == Id);
             
+            return userEntity;
+        }
+
+        public async Task<UserEntity> GetByEmployeeCode(string employeeCode) {
+            var userEntity = await _dataBaseService.UserEntity
+                 .FirstOrDefaultAsync(u => u.EmployeeCode == employeeCode);
+
             return userEntity;
         }
     }

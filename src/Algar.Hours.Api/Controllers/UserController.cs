@@ -278,11 +278,18 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             var data = await getListUsuarioCommand.ConsultUsersByCountryId(Id);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
-        [HttpGet("GetByEmployeCode")]
+        [HttpGet("GetUserIdByEmployeCode")]
         [Authorize(Roles = "standard")]
-        public async Task<IActionResult> GetByEmployeCode([FromQuery] string EmployeeCode, [FromQuery] Guid PaisId, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
+        public async Task<IActionResult> GetUserIdByEmployeCode([FromQuery] string EmployeeCode, [FromQuery] Guid? PaisId, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
         {
             var data = await getListUsuarioCommand.GetUserIdByEmployeeCode(EmployeeCode, PaisId);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+        [HttpGet("GetByEmployeCode")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> GetByEmployeCode([FromQuery] string EmployeeCode, [FromServices] IGetListUsuarioCommand getListUsuarioCommand)
+        {
+            var data = await getListUsuarioCommand.GetByEmployeeCode(EmployeeCode);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
         [HttpGet("GetByEmail")]
