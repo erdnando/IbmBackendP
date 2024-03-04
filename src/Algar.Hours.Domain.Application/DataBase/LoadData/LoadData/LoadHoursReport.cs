@@ -3639,7 +3639,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                     //Caso aprobacion directa por sistema
-                    if (userRow.RoleEntity.NameRole== "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
+                    /*if (userRow.RoleEntity.NameRole== "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
                     {
                         //Generating HORUSREPORT
                         rowAdd = new()
@@ -3681,7 +3681,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         rowAssignments.Add(rowAddAssig);
                     }
                     else
-                    {
+                    {*/
                         //Generating HORUSREPORT
                         rowAdd = new()
                         {
@@ -3720,7 +3720,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             Nivel = 0
                         };
                         rowAssignments.Add(rowAddAssig);
-                    }
+                   // }
                    
                 }
 
@@ -3737,7 +3737,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                     //Caso aprobacion directa por sistema
-                    if (userRow.RoleEntity.NameRole == "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
+                    /*if (userRow.RoleEntity.NameRole == "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
                     {
                         //Generating HORUSREPORT
                         rowAdd = new()
@@ -3779,7 +3779,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         };
                         rowAssignments.Add(rowAddAssig);
                     }
-                    else { 
+                    else { */
                         rowAdd = new()
                         {
                             IdHorusReport = Guid.NewGuid(),
@@ -3816,7 +3816,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             Nivel = 0
                         };
                         rowAssignments.Add(rowAddAssig);
-                    }
+                   // }
                 }
                 //STE
                 //------------------------------------------------------------------------
@@ -3830,7 +3830,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                     //Caso aprobacion directa por sistema
-                    if (userRow.RoleEntity.NameRole == "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
+                    /*if (userRow.RoleEntity.NameRole == "Usuario Aprobador N2" || userRow.RoleEntity.NameRole == "Administrador" || userRow.RoleEntity.NameRole == "Super Administrador")
                     {
                         //Generating HORUSREPORT
                         rowAdd = new()
@@ -3872,7 +3872,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         rowAssignments.Add(rowAddAssig);
                     }
                     else
-                    {
+                    {*/
                         rowAdd = new()
                         {
                             IdHorusReport = Guid.NewGuid(),
@@ -3909,7 +3909,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             Nivel = 0
                         };
                         rowAssignments.Add(rowAddAssig);
-                    }
+                    //}
                 }
 
 
