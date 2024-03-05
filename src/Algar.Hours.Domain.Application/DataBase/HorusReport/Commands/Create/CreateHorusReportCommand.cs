@@ -294,12 +294,6 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
 
 
-         
-
-
-          
-
-
             //------------------------------------------Working on Horus report and assignment tables-----------------------------------------------------
             if (horusModel.ClientEntityId == Guid.Empty || string.IsNullOrEmpty(horusModel.ClientEntityId.ToString()))
             {
