@@ -169,7 +169,10 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             //////ILogger logger = factory.CreateLogger("Program");
             //logger.LogInformation(Request.Form["SAMLResponse"]);
             // 2. Let's read the data - SAML providers usually POST it into the "SAMLResponse" var
-           // var samlResponse = Request.Form["SAMLResponse"].ToString();
+            // var samlResponse = Request.Form["SAMLResponse"].ToString();
+
+           
+           
             var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
 
             try
@@ -181,8 +184,8 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
               
             }
-            
 
+            
 
             // 3. DONE!
              try{
