@@ -76,7 +76,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
 
                 diasDeLaSemana.Add(convert.dia);
 
-                var modeloHorario = await CreateModeloHorario(convert);
+                var modeloHorario = await CreateModeloHorario2(convert);
                 listaSemana.Add(modeloHorario);
             }
 
@@ -122,7 +122,40 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
             }
             
 
-            
+            return modeloHorario;
+        }
+
+        private async Task<CreateWorkingHoursModel> CreateModeloHorario2(LoadWorkingHoursModel convert)
+        {
+            var modeloHorario = new CreateWorkingHoursModel();
+            try
+            {
+                Guid idPais = await _getCountryId.ConsultIdbyName(convert.pais);
+                Guid idUser = await _getUserId.GetUserIdByEmployeeCode(convert.codigo_Empleado, idPais);
+                //Guid idUser = await _getUserId.GetUserIdByID(convert.codigo_Empleado, idPais);
+
+                var fechasr = convert.fecha.Split("/");
+
+                DateTime dateTime = new DateTime(int.Parse(fechasr[0]), int.Parse(fechasr[1]), int.Parse(fechasr[2]));
+                Calendar calendar = CultureInfo.InvariantCulture.Calendar;
+                string weekOfYear = calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString();
+                string year = dateTime.Year.ToString();
+
+                modeloHorario.UserEntityId = idUser;
+                modeloHorario.week = weekOfYear;
+                modeloHorario.HoraInicio = FormatTime(convert.HoraInicio);
+                modeloHorario.HoraFin = FormatTime(convert.HoraFin);
+                modeloHorario.Day = convert.dia;
+                modeloHorario.Ano = year;
+                modeloHorario.FechaWorking = dateTime;
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
 
             return modeloHorario;
         }
