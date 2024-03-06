@@ -68,7 +68,9 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Update
 
                     au.IdAprobadorUsuario= Guid.NewGuid();
                     au.UserEntityId= createUserModel.IdUser;
-                    au.AprobadorId = rolUsuario.NameRole == "Usuario Aprobador N1" ? Guid.Parse("4666494f-60d3-42da-89fd-998b20fb40bf") : Guid.Parse("bdb101ed-5e37-4c74-86c8-112961948d7e");
+                //N1 --> bdb101ed-5e37-4c74-86c8-112961948d7e
+                //N2 --> 4666494f-60d3-42da-89fd-998b20fb40bf
+                au.AprobadorId = rolUsuario.NameRole == "Usuario Aprobador N1" ? Guid.Parse("bdb101ed-5e37-4c74-86c8-112961948d7e") : Guid.Parse("4666494f-60d3-42da-89fd-998b20fb40bf");
 
                     var entity = _mapper.Map<Domain.Entities.AprobadorUsuario.AprobadorUsuario>(au);
 

@@ -33,6 +33,8 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var firstDate = FirstDateOfWeek(anio, semana);
             var allWeekDays = new List<DateTime>();
+
+
             allWeekDays.Add(firstDate);
             var currentDate = firstDate;
             for (int d = 1; d < 7; d++)
@@ -42,7 +44,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             }
 
 
-
+            //=============================grafico de barras por mes========================================================================
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
                                         where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal != "RECHAZADO")
@@ -63,10 +65,12 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                                          }
                               ).Distinct().ToListAsync();
 
+            //============================Registros aprobados en el portal TLS / Horas & Week========================================
+
 
             var StandByRep = await (from us in _dataBaseService.UserEntity
                                     join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal != "RECHAZADO")
+                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal == "APROBADO")
                                     select new
                                     {
                                         fechaRep = hor.DateApprovalSystem,
@@ -75,12 +79,9 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                               ).ToListAsync();
 
          
-
-            //===============================================================================================================================
-
             var OverTimeRep = await (from us in _dataBaseService.UserEntity
                                      join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.EstatusFinal != "RECHAZADO")
+                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.EstatusFinal == "APROBADO")
                                      select new
                                      {
                                          fechaRep = hor.DateApprovalSystem,
@@ -89,13 +90,8 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             ).ToListAsync();
 
 
-            
 
-            
-
-            //========================================================================================================================
-
-           
+            //=============================Horas reportadas en CAS / Horas (Suma Total) Desgloce ARP, TSE y STE=================================================
 
 
             var arp = await (from us in _dataBaseService.UserEntity
@@ -171,13 +167,19 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             foreach (var a in allWeekDays)
             {
-               
 
-                var restARP = arp.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+
+                //var restARP = arp.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+                //var restTSE = tse.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+                //var restSTE = ste.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+
+                var restARP = arp.Where(op => op.fechaRep.Substring(0, 10) == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
+                var restTSE = tse.Where(op => op.fechaRep.Substring(0, 10) == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
+                var restSTE = ste.Where(op => op.fechaRep.Substring(0, 10) == ($"{a.Day.ToString("00")}/{a.Month.ToString("00")}/{a.Year}"));
+
                 var restStanBy = StandByRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}")));
                 var restOverTime = OverTimeRep.Where(op => op.fechaRep.Date == DateTime.Parse(($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}")));
-                var restTSE = tse.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
-                var restSTE = ste.Where(op => op.fechaRep == ($"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}"));
+               
 
                 var SumaMinutos = 0.0;
                 var SumaHoras = 0.0;
