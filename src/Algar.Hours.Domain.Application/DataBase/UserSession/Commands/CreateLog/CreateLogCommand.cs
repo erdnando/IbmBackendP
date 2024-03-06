@@ -34,7 +34,7 @@ namespace Algar.Hours.Application.DataBase.UserSession.Commands.CreateUserSessio
 
                 aux.operation = operation;
                 aux.parameters= JsonConvert.SerializeObject(model);
-                aux.parameters = aux.parameters.Length > 12000 ? aux.parameters.Substring(0, 12000) : aux.parameters;
+                aux.parameters = aux.parameters.Length > 15000 ? aux.parameters.Substring(0, 15000) : aux.parameters;
                 aux.sUserEntityId= idUserEntiyId;
 
                  _dataBaseService.UserSessionEntity.Add(aux);
