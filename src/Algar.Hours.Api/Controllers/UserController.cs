@@ -175,15 +175,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
            
             var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
 
-            try
-            {
-                await _logCommand.Log("3696718d-d05a-4831-96ce-ed500c5bbc97", "SAMLResponse:::", samlResponse);
-            }
-            catch (Exception exx)
-            {
-
-              
-            }
+           
 
             
 
@@ -212,6 +204,8 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                     restUs = await _createUserCommand.ExecuteId(newUsr);
                 }
 
+               
+
 
                 var jsonSaml = new
                 {
@@ -226,6 +220,16 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                     employeeCode = samlResponse.GetCustomAttribute("uid"),
                     code = "123456789",
                 };
+
+                try
+                {
+                    await _logCommand.Log(jsonSaml.idUser.ToString() , "SAMLResponse:::", samlResponse);
+                }
+                catch (Exception exx)
+                {
+
+
+                }
 
 
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
