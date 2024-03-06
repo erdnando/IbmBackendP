@@ -37,13 +37,15 @@ namespace Algar.Hours.Api.Controllers
         private ICreateUserCommand _createUserCommand;
         private IConsultCountryCommand _consultCountryCommand;
         private readonly IConfiguration _config;
+        private ICreateLogCommand _logCommand;
 
-        public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand, IConfiguration config)
+        public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand, IConfiguration config, ICreateLogCommand logCommand)
         {
             _getListUsuarioCommand = getListUsuarioCommand;
             _createUserCommand = createUserCommand;
             _consultCountryCommand = consultCountryCommand;
             _config = config;
+            _logCommand = logCommand;
         }
 
         [HttpPost("create")]
@@ -170,7 +172,15 @@ AB7XkC7atqVVYhLhRXClgxt45wme
            // var samlResponse = Request.Form["SAMLResponse"].ToString();
             var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
 
-            
+            try
+            {
+                await _logCommand.Log("3696718d-d05a-4831-96ce-ed500c5bbc97", "SAMLResponse:::", samlResponse);
+            }
+            catch (Exception exx)
+            {
+
+              
+            }
             
 
 
