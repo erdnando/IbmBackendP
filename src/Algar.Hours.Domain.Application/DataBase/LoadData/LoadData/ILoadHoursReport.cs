@@ -12,6 +12,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
     {
         Task<string> GeneraCarga();
         Task<string> LoadARP(LoadJsonPais model);
+        Task<string> LoadUserGMT(LoadJsonUserGMT model);
         Task<string> LoadTSE(LoadJsonPais model);
         Task<SummaryLoad> LoadSTE(LoadJsonPais model);
         Task<bool> NotificacionesProceso1(string model,string idUserEntiyId);

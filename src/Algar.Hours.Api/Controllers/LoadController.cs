@@ -65,8 +65,16 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
 
+        [HttpPost("UploadUserGMT")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> UploadUserGMT([FromBody] LoadJsonUserGMT requestData, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var dataFinal = await loadHoursReport.LoadUserGMT(requestData);
 
-        
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
         [HttpPost("ValidaLimitesExcepcionesOverlapping")]
        // [Authorize(Roles = "standard")]
         [AllowAnonymous]

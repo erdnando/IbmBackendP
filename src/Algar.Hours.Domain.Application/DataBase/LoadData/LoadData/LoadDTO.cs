@@ -26,6 +26,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public string idUserEntiyId { get; set; }
 
     }
+
+    public class LoadJsonUserGMT
+    {
+        [JsonIgnore]
+        public JsonArray Data { get; set; }
+
+    }
     public class LoadGenericDTO
     {
         public JsonArray Data { get; set; }
