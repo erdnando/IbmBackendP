@@ -17,7 +17,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
 
         public string Day { get; set; }
         public string Ano { get; set; } 
-        public DateTime FechaWorking { get; set; }
+        public DateTimeOffset FechaWorking { get; set; }
 
     }
 }

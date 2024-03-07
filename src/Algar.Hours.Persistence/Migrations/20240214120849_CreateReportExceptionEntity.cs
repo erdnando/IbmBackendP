@@ -18,8 +18,8 @@ namespace Algar.Hours.Persistence.Migrations
                     IdReportException = table.Column<Guid>(type: "uuid", nullable: false),
                     UserEntityId = table.Column<Guid>(type: "uuid", nullable: false),
                     Report = table.Column<string>(type: "text", nullable: false),
-                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ExceptionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CreationDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    ExceptionDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     ExceptionUserEntityId = table.Column<Guid>(type: "uuid", nullable: true),
                 },
                 constraints: table =>

@@ -60,7 +60,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                     {
                         //lo recrea
                         entity.IdworkinghoursEntity = Guid.NewGuid();
-                        entity.FechaCreacion = DateTime.Now;
+                        entity.FechaCreacion = DateTimeOffset.Now;
 
 
                         _databaseService.workinghoursEntity.Add(entity);

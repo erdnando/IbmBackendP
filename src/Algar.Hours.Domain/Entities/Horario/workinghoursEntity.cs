@@ -14,12 +14,12 @@ namespace Algar.Hours.Domain.Entities.Horario
         public Guid UserEntityId {  get; set; }
         public UserEntity UserEntity { get; set; }
         public string week { get; set; }
-        public DateTime FechaCreacion { get; set; } 
+        public DateTimeOffset FechaCreacion { get; set; } 
         public string HoraInicio { get; set; }
         public string HoraFin {  get; set; }  
         public string Day {  get; set; }
         public string Ano {  get; set; }
-        public DateTime FechaWorking { get; set; }  
+        public DateTimeOffset FechaWorking { get; set; }  
 
 
     }

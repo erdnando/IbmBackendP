@@ -30,7 +30,7 @@ namespace Algar.Hours.Domain.Entities.WorkdayException
         public string Justification { get; set; }
         public string ApprovingManager { get; set; }
 
-        public DateTime CreationDate { get; set; }
+        public DateTimeOffset CreationDate { get; set; }
         public bool Active { get; set; }
         
     }

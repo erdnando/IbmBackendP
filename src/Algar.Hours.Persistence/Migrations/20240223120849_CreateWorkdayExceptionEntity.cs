@@ -20,17 +20,17 @@ namespace Algar.Hours.Persistence.Migrations
                     EmployeeCode = table.Column<string>(type: "text", nullable: false),
                     EmployeeName = table.Column<string>(type: "text", nullable: false),
                     CountryEntityId = table.Column<Guid>(type: "uuid", nullable: false),
-                    OriginalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    OriginalDate = table.Column<DateTime>(type: "timestamp", nullable: false),
                     OriginalStartTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     OriginalEndTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    RealDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RealDate = table.Column<DateTime>(type: "timestamp", nullable: false),
                     RealStartTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     RealEndTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     ReportType = table.Column<string>(type: "text", nullable: false),
                     Justification = table.Column<string>(type: "text", nullable: false),
                     AprrovingManager = table.Column<string>(type: "text", nullable: false),
 
-                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreationDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                 },
                 constraints: table =>
                 {

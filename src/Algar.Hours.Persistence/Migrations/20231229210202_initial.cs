@@ -472,12 +472,12 @@ namespace Algar.Hours.Persistence.Migrations
                     IdworkinghoursEntity = table.Column<Guid>(type: "uuid", nullable: false),
                     UserEntityId = table.Column<Guid>(type: "uuid", nullable: false),
                     week = table.Column<string>(type: "text", nullable: false),
-                    FechaCreacion = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FechaCreacion = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     HoraInicio = table.Column<string>(type: "text", nullable: false),
                     HoraFin = table.Column<string>(type: "text", nullable: false),
                     Day = table.Column<string>(type: "text", nullable: false),
                     Ano = table.Column<string>(type: "text", nullable: false),
-                    FechaWorking = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    FechaWorking = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
