@@ -456,10 +456,10 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 {
                     return false;
                 }
-                else if (totalHoursReportadas >= totalHoursAsignadas)
+                /*else if (totalHoursReportadas >= totalHoursAsignadas)
                 {
                     return false;
-                }
+                }*/
                 else
                 {
                     return true;
