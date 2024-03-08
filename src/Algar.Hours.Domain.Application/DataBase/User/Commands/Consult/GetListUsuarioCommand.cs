@@ -111,7 +111,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Consult
 
         public async Task<UserEntity> GetByEmail(string EmailUser)
         {
-            var userEntity = await _dataBaseService.UserEntity.FirstOrDefaultAsync(u => u.Email.Trim().ToUpper() == EmailUser.Trim().ToUpper());
+            var userEntity = await _dataBaseService.UserEntity.Include(u => u.RoleEntity).FirstOrDefaultAsync(u => u.Email.Trim().ToUpper() == EmailUser.Trim().ToUpper());
             
             return userEntity;
         }
