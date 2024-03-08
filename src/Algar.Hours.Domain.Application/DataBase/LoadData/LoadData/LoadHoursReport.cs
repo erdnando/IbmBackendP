@@ -21,6 +21,7 @@ using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using Azure;
+using DocumentFormat.OpenXml.Office2010.Drawing;
 using EFCore.BulkExtensions;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
@@ -310,6 +311,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var entity in datosARPExcel)
                 {
                     var arpx = fHomologaARP(entity!);
+                    arpx.ID_EMPLEADO= entity.ID_EMPLEADO+ entity.PAIS;
                     var parametersARP = new ParametersArpInitialEntity();
 
                     parametersARP.IdParametersInitialEntity = Guid.NewGuid();
@@ -319,7 +321,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersARP.totalHoras = getHoras(arpx.TOTAL_MINUTOS);
                     parametersARP.HorasInicio = 0;
                     parametersARP.HorasFin = 0;
-                    parametersARP.EmployeeCode = arpx.ID_EMPLEADO;
+                    parametersARP.EmployeeCode = arpx.ID_EMPLEADO;//ARP le falta el codigo de pais
                     parametersARP.IdCarga = new Guid(model.IdCarga);
                     parametersARP.HoraInicio = arpx.HORA_INICIO;//hora reportada inicio
                     parametersARP.HoraFin = arpx.HORA_FIN;//hora reportada fin
@@ -334,7 +336,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersARP.Reporte = arpx.DOC_NUM;
                     parametersARP.EstatusOrigen = arpx.ESTADO.Trim().ToUpper();
 
-                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
+                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.PAIS);  // entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
 
 
                     if (paisRegistro == null)
@@ -359,13 +361,23 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     try
                     {
-                        semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                        //semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                        semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     }
                     catch (Exception ex)
                     {
-                        parametersARP.EstatusProceso = "NO_APLICA_X_FORMATO_FECHA";
-                        listParametersInitialEntity.Add(parametersARP);
-                        continue;
+                        try
+                        {
+                            semanahorario = DateTimeOffset.ParseExact(arp.FECHA_REP, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                        }
+                        catch (Exception)
+                        {
+
+                            parametersARP.EstatusProceso = "NO_APLICA_X_FORMATO_FECHA";
+                            listParametersInitialEntity.Add(parametersARP);
+                            continue;
+                        }
+                       
                     }
 
 
@@ -2813,7 +2825,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Remueve duplicados 
                 datosSTEExcel = datosSTEExcel.DistinctBy(m => new { m.SessionEmployeeSerialNumber, m.StartDateTime, m.EndDateTime }).ToList();
                 DateTime currentDateTime = DateTime.Now;
-                await updateCargaStatus(model.IdCarga, "Removiendo duplicados ARP...");
+                await updateCargaStatus(model.IdCarga, "Procesando STE...");
 
                 foreach (var registrox in datosSTEExcel)
                 {

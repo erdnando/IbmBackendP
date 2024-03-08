@@ -245,7 +245,17 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             }
             catch(Exception ex)
             {
-                encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML"+ex.Message));
+                encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML::"+ex.Message));
+
+                try
+                {
+                    await _logCommand.Log("53765c41-411f-4add-9034-7debaf04f276", "SAMLResponse mal formado:::", samlResponse);
+                }
+                catch (Exception exx)
+                {
+
+
+                }
                 return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud/#/dashboard?uxm_erd=" + encodedStr);
             }
 
