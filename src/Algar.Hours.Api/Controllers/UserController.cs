@@ -245,7 +245,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
             }
             catch(Exception ex)
             {
-                encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML"+ex.Message));
+                encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML::"+ex.Message));
 
                 try
                 {
