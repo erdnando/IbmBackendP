@@ -205,17 +205,17 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                     restUs = await _createUserCommand.ExecuteId(newUsr);
                 }
 
-               
+
 
 
                 var jsonSaml = new
                 {
-                    idUser= data1==null? restUs.IdUser: data1.IdUser,
+                    idUser = data1 == null ? restUs.IdUser : data1.IdUser,
                     email = samlResponse.GetCustomAttribute("emailAddress"),
                     nombre = samlResponse.GetCustomAttribute("firstName"),
                     lastName = samlResponse.GetCustomAttribute("lastName"),
-                    roleEntityId = "5a0ab2a2-f790-4f96-9dee-da0b9111f7c7",
-                    nameRole= "Usuario estandar",
+                    roleEntityId = data1?.RoleEntityId,
+                    nameRole = data1?.RoleEntity.NameRole, 
                     countryEntityId = dataCountry.IdCounty,
                     nameCountry= dataCountry.NameCountry,
                     employeeCode = samlResponse.GetCustomAttribute("uid"),
