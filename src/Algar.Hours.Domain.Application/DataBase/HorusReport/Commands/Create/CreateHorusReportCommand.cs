@@ -198,7 +198,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
             var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy-MM-dd 00:00:00");
-            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.DateTime.Year.ToString());
+            var horarioAsignado = Lsthorario.FirstOrDefault(x => {
+                return x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.DateTime.Year.ToString() && x.FechaWorking.DayOfWeek == fechaReportada.DayOfWeek;
+            });
 
 
             //Validación del Horario reportado
@@ -240,6 +242,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             var limitesCountry = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == parametrosCountry.CountryEntityId && x.TypeHours==0);
             var HorasLimiteDia = limitesCountry.TargetTimeDay;
+            var HorasLimiteSemanales = limitesCountry.TargetHourWeek;
+            var HorasLimiteMensuales = limitesCountry.TargetHourMonth;
+            var HorasLimiteAnuales = limitesCountry.TargetHourYear;
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
             var listExeptios = _dataBaseService.UsersExceptions.ToList();
@@ -251,8 +256,11 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             
 
             var HorasPortalDBT = infoQuery.Select(x => double.Parse(x.HorusReportEntity.CountHours)).Sum();
-            if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada))
-            {
+            var limiteDiaExcedido = (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada));
+            var limiteSemanalExcedido = (HorasLimiteSemanales != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteSemanales + horasExceptuada));
+            var limiteMensualExcedido = (HorasLimiteMensuales != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteMensuales + horasExceptuada));
+            var limiteAnualExcedido = (HorasLimiteAnuales != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteAnuales + horasExceptuada));
+            if (limiteDiaExcedido || limiteSemanalExcedido || limiteMensualExcedido || limiteAnualExcedido) {
                 //Se ha superado el límite de horas para StandBy
                 // agregar notificacion email
                 returnPortalDB.State = 101;
@@ -444,7 +452,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 TimeSpan tsAsignado = (DateTimeOffset.Parse(horarioAsigando.HoraFin) - DateTimeOffset.Parse(horarioAsigando.HoraInicio));
                 double totalHoursReportadas = tsReportado.TotalHours;
                 double totalHoursAsignadas = tsAsignado.TotalHours;
-                if (_HoraInicioReportado.TimeOfDay >= DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay && _HoraFinReportado.TimeOfDay <= DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay)
+                if ((_HoraInicioReportado.TimeOfDay >= DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay && _HoraInicioReportado.TimeOfDay < DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay) || (_HoraFinReportado.TimeOfDay > DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay && _HoraFinReportado.TimeOfDay <= DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay))
                 {
                     return false;
                 }
