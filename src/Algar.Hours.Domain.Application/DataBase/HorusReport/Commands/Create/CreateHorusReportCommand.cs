@@ -221,7 +221,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     return returnPortalDB;
                 }
             }
-            else
+            /*else
             {
                 // State 99 es por que no tiene horario para comparar
                 // agregar notificacion email
@@ -232,7 +232,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     Plantilla = "8"
                 });
                 return returnPortalDB;
-            }
+            }*/
 
             //Validacion de limites y excepciones
             //=================================================================================================================
