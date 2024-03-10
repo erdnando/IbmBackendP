@@ -1,6 +1,10 @@
-﻿using Algar.Hours.Application.DataBase.Festivos.Create;
+﻿using Algar.Hours.Application.DataBase.Country.Commands.Consult;
+using Algar.Hours.Application.DataBase.Festivos.Create;
 using Algar.Hours.Application.DataBase.Festivos.Update;
 using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
+using Algar.Hours.Application.DataBase.User.Commands.Consult;
+using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
+using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Consult;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create;
 using Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load;
@@ -8,6 +12,7 @@ using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using System.ServiceModel.Channels;
 using System.Text.Json.Nodes;
 
@@ -18,6 +23,14 @@ namespace Algar.Hours.Api.Controllers
     [TypeFilter(typeof(ExceptionManager))]
     public class HorarioController : ControllerBase
     {
+
+        private readonly IConfiguration _config;
+
+        public HorarioController(IConfiguration config)
+        {
+            _config = config;
+        }
+
         [HttpPost("create")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Create(
@@ -81,6 +94,17 @@ namespace Algar.Hours.Api.Controllers
         {
             var data = await loadHorusReportManagerCommand.LoadExcel(model);
             return data;
+        }
+
+        [HttpGet("Template")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Template() {
+            var pathToFile = $"{_config["Resources:Templates"]}/Plantilla Horarios.xlsx";
+            if (!System.IO.File.Exists(pathToFile)) { return NotFound(); }
+
+            new FileExtensionContentTypeProvider().TryGetContentType(pathToFile, out var contentType);
+            var bytes = System.IO.File.ReadAllBytes(pathToFile);
+            return File(bytes, contentType, Path.GetFileName(pathToFile));
         }
     }
 }

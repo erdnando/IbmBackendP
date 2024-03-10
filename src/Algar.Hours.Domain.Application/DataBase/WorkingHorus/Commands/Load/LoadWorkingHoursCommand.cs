@@ -54,8 +54,6 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
 
                 var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<LoadWorkingHoursModel>(entity.ToJsonString());
 
-                
-
                 if (diasDeLaSemana.Contains(convert.dia))
                 {
                     listaSemanasTotales.Add(new List<CreateWorkingHoursModel>(listaSemana));
@@ -134,9 +132,10 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 Guid idUser = await _getUserId.GetUserIdByEmployeeCode(convert.codigo_Empleado, idPais);
                 //Guid idUser = await _getUserId.GetUserIdByID(convert.codigo_Empleado, idPais);
 
-                var fechasr = convert.fecha.Split("/");
+                convert.HoraInicio = DateTime.Parse(convert.HoraInicio).ToString("HH:mm");
+                convert.HoraFin = DateTime.Parse(convert.HoraFin).ToString("HH:mm");
 
-                DateTime dateTime = new DateTime(int.Parse(fechasr[0]), int.Parse(fechasr[1]), int.Parse(fechasr[2]));
+                DateTime dateTime = DateTime.ParseExact(convert.fecha, "d/M/yy", CultureInfo.InvariantCulture);
                 Calendar calendar = CultureInfo.InvariantCulture.Calendar;
                 string weekOfYear = calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString();
                 string year = dateTime.Year.ToString();
