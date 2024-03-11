@@ -99,7 +99,8 @@ namespace Algar.Hours.Api.Controllers
         [HttpGet("Template")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Template() {
-            var pathToFile = $"{_config["Resources:Templates"]}/Plantilla Horarios.xlsx";
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, System.IO.Directory.GetCurrentDirectory()));
+            var pathToFile = $"{_config["Resources:Templates"]}/PlantillaHorarios.xlsx";
             if (!System.IO.File.Exists(pathToFile)) { return NotFound(); }
 
             new FileExtensionContentTypeProvider().TryGetContentType(pathToFile, out var contentType);
