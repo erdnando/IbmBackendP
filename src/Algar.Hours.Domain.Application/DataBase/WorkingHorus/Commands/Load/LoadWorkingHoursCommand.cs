@@ -135,7 +135,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 convert.HoraInicio = DateTime.Parse(convert.HoraInicio).ToString("HH:mm");
                 convert.HoraFin = DateTime.Parse(convert.HoraFin).ToString("HH:mm");
 
-                DateTime dateTime = DateTime.ParseExact(convert.fecha, "d/M/yy", CultureInfo.InvariantCulture);
+                DateTime dateTime = DateTime.ParseExact(convert.fecha, "M/d/yy", CultureInfo.InvariantCulture);
                 Calendar calendar = CultureInfo.InvariantCulture.Calendar;
                 string weekOfYear = calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString();
                 string year = dateTime.Year.ToString();

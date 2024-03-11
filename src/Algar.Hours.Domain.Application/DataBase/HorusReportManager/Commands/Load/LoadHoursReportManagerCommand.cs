@@ -30,7 +30,6 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
         private readonly IDataBaseService _dataBaseService;
         private readonly IMapper _mapper;
         private readonly ICreateHorusReportManagerCommand _ICreateHorusReportManagerCommand;
-        
         private IGetListUsuarioCommand _usuarioCommand;
 
         public LoadHoursReportManagerCommand
@@ -45,22 +44,27 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
         public async Task<FileStreamResult> LoadExcel(LoadHoursReportManagerModel models) {
             var workbook = new XLWorkbook();
+            var wsSummary = workbook.Worksheets.Add("Summary");
             var worksheet = workbook.Worksheets.Add("Workday");
 
-            worksheet.Range("A1:F1").Style.Font.FontColor = XLColor.White;
-            worksheet.Range("A1:F1").Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1);
+            wsSummary.Column("A").Width = 30;
+
+            worksheet.Range("A1:G1").Style.Font.FontColor = XLColor.White;
+            worksheet.Range("A1:G1").Style.Fill.BackgroundColor = XLColor.FromTheme(XLThemeColor.Accent1);
             worksheet.Column("A").Width = 30;
-            worksheet.Column("B").Width = 20;
-            worksheet.Column("C").Width = 30;
-            worksheet.Column("D").Width = 20;
-            worksheet.Column("E").Width = 30;
-            worksheet.Column("F").Width = 60;
+            worksheet.Column("B").Width = 35;
+            worksheet.Column("C").Width = 20;
+            worksheet.Column("D").Width = 30;
+            worksheet.Column("E").Width = 20;
+            worksheet.Column("F").Width = 30;
+            worksheet.Column("G").Width = 60;
             worksheet.Cell("A1").Value = "ID EMPLEADO";
-            worksheet.Cell("B1").Value = "FECHA";
-            worksheet.Cell("C1").Value = "TIPO";
-            worksheet.Cell("D1").Value = "HORAS";
-            worksheet.Cell("E1").Value = "ESTADO FINAL";
-            worksheet.Cell("F1").Value = "LOG";
+            worksheet.Cell("B1").Value = "NOMBRE EMPLEADO";
+            worksheet.Cell("C1").Value = "FECHA";
+            worksheet.Cell("D1").Value = "TIPO";
+            worksheet.Cell("E1").Value = "HORAS";
+            worksheet.Cell("F1").Value = "ESTADO FINAL";
+            worksheet.Cell("G1").Value = "LOG";
 
             var initialRow = 2;
             var currentRow = initialRow;
@@ -102,6 +106,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 if (workdayUserModel == null) continue;
+                if (workdayHourModel.Type != "Standby" && workdayHourModel.Type != "Overtime" && workdayHourModel.Type != "Vacation" && workdayHourModel.Type != "Holiday Worked") continue;
 
                 var startTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8)).ToString("HH:mm");
                 var endTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8)).ToString("HH:mm");
@@ -114,28 +119,29 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 if (horusReportEntity != null) {
                     var statusFinal = (horusReportEntity.EstatusFinal == "FINAL" || horusReportEntity.EstatusFinal == "SUBMITTED") ? "ENPROCESO" : "APROBADO";
                     worksheet.Cell(currentRow, 1).Value = horusReportEntity.UserEntity.EmployeeCode;
-                    worksheet.Cell(currentRow, 2).Value = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy");
-                    worksheet.Cell(currentRow, 3).Value = horusReportEntity.EstatusOrigen;
-                    worksheet.Cell(currentRow, 4).Value = horusReportEntity.CountHours;
-                    worksheet.Cell(currentRow, 5).Value = statusFinal;
-                    worksheet.Cell(currentRow, 6).Value = "";
+                    worksheet.Cell(currentRow, 2).Value = workdayUserModel.Worker;
+                    worksheet.Cell(currentRow, 3).Value = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy");
+                    worksheet.Cell(currentRow, 4).Value = horusReportEntity.EstatusOrigen;
+                    worksheet.Cell(currentRow, 5).Value = horusReportEntity.CountHours;
+                    worksheet.Cell(currentRow, 6).Value = statusFinal;
+                    worksheet.Cell(currentRow, 7).Value = "";
                 }
                 else {
                     var exception = exceptions.Where(x => x.EmployeeCode == workdayUserModel.HomeCNUM && x.RealDate.ToString("dd/MM/yyyy") == workdayHourModel.ReportedDate.ToString("dd/MM/yyyy") && x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime)
                     .FirstOrDefault();
 
                     worksheet.Cell(currentRow, 1).Value = workdayUserModel.EmployeeID;
-                    worksheet.Cell(currentRow, 2).Value = workdayHourModel.ReportedDate;
-                    worksheet.Cell(currentRow, 4).Value = workdayHourModel.Quantity;
-                    worksheet.Cell(currentRow, 6).Value = "";
+                    worksheet.Cell(currentRow, 2).Value = workdayUserModel.Worker;
+                    worksheet.Cell(currentRow, 3).Value = workdayHourModel.ReportedDate;
+                    worksheet.Cell(currentRow, 4).Value = workdayHourModel.Type;
+                    worksheet.Cell(currentRow, 5).Value = workdayHourModel.Quantity;
+                    worksheet.Cell(currentRow, 7).Value = "";
 
                     if (exception != null) {
-                        worksheet.Cell(currentRow, 3).Value = exception.ReportType;
-                        worksheet.Cell(currentRow, 5).Value = "APROBADO POR EXCEPCION";
+                        worksheet.Cell(currentRow, 6).Value = "APROBADO POR EXCEPCION";
                     }
                     else {
-                        worksheet.Cell(currentRow, 3).Value = "";
-                        worksheet.Cell(currentRow, 5).Value = "RECHAZADO";
+                        worksheet.Cell(currentRow, 6).Value = "RECHAZADO";
                     }
 
                 }
@@ -143,6 +149,12 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 currentRow++;
 
             }
+
+            var pivotTable = wsSummary.PivotTables.Add("pvt", wsSummary.Cell("A1"), worksheet.Range($"A1:F{(currentRow-1)}"));
+            pivotTable.RowLabels.Add("TIPO");
+            pivotTable.ColumnLabels.Add("ESTADO FINAL");
+            pivotTable.Values.Add("TIPO", "TIPOS").SetSummaryFormula(XLPivotSummary.Count);
+            pivotTable.SetShowGrandTotalsRows(true);
 
             var stream = new MemoryStream();
             workbook.SaveAs(stream);

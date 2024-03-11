@@ -19,6 +19,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
 
         private IEmailCommand _emailCommand;
         private IGetListUsuarioCommand _usuarioCommand;
+        private string[] weekDays = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
         public CreateWorkingHoursCommand(IDataBaseService databaseService, IMapper mapper, IEmailCommand emailCommand, IGetListUsuarioCommand usuarioCommand)
         {
@@ -46,7 +47,13 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
 
                 foreach (var entity in entityList)
                 {
+                    TimeSpan startTime = TimeSpan.Parse(entity.HoraInicio);
+                    TimeSpan endTime = TimeSpan.Parse(entity.HoraFin);
+                    if (startTime >= endTime) continue;
+
                     entity.FechaWorking = entity.FechaWorking;
+                    var weekDayNumber = Convert.ToUInt32(entity.FechaWorking.DayOfWeek.ToString("d"));
+                    entity.Day = this.weekDays[weekDayNumber];
                     var existingEntity = await  _databaseService.workinghoursEntity
                         .FirstOrDefaultAsync(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano && e.Day == entity.Day);
 
