@@ -185,7 +185,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
-            horusModel.StrStartDate = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).ToString();
+            var dateTime = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            horusModel.StrStartDate = dateTime.ToString();
 
             //--------------------------------------------------------------------------------------------------------------------------
 
@@ -250,16 +251,23 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var listExeptios = _dataBaseService.UsersExceptions.ToList();
             var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.ToString("dd/MM/yyyy") == horusModel.StrStartDate);
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
-            var infoQuery = _dataBaseService.assignmentReports.Include("HorusReportEntity").
-                Where(op => (op.State == 0 || op.State == 1) &&  (op.HorusReportEntity.StrStartDate == horusModel.StrStartDate   && op.UserEntityId==horusModel.UserEntityId   )).ToList();
-
             
 
-            var HorasPortalDBT = infoQuery.Select(x => double.Parse(x.HorusReportEntity.CountHours)).Sum();
-            var limiteDiaExcedido = (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteDia + horasExceptuada));
-            var limiteSemanalExcedido = (HorasLimiteSemanales != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteSemanales + horasExceptuada));
-            var limiteMensualExcedido = (HorasLimiteMensuales != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteMensuales + horasExceptuada));
-            var limiteAnualExcedido = (HorasLimiteAnuales != 0 && (tsReportado.TotalHours + HorasPortalDBT) > (HorasLimiteAnuales + horasExceptuada));
+            var HorasPortalDBTDia = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{horusModel.UserEntityId}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+            var dateTimeInicioSemana = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-dd")} 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(-((int) dateTime.DayOfWeek));
+            var dateTimeFinSemana = DateTime.ParseExact($"{dateTimeInicioSemana.ToString("yyyy-MM-dd")} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(6);
+            var HorasPortalDBTSemana = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{horusModel.UserEntityId}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTimeInicioSemana.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTimeFinSemana.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+            var dateTimeInicioMes = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-")}01 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var dateTimeFinMes = DateTime.ParseExact($"{dateTimeInicioMes.ToString("yyyy-MM-")}{DateTime.DaysInMonth(dateTimeInicioMes.Year, dateTimeInicioMes.Month)} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var HorasPortalDBTMes = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{horusModel.UserEntityId}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTimeInicioMes.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTimeFinMes.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+            var dateTimeInicioAno = DateTime.ParseExact($"{dateTime.ToString("yyyy-")}01-01 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var dateTimeFinAno = DateTime.ParseExact($"{dateTime.ToString("yyyy-")}12-31 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+            var HorasPortalDBTAno = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{horusModel.UserEntityId}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTimeInicioAno.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTimeFinAno.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+            
+            var limiteDiaExcedido = (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasPortalDBTDia) > (HorasLimiteDia + horasExceptuada));
+            var limiteSemanalExcedido = (HorasLimiteSemanales != 0 && (tsReportado.TotalHours + HorasPortalDBTSemana) > (HorasLimiteSemanales + horasExceptuada));
+            var limiteMensualExcedido = (HorasLimiteMensuales != 0 && (tsReportado.TotalHours + HorasPortalDBTMes) > (HorasLimiteMensuales + horasExceptuada));
+            var limiteAnualExcedido = (HorasLimiteAnuales != 0 && (tsReportado.TotalHours + HorasPortalDBTAno) > (HorasLimiteAnuales + horasExceptuada));
             if (limiteDiaExcedido || limiteSemanalExcedido || limiteMensualExcedido || limiteAnualExcedido) {
                 //Se ha superado el límite de horas para StandBy
                 // agregar notificacion email

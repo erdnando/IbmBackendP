@@ -59,9 +59,9 @@ namespace Algar.Hours.Api.Controllers
         [HttpGet("ConsultIdUserW")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> ConsultByIdUserW(
-         [FromQuery] Guid IdUser, string week, string ano,[FromServices] IConsultWorkingHoursCommand consultWorkingHours)
+         [FromQuery] Guid IdUser, DateTimeOffset date, [FromServices] IConsultWorkingHoursCommand consultWorkingHours)
         {
-            var data = await consultWorkingHours.Consult(IdUser, week, ano);
+            var data = await consultWorkingHours.Consult(IdUser, date);
             if(data.Count() > 0)
             {
                 return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
@@ -99,7 +99,8 @@ namespace Algar.Hours.Api.Controllers
         [HttpGet("Template")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Template() {
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, System.IO.Directory.GetCurrentDirectory()));
+            var directories = System.IO.Directory.GetDirectories(System.IO.Directory.GetCurrentDirectory());
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, string.Join(", ", directories)));
             var pathToFile = $"{_config["Resources:Templates"]}/PlantillaHorarios.xlsx";
             if (!System.IO.File.Exists(pathToFile)) { return NotFound(); }
 

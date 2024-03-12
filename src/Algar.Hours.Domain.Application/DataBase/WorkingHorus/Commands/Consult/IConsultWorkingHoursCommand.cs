@@ -13,7 +13,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Consult
     {
         Task<CreateUserModel> Execute(LoginUserModel model);
 
-        Task<List<CreateWorkingHoursModel>> Consult(Guid idUser, string week, string ano);
+        Task<List<CreateWorkingHoursModel>> Consult(Guid idUser, DateTimeOffset date);
 
     }
 }

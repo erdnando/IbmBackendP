@@ -8,6 +8,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,11 +36,12 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Consult
             throw new NotImplementedException();
         }
 
-        public async Task<List<CreateWorkingHoursModel>> Consult(Guid idUser, string week, string ano)
+        public async Task<List<CreateWorkingHoursModel>> Consult(Guid idUser, DateTimeOffset dateTime)
         {
-            var data = await _dataBaseService.workinghoursEntity
-                .Where(e => e.UserEntityId == idUser && e.week == week && e.Ano == ano).ToListAsync();
-
+            var dateTimeInicioSemana = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-dd")} 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(-((int)dateTime.DayOfWeek));
+            var dateTimeFinSemana = DateTime.ParseExact($"{dateTimeInicioSemana.ToString("yyyy-MM-dd")} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(6);
+            var data = await _dataBaseService.workinghoursEntity.FromSqlRaw($"SELECT * FROM \"workinghoursEntity\" w WHERE w.\"UserEntityId\"='{idUser}' AND w.\"FechaWorking\" >= TO_TIMESTAMP('{dateTimeInicioSemana.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND w.\"FechaWorking\" <= TO_TIMESTAMP('{dateTimeFinSemana.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToListAsync();
+            
             if (data.Count==0)
             {
                 _emailCommand.SendEmail(new EmailModel
