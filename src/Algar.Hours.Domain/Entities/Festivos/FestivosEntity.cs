@@ -12,7 +12,7 @@ namespace Algar.Hours.Domain.Entities.Festivos
         public Guid IdFestivo { get; set; }
         public string Descripcion { get; set; }
         public string ano { get; set; }
-        public DateTime DiaFestivo { get; set; }
+        public DateTimeOffset DiaFestivo { get; set; }
         public string sDiaFestivo { get; set; }
         public Guid CountryId { get; set; }
         public CountryEntity Country { get; set; }
