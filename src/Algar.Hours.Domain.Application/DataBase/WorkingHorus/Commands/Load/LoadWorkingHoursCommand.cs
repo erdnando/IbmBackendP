@@ -53,6 +53,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 count += 1;
 
                 var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<LoadWorkingHoursModel>(entity.ToJsonString());
+                if (convert.dia == "") continue;
 
                 if (diasDeLaSemana.Contains(convert.dia))
                 {
