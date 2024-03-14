@@ -21,6 +21,7 @@ using Algar.Hours.Domain.Entities.QueuesAcceptance;
 using Algar.Hours.Domain.Entities.ReportException;
 using Algar.Hours.Domain.Entities.Rol;
 using Algar.Hours.Domain.Entities.RolMenu;
+using Algar.Hours.Domain.Entities.Template;
 using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using Algar.Hours.Domain.Entities.WorkdayException;
@@ -52,6 +53,7 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<UsersExceptions> UsersExceptions { get; set; }
         public DbSet<ReportExceptionEntity> ReportExceptionEntity { get; set; }
         public DbSet<WorkdayExceptionEntity> WorkdayExceptionEntity { get; set; }
+        public DbSet<TemplateEntity> TemplateEntity { get; set; }
         public DbSet<Aprobador> Aprobador { get; set; }
         public DbSet<AprobadorUsuario> AprobadorUsuario { get; set; }
         public DbSet<ARPLoadDetailEntity> ARPLoadDetailEntity { get; set; }
@@ -110,6 +112,8 @@ namespace Algar.Hours.Persistence.DataBase
             new UserConfiguration(modelBuilder.Entity<UserEntity>());
             new UserExceptionsConfiguration(modelBuilder.Entity<UsersExceptions>());
             new ReportExceptionEntityConfiguration(modelBuilder.Entity<ReportExceptionEntity>());
+            new WorkdayExceptionEntityConfiguration(modelBuilder.Entity<WorkdayExceptionEntity>());
+            new TemplateEntityConfiguration(modelBuilder.Entity<TemplateEntity>());
             new AprobadorConfiguration(modelBuilder.Entity<Aprobador>());
             new AprobadorUsuarioConfiguration(modelBuilder.Entity<AprobadorUsuario>());
             new ARPLoadDetailConfiguration(modelBuilder.Entity<ARPLoadDetailEntity>());

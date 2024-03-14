@@ -64,6 +64,8 @@ using Algar.Hours.Application.DataBase.WorkdayException.Commands.Create;
 using Algar.Hours.Application.DataBase.WorkdayException.Commands.Delete;
 using Algar.Hours.Application.DataBase.WorkdayException.Commands.Activate;
 using Algar.Hours.Application.DataBase.WorkdayException.Commands.Deactivate;
+using Algar.Hours.Application.DataBase.Template.Commands.Create;
+using Algar.Hours.Application.DataBase.Template.Commands.Consult;
 
 namespace Algar.Hours.Application
 {
@@ -130,6 +132,8 @@ namespace Algar.Hours.Application
             services.AddTransient<IDeleteWorkdayExceptionCommand, DeleteWorkdayExceptionCommand>();
             services.AddTransient<IActivateWorkdayExceptionCommand, ActivateWorkdayExceptionCommand>();
             services.AddTransient<IDeactivateWorkdayExceptionCommand, DeactivateWorkdayExceptionCommand>();
+            services.AddTransient<IConsultTemplateCommand, ConsultTemplateCommand>();
+            services.AddTransient<ICreateTemplateCommand, CreateTemplateCommand>();
             services.AddTransient<ILoadWorkingHoursCommand, LoadWorkingHoursCommand>();
             services.AddTransient<ILoadHorusReportManagerCommand, LoadHoursReportManagerCommand>();
             services.AddTransient<ICreateHorusReportManagerCommand, CreateHorusReportManagerCommand>();

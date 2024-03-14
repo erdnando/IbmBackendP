@@ -2,6 +2,8 @@
 using Algar.Hours.Application.DataBase.Festivos.Create;
 using Algar.Hours.Application.DataBase.Festivos.Update;
 using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
+using Algar.Hours.Application.DataBase.Template.Commands.Consult;
+using Algar.Hours.Application.DataBase.Template.Commands.Create;
 using Algar.Hours.Application.DataBase.User.Commands.Consult;
 using Algar.Hours.Application.DataBase.User.Commands.CreateUser;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
@@ -98,15 +100,10 @@ namespace Algar.Hours.Api.Controllers
 
         [HttpGet("Template")]
         [Authorize(Roles = "standard")]
-        public async Task<IActionResult> Template() {
-            var directories = System.IO.Directory.GetDirectories(System.IO.Directory.GetCurrentDirectory());
-            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, string.Join(", ", directories)));
-            var pathToFile = $"{_config["Resources:Templates"]}/PlantillaHorarios.xlsx";
-            if (!System.IO.File.Exists(pathToFile)) { return NotFound(); }
-
-            new FileExtensionContentTypeProvider().TryGetContentType(pathToFile, out var contentType);
-            var bytes = System.IO.File.ReadAllBytes(pathToFile);
-            return File(bytes, contentType, Path.GetFileName(pathToFile));
+        public async Task<IActionResult> Template([FromServices] ICreateTemplateCommand createTemplateCommand, [FromServices] IConsultTemplateCommand consultTemplateCommand) {
+            var template = await consultTemplateCommand.Consult(Guid.Parse("4e24352f-9175-4046-9e39-3ee844b9f8f4"));
+            var bytes = template.FileData;
+            return File(bytes, template.FileContentType, template.FileName);
         }
     }
 }

@@ -57,6 +57,9 @@ using Algar.Hours.Application.DataBase.ReportException.Commands.Consult;
 using Algar.Hours.Domain.Entities.WorkdayException;
 using Algar.Hours.Application.DataBase.WorkdayException.Commands.Consult;
 using Algar.Hours.Application.DataBase.WorkdayException.Commands.Create;
+using Algar.Hours.Application.DataBase.Template.Commands.Create;
+using Algar.Hours.Domain.Entities.Template;
+using Algar.Hours.Application.DataBase.Template.Commands.Consult;
 
 namespace Algar.Hours.Application.Configuration
 {
@@ -69,7 +72,6 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<Domain.Entities.AssignmentReport.AssignmentReport, CreateAssignmentReportModel>().ReverseMap();
             CreateMap<ClientEntity, ClientModel>().ReverseMap();
             CreateMap<CountryEntity, CountryModel>().ReverseMap();
-            CreateMap<HorusReportEntity, HorusReportModel>().ReverseMap();
             CreateMap<HorusReportEntity, HorusReportModel>().ReverseMap();
             CreateMap<MenuEntity, MenuModel>().ReverseMap();
             CreateMap<ParametersEntity, CreateParametersModel>().ReverseMap();
@@ -101,6 +103,8 @@ namespace Algar.Hours.Application.Configuration
             CreateMap<ReportExceptionEntity, ReportExceptionModel>().ReverseMap();
             CreateMap<ReportExceptionModel, ReportExceptionModelC>().ReverseMap();
             CreateMap<ReportExceptionEntity, ReportExceptionModelC>().ReverseMap();
+            CreateMap<TemplateEntity, TemplateModelC>().ReverseMap();
+            CreateMap<TemplateModel, TemplateEntity>().ReverseMap();
             CreateMap<WorkdayExceptionEntity, WorkdayExceptionModel>().ReverseMap();
             CreateMap<WorkdayExceptionModel, WorkdayExceptionModelC>().ReverseMap();
             CreateMap<WorkdayExceptionEntity, WorkdayExceptionModelC>().ReverseMap();
