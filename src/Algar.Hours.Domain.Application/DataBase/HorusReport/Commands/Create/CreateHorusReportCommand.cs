@@ -199,14 +199,13 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
             var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy-MM-dd 00:00:00");
-            var horarioAsignado = Lsthorario.FirstOrDefault(x => {
-                return x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.DateTime.Year.ToString() && x.FechaWorking.DayOfWeek == fechaReportada.DayOfWeek;
-            });
-
-
+            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.DateTime.Year.ToString() && x.FechaWorking.DayOfWeek == fechaReportada.DayOfWeek );
+             
+            var isFestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == DateTimeOffset.ParseExact(fechaformateadaReporta, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture)).Count() > 0;
+             
             //Validación del Horario reportado
             //================================================================================================================
-            if (horarioAsignado != null)
+            if (horarioAsignado != null && !isFestivo)
             {
                 var validaHorario = ValidarHorarioEmployee(horarioAsignado, fechaReportada, HoraInicioReportado, HoraFinReportado);
                 if (!validaHorario)

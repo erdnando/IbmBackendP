@@ -28,8 +28,8 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
 
         public async Task<Boolean> Execute(List<CreateFestivoModel> model)
         {
-            bool existe = false;
             var idUserEntiyId = "";
+            var savedDatesCount = 0;
             if (model != null && model.Count > 0)
             {
                 foreach (var item in model)
@@ -49,10 +49,9 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                     var existingEntity = await _dataBaseService.FestivosEntity
                         .FirstOrDefaultAsync(e => e.sDiaFestivo == item.sDiaFestivo && e.CountryId == entity.CountryId);
 
-                    if (existingEntity != null)
-                    {
-                        existe = false;
-                    }
+                    if (existingEntity != null) { continue; }
+
+                    savedDatesCount++;
 
                     if (entity.IdFestivo == Guid.Empty)
                     {
@@ -63,7 +62,7 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
                     // entity.DiaFestivo = DateTime.Parse(item.sDiaFestivo);
                     try
                     {
-                        entity.DiaFestivo = DateTime.ParseExact(item.sDiaFestivo, "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                        entity.DiaFestivo = DateTime.ParseExact($"{item.sDiaFestivo} 00:00:00", "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     }
                     catch (Exception)
                     {
@@ -79,14 +78,9 @@ namespace Algar.Hours.Application.DataBase.Festivos.Create
 
                 await _logCommand.Log(idUserEntiyId, "Modifica festivos", model);
 
-                if (existe)
-                {
-                    return false;
-                }
-                return true;
             }
 
-            return false;
+            return savedDatesCount > 0;
         }
     }
 }
