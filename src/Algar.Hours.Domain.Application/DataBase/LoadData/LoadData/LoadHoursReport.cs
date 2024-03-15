@@ -1785,6 +1785,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         dt = dt.AddHours(gral);
                         convert.StartHours = dt.ToString("HH:mm");
                     }
+                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                    {
+
+                        dt = dt.AddHours(gral);
+                        convert.StartHours = dt.ToString("HH:mm");
+                    }
                     else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                     {
                         dt = dt.AddHours(gral);
@@ -3834,7 +3840,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var exceptedHoursByEmployee = exceptionUser == null ? 0 : exceptionUser.horas;
                         //get employee hours from PortalDB
-                        var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser).ToList();
+                        var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && co.EstatusFinal!= "RECHAZADO").ToList();
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
 
