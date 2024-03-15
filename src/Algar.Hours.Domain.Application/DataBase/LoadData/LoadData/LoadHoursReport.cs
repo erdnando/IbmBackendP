@@ -4309,7 +4309,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             //Escenario coincidencia Parcial
             //=================================================================
             var _horusCoincidenciaParcial = _dataBaseService.HorusReportEntity
-                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal!= "RECHAZADO")
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -4419,7 +4419,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             //Escenario coincidencia Parcial
             //=================================================================
             var _horusCoincidenciaParcial = _dataBaseService.HorusReportEntity
-                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -4529,7 +4529,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             //Escenario coincidencia Parcial
             //=================================================================
             var _horusCoincidenciaParcial = _dataBaseService.HorusReportEntity
-                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
