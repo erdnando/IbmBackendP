@@ -213,6 +213,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                     // State 100 es por que trata de asignar un standby durante horario laboral
                     // agregar notificacion email
                     returnPortalDB.State = 100;
+                    returnPortalDB.Error = true;
+                    returnPortalDB.Message = "Error en el registro de horas, por tratar de asignar un horario standby durante horario laboral";
                     _emailCommand.SendEmail(new EmailModel
                     {
                         To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
@@ -268,9 +270,12 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             var limiteMensualExcedido = (HorasLimiteMensuales != 0 && (tsReportado.TotalHours + HorasPortalDBTMes) > (HorasLimiteMensuales + horasExceptuada));
             var limiteAnualExcedido = (HorasLimiteAnuales != 0 && (tsReportado.TotalHours + HorasPortalDBTAno) > (HorasLimiteAnuales + horasExceptuada));
             if (limiteDiaExcedido || limiteSemanalExcedido || limiteMensualExcedido || limiteAnualExcedido) {
+                var tipoLimite = limiteDiaExcedido? "diario" : (limiteSemanalExcedido ? "semanal" : (limiteMensualExcedido ? "mensual" : "anual"));
                 //Se ha superado el límite de horas para StandBy
                 // agregar notificacion email
                 returnPortalDB.State = 101;
+                returnPortalDB.Error = true;
+                returnPortalDB.Message = $"Error en el registro de horas, el registro supera el límite {tipoLimite} de horas para StandBy";
                 _emailCommand.SendEmail(new EmailModel
                 {
                     To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,
@@ -298,6 +303,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             if (data.Count > 0)
             {
                 returnPortalDB.State = 102;
+                returnPortalDB.Error = true;
+                returnPortalDB.Message = "Error en el registro de horas, existe Overlaping";
                 _emailCommand.SendEmail(new EmailModel
                 {
                     To = (await _usuarioCommand.GetByUsuarioId(new Guid(model.ApproverId.ToString()))).Email,

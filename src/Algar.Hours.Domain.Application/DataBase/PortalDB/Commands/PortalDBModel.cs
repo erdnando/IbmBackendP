@@ -23,6 +23,8 @@ namespace Algar.Hours.Application.DataBase.PortalDB.Commands
         public int NumberReport { get; set; }
         public string ApproverId { get; set; }
         public int State { get; set; }
+        public bool Error { get; set; }
+        public string Message { get; set; }
 
     }
 }
