@@ -186,7 +186,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             DateTime fechaHoraOriginal = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
             string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
             var dateTime = DateTime.ParseExact(model.StartDate.ToString(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
-            horusModel.StrStartDate = dateTime.ToString();
+            horusModel.StrStartDate = dateTime.ToString("dd/MM/yyyy");
 
             //--------------------------------------------------------------------------------------------------------------------------
 

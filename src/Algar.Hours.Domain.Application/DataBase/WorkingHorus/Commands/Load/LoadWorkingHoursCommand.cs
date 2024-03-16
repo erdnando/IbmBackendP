@@ -37,14 +37,11 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
 
         public async Task<bool> LoadExcel(JsonArray model)
         {
-            List<List<CreateWorkingHoursModel>> listaSemanasTotales = new List<List<CreateWorkingHoursModel>>();
-            List<CreateWorkingHoursModel> listaSemana = new List<CreateWorkingHoursModel>();
-            List<string> diasDeLaSemana = new List<string>();
-
+            List<CreateWorkingHoursModel> lista = new List<CreateWorkingHoursModel>();
+            
             var idPais = default(string);
             var idUser = default(string);
-            var fechaCovert = default(string);
-
+            
             var count = 0;
 
             foreach (var entity in model)
@@ -55,37 +52,21 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<LoadWorkingHoursModel>(entity.ToJsonString());
                 if (convert.dia == "") continue;
 
-                if (diasDeLaSemana.Contains(convert.dia))
-                {
-                    listaSemanasTotales.Add(new List<CreateWorkingHoursModel>(listaSemana));
-                    listaSemana = new List<CreateWorkingHoursModel>();
-                    diasDeLaSemana.Clear();
-                    count = 1;
-                }
-
                 if(count == 1)
                 {
                     idPais = convert.pais;
                     idUser = convert.codigo_Empleado;
-                    fechaCovert = convert.fecha;
                 }
 
                 convert.pais = idPais;
                 convert.codigo_Empleado = idUser;
 
-                diasDeLaSemana.Add(convert.dia);
-
                 var modeloHorario = await CreateModeloHorario2(convert);
-                listaSemana.Add(modeloHorario);
+                lista.Add(modeloHorario);
             }
 
-            listaSemanasTotales.Add(new List<CreateWorkingHoursModel>(listaSemana));
-
-            foreach (var lista in listaSemanasTotales)
-            {
-                await _createHorario.Execute(lista); 
-            }
-
+            await _createHorario.Execute(lista);
+            
             return true;
         }
 
