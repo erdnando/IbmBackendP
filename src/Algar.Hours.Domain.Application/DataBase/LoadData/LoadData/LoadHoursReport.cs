@@ -411,7 +411,17 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var previosAndPos = new List<double>();
                     if (horario.Count >0)
                     {
-                        previosAndPos = getPreviasAndPosHorario(arp.HORA_INICIO, arp.HORA_FIN, horario[indexHorario].HoraInicio, horario[indexHorario].HoraFin);
+                        if (indexHorario>=0)
+                        {
+                            previosAndPos = getPreviasAndPosHorario(arp.HORA_INICIO, arp.HORA_FIN, horario[indexHorario].HoraInicio, horario[indexHorario].HoraFin);
+                        }
+                        else
+                        {
+                            parametersARP.EstatusProceso = "NO_APLICA_X_HORARIO";
+                            listParametersInitialEntity.Add(parametersARP);
+                            continue;
+                        }
+                        
                     }
                     else
                     {
