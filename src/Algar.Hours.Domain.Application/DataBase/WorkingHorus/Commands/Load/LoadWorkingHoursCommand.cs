@@ -81,10 +81,10 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
 
                 var fechasr = convert.fecha.Split("/");
 
-                DateTime dateTime = new DateTime(int.Parse(fechasr[0]), int.Parse(fechasr[1]), int.Parse(fechasr[2]));
+                DateTimeOffset dateTimeOffset = DateTimeOffset.ParseExact(convert.fecha, "M/d/yy", CultureInfo.InvariantCulture);
                 Calendar calendar = CultureInfo.InvariantCulture.Calendar;
-                string weekOfYear = calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday).ToString();
-                string year = dateTime.Year.ToString();
+                string weekOfYear = ((int) dateTimeOffset.DayOfWeek).ToString();
+                string year = dateTimeOffset.Year.ToString();
 
                 modeloHorario.UserEntityId = idUser;
                 modeloHorario.week = weekOfYear;
@@ -92,7 +92,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 modeloHorario.HoraFin = FormatTime(convert.HoraFin);
                 modeloHorario.Day = convert.dia;
                 modeloHorario.Ano = year;
-                modeloHorario.FechaWorking = dateTime;
+                modeloHorario.FechaWorking = dateTimeOffset;
 
             }
             catch (Exception ex)
