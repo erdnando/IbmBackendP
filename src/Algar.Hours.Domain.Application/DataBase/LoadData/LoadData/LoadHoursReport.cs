@@ -3314,7 +3314,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                //PROCESO DE VALIDACION OVER-LAPING!!!!
+                //PROCESO DE VALIDACION OVER-LAPING ENTRE CARGAS!!!!
                 var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
@@ -3356,10 +3356,73 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 await _dataBaseService.SaveAsync();
 
+                //---------------------------------------------------------------------------------------------------------------------------------------
+
+                var rowARPGral2 = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
+                var rowSTEGral2 = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
+                var rowTSEGral2 = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
 
 
+                var listIntegrados = new List<ParametersArpInitialEntity>();
+                foreach (var item in rowARPGral2)
+                {
+                    listIntegrados.Add(item);
+                }
+
+                foreach (var item in rowTSEGral2)
+                {
+                    var itemTse = new ParametersArpInitialEntity();
+                    itemTse.IdParametersInitialEntity = item.IdParamTSEInitialId;
+                    itemTse.OverTime = item.OverTime;
+                    itemTse.OutIme = item.OutIme;
+                    itemTse.Anio = item.Anio;
+                    itemTse.HoraInicio = item.HoraInicio;
+                    itemTse.HoraInicioHoraio = item.HoraInicioHoraio;
+                    itemTse.HoraFinHorario = item.HoraFinHorario;
+                    itemTse.totalHoras = item.totalHoras;
+                    itemTse.HorasFin = item.HorasFin;
+                    itemTse.HoraFin = item.HoraFin;
+                    itemTse.EmployeeCode = item.EmployeeCode;
+                    itemTse.Estado = item.Estado;
+                    itemTse.EstatusOrigen = item.EstatusOrigen;
+                    itemTse.EstatusProceso = item.EstatusProceso;
+                    itemTse.Reporte = item.Reporte;
+                    itemTse.FECHA_REP = item.FECHA_REP;
+                    itemTse.Festivo = item.Festivo;
+                    itemTse.IdCarga = item.IdCarga;
+                    itemTse.Semana = item.Semana;
+                    itemTse.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
 
 
+                    listIntegrados.Add(itemTse);
+                }
+
+                foreach (var item in rowSTEGral2)
+                {
+                    var itemSte = new ParametersArpInitialEntity();
+                    itemSte.IdParametersInitialEntity = item.IdParamSTEInitialId;
+                    itemSte.OverTime = item.OverTime;
+                    itemSte.OutIme = item.OutIme;
+                    itemSte.Anio = item.Anio;
+                    itemSte.HoraInicio = item.HoraInicio;
+                    itemSte.HoraInicioHoraio = item.HoraInicioHoraio;
+                    itemSte.HoraFinHorario = item.HoraFinHorario;
+                    itemSte.totalHoras = item.totalHoras;
+                    itemSte.HorasFin = item.HorasFin;
+                    itemSte.HoraFin = item.HoraFin;
+                    itemSte.EmployeeCode = item.EmployeeCode;
+                    itemSte.Estado = item.Estado;
+                    itemSte.EstatusOrigen = item.EstatusOrigen;
+                    itemSte.EstatusProceso = item.EstatusProceso;
+                    itemSte.Reporte = item.Reporte;
+                    itemSte.FECHA_REP = item.FECHA_REP;
+                    itemSte.Festivo = item.Festivo;
+                    itemSte.IdCarga = item.IdCarga;
+                    itemSte.Semana = item.Semana;
+                    itemSte.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
+
+                    listIntegrados.Add(itemSte);
+                }
 
 
                 //----------------------------------------------------------------------------------------------------------------------------------------
