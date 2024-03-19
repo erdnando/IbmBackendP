@@ -8,10 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Ubiety.Dns.Core.Records;
+using static Algar.Hours.Application.Enums.Enums;
 
 namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAproveedNivel1
 {
@@ -52,6 +54,46 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
                 if (modelAprobador.roleAprobador == "Usuario estandar")
                 {
+                    //Verificar limites Overtime
+                    var dateTime = DateTime.ParseExact(currentHReport.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    var HoraInicioReportado = DateTimeOffset.Parse(currentHReport.StartTime);
+                    var HoraFinReportado = DateTimeOffset.Parse(currentHReport.EndTime);
+                    var parametrosCountry = _dataBaseService.UserEntity.Include("CountryEntity").FirstOrDefault(x => x.IdUser == currentHReport.UserEntityId);
+                    var limitesCountry = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == parametrosCountry.CountryEntityId && x.TypeHours == 1);
+                    var HorasLimiteDia = limitesCountry.TargetTimeDay;
+                    var HorasLimiteSemanales = limitesCountry.TargetHourWeek;
+                    var HorasLimiteMensuales = limitesCountry.TargetHourMonth;
+                    var HorasLimiteAnuales = limitesCountry.TargetHourYear;
+
+                    TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
+                    var listExeptios = _dataBaseService.UsersExceptions.ToList();
+                    var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == currentHReport.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == dateTime.ToString("dd/MM/yyyy"));
+                    var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+
+                    int[] status = [(byte)AprobacionPortalDB.Pendiente, (byte)AprobacionPortalDB.AprobadoN1, (byte)AprobacionPortalDB.AprobadoN2, (byte)AprobacionPortalDB.Cerrada, (byte)AprobacionPortalDB.AprobadoN0];
+                    var HorasPortalDBTDia = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{currentHReport.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND h.\"IdHorusReport\" != '{currentHReport.IdHorusReport}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+                    var dateTimeInicioSemana = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-dd")} 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(-((int)dateTime.DayOfWeek));
+                    var dateTimeFinSemana = DateTime.ParseExact($"{dateTimeInicioSemana.ToString("yyyy-MM-dd")} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(6);
+                    var HorasPortalDBTSemana = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{currentHReport.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND h.\"IdHorusReport\" != '{currentHReport.IdHorusReport}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTimeInicioSemana.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTimeFinSemana.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+                    var dateTimeInicioMes = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-")}01 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                    var dateTimeFinMes = DateTime.ParseExact($"{dateTimeInicioMes.ToString("yyyy-MM-")}{DateTime.DaysInMonth(dateTimeInicioMes.Year, dateTimeInicioMes.Month)} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                    var HorasPortalDBTMes = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{currentHReport.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND h.\"IdHorusReport\" != '{currentHReport.IdHorusReport}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTimeInicioMes.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTimeFinMes.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+                    var dateTimeInicioAno = DateTime.ParseExact($"{dateTime.ToString("yyyy-")}01-01 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                    var dateTimeFinAno = DateTime.ParseExact($"{dateTime.ToString("yyyy-")}12-31 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                    var HorasPortalDBTAno = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{currentHReport.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND h.\"IdHorusReport\" != '{currentHReport.IdHorusReport}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTimeInicioAno.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTimeFinAno.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
+
+                    var limiteDiaExcedido = (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasPortalDBTDia) > (HorasLimiteDia + horasExceptuada));
+                    var limiteSemanalExcedido = (HorasLimiteSemanales != 0 && (tsReportado.TotalHours + HorasPortalDBTSemana) > (HorasLimiteSemanales + horasExceptuada));
+                    var limiteMensualExcedido = (HorasLimiteMensuales != 0 && (tsReportado.TotalHours + HorasPortalDBTMes) > (HorasLimiteMensuales + horasExceptuada));
+                    var limiteAnualExcedido = (HorasLimiteAnuales != 0 && (tsReportado.TotalHours + HorasPortalDBTAno) > (HorasLimiteAnuales + horasExceptuada));
+                    if (limiteDiaExcedido || limiteSemanalExcedido || limiteMensualExcedido || limiteAnualExcedido)
+                    {
+                        var tipoLimite = limiteDiaExcedido ? "diario" : (limiteSemanalExcedido ? "semanal" : (limiteMensualExcedido ? "mensual" : "anual"));
+                        modelAprobador.Error = true;
+                        modelAprobador.Message = $"Error en el registro de horas, el registro supera el límite {tipoLimite} de horas para Overtime";
+                        return modelAprobador;
+
+                    }
 
                     //Se maerca reporte como pendiente y en progreso en el flujo de aprobacion
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;

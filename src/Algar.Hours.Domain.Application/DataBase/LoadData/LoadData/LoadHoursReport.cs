@@ -3875,7 +3875,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //get employee ref from this employee
                         var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == item.EmployeeCode);
                         //get user exceptions
-                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.UtcDateTime.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var exceptedHoursByEmployee = exceptionUser == null ? 0 : exceptionUser.horas;
                         //get employee hours from PortalDB
                         var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && co.EstatusFinal!= "RECHAZADO").ToList();
