@@ -3208,6 +3208,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                     bool bOvertime = false;
+                    var totMinOrig = parametersSte.TOTAL_MINUTOS; 
+                    var totHorasOrig = parametersSte.totalHoras; 
 
                     if (repo.rInicioOK != 400)
                     {
@@ -3216,8 +3218,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte.HoraInicio = repo.rInicioOK.ToString().Replace(".", ":");
                         parametersSte.HoraFin = repo.rFinOK.ToString() == "23.59"? "00:00":repo.rFinOK.ToString().Replace(".", ":");
                         parametersSte.Reporte = parametersSte.Reporte;
-                        parametersSte.TOTAL_MINUTOS = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? "1": (int.Parse(parametersSte.TOTAL_MINUTOS) - 1).ToString(): parametersSte.TOTAL_MINUTOS;
-                        parametersSte.totalHoras = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? (1/60).ToString() : parametersSte.totalHoras : parametersSte.totalHoras;
+                        parametersSte.TOTAL_MINUTOS = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? "1": (int.Parse(totMinOrig) - 1).ToString(): parametersSte.TOTAL_MINUTOS;
+                        parametersSte.totalHoras = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? (1/60).ToString() : totHorasOrig : totHorasOrig;
                         listParametersInitialEntity.Add(parametersSte);
                         bOvertime = true;
                     }
@@ -3230,8 +3232,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var parametersSte2 = new ParametersSteInitialEntity();
                         parametersSte2.HoraInicio = repo.rInicio2OK.ToString().Replace(".", ":");
                         parametersSte2.HoraFin = repo.rFin2OK.ToString()=="23.59"?"00:00":repo.rFin2OK.ToString().Replace(".", ":");
-                        parametersSte.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(parametersSte.TOTAL_MINUTOS) - 1).ToString() : parametersSte.TOTAL_MINUTOS;
-                        parametersSte.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : parametersSte.totalHoras : parametersSte.totalHoras;
+                        parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
+                        parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;
                         parametersSte2.Reporte = parametersSte.Reporte + (bOvertime ? "-R2" : "");
 
                         parametersSte2.Anio = parametersSte.Anio;
@@ -3243,7 +3245,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte2.Festivo = parametersSte.Festivo;
                         parametersSte2.HoraFinHorario = parametersSte.HoraFinHorario;
                         parametersSte2.HoraInicioHoraio = parametersSte.HoraInicioHoraio;
-                        parametersSte2.totalHoras = parametersSte.totalHoras;
+                        //parametersSte2.totalHoras = parametersSte.totalHoras;
                         parametersSte2.HorasFin = parametersSte.HorasFin;
                         parametersSte2.HorasInicio = parametersSte.HorasInicio;
                         parametersSte2.IdCarga = parametersSte.IdCarga;
@@ -3251,8 +3253,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte2.OutIme = parametersSte.OutIme;
                         parametersSte2.OverTime = parametersSte.OverTime;
                         parametersSte2.Semana = parametersSte.Semana;
-                        parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
-                        parametersSte2.totalHoras = parametersSte.totalHoras;
+                        //parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                        //parametersSte2.totalHoras = parametersSte.totalHoras;
 
                         listParametersInitialEntity.Add(parametersSte2);
                         bOvertime = true;
