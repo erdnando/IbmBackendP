@@ -3944,8 +3944,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && co.EstatusFinal!= "RECHAZADO").ToList();
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
-
-                        if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
+                        var limiteOmitido = true;
+                        if (!limiteOmitido && HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
                         {
                             item.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
                             //=====================================================================
@@ -4087,7 +4087,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                     else
                     {*/
-                        //Generating HORUSREPORT
+                    //Generating HORUSREPORT
+                        var countHours = (TimeSpan.Parse(itemARPNew.HoraFin) - TimeSpan.Parse(itemARPNew.HoraInicio)).TotalHours;
                         rowAdd = new()
                         {
                             IdHorusReport = Guid.NewGuid(),
@@ -4097,7 +4098,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             EndTime = itemARPNew.HoraFin,
                             ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),//   processed by overtime clientEntity,
                             strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                            CountHours = itemARPNew.totalHoras,
+                            CountHours = countHours.ToString(),
                             StrReport = itemARPNew.Reporte,
                             ARPLoadingId = idCarga,
                             Acitivity = 1,//overtime
@@ -4769,7 +4770,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     var _tipo = "OVERTIME1";
 
-                    if (i >= this.hInicio && i <= this.hFin) _tipo = "HORARIO";
+                    if (i > this.hInicio && i < this.hFin) _tipo = "HORARIO";
                     else
                     {
 
@@ -4808,7 +4809,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     var _tipo = "OVERTIME1";
 
-                    if (i >= this.hInicio && i <= this.hFin) _tipo = "HORARIO";
+                    if (i > this.hInicio && i < this.hFin) _tipo = "HORARIO";
                     else
                     {
 
