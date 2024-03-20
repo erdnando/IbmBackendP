@@ -471,38 +471,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     //Evaluating schedullers
                     //-----------------------------------------------------------------------------------------------
-                    
-                    var repo = new ReportOvertime();
-                    repo.hInicio = decimal.Parse(horario[indexHorario].HoraInicio.Substring(0, 5).Replace(":", "."));
-                    repo.hFin = decimal.Parse(horario[indexHorario].HoraFin.Substring(0, 5).Replace(":", "."));
 
-                    repo.rInicio = decimal.Parse(parametersARP.HoraInicio.Substring(0, 5).Replace(":", "."));
-                    repo.rFin = decimal.Parse(parametersARP.HoraFin.Substring(0, 5).Replace(":", "."));
-
-                    repo.generaHorarioDefinicion();
-                    repo.detectaFirstAndLast();
+                    var scheduleStartTime = TimeSpan.Parse(horario[indexHorario].HoraInicio);
+                    var scheduleEndTime = TimeSpan.Parse(horario[indexHorario].HoraFin);
+                    var excelStartTime = TimeSpan.Parse(parametersARP.HoraInicio);
+                    var excelEndTime = TimeSpan.Parse(parametersARP.HoraFin);
+                    var beforeTime = scheduleStartTime - excelStartTime;
+                    var afterTime = excelEndTime - scheduleEndTime;
 
 
                     bool bOvertime = false;
                     //listParametersInitialEntity.Add(parametersARP);
-                    if (repo.rInicioOK != 400)
+                    if (beforeTime.TotalMinutes > 0)
                     {
-                  
+
                         //OVERTIME 1
-                        parametersARP.HoraInicio = repo.rInicioOK.ToString().Replace(".",":");
-                        parametersARP.HoraFin = repo.rFinOK.ToString().Replace(".", ":");
+                        parametersARP.HoraInicio = excelStartTime.ToString(@"hh\:mm");
+                        parametersARP.HoraFin = scheduleStartTime.ToString(@"hh\:mm");
                         parametersARP.Reporte = parametersARP.Reporte;
                         listParametersInitialEntity.Add(parametersARP);
                         bOvertime = true;
                     }
                     
-                    if (repo.rInicio2OK != 400)
+                    if (afterTime.TotalMinutes > 0)
                     {
 
                         //OVERTIME2
                         var parametersARP2 = new ParametersArpInitialEntity();
-                        parametersARP2.HoraInicio = repo.rInicio2OK.ToString().Replace(".", ":");
-                        parametersARP2.HoraFin = repo.rFin2OK.ToString().Replace(".", ":");
+                        parametersARP2.HoraInicio = scheduleEndTime.ToString(@"hh\:mm");
+                        parametersARP2.HoraFin = excelEndTime.ToString(@"hh\:mm");
                         parametersARP2.Reporte = parametersARP.Reporte + (bOvertime ? "-R2": "");
                         
                         parametersARP2.Anio = parametersARP.Anio;
@@ -2118,10 +2115,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             {
                 var convert = item;
 
-
-                DateTimeOffset dateTimeOffset = new DateTimeOffset();
-
-                
                 if (convert.EndDateTime == null)
                 {
                     return convert;
@@ -2138,825 +2131,20 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     string horarioRowGMT = userDbGMT.Substring(0, 11);
                     int zonf = int.Parse(horarioRowGMT.Replace("(GMT", "").Replace(":00)", ""));
                     int ZonBase = int.Parse(GMTSelect);
-                    int gral = zonf - ZonBase;
-                    var dt = new DateTimeOffset();
+                    var zzz = $"{(Math.Sign(zonf) < 0 ? "-" : "+")}{Math.Abs(zonf).ToString().PadLeft(2, '0')}:00";
+                    var dt = DateTimeOffset.ParseExact($"{convert.StartDateTime} {zzz}", "d/MM/yyyy HH:mm tt zzz", CultureInfo.InvariantCulture);
+                    var zonBaseString = ZonBase.ToString();
+                    var format = $"{((ZonBase < 0) ? @"\-" : "")}h";
+                    var timeSpanStyle = ZonBase < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
+                    var offset = TimeSpan.ParseExact(zonBaseString, format, CultureInfo.InvariantCulture, timeSpanStyle);
+                    dt = dt.ToOffset(offset);
+                    convert.StartHours = dt.ToString("HH:mm");
+                    convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
 
-                    if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-
-
-
-
-
-
-
-
-
-
-                    if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-
-
-
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-
-
-
-
-
-
-
-
-                    try
-                    {
-
-                        if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                           // convert.StartDateTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
-
-
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "MM/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                            // convert.StartDateTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
-                    }
-                    catch (Exception exx)
-                    {
-
-
-                    }
-
-
-
-                    try
-                    {
-
-                        if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                            //convert.EndDateTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy HH:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
-
-
-
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "MM/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                            //convert.EndDateTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndDateTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
-                    }
-                    catch (Exception exx)
-                    {
-
-
-                    }
-
+                    dt = DateTimeOffset.ParseExact($"{convert.EndDateTime} {zzz}", "d/MM/yyyy HH:mm tt zzz", CultureInfo.InvariantCulture);
+                    dt = dt.ToOffset(offset);
+                    convert.EndHours = dt.ToString("HH:mm");
+                    convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
 
                 }
                 catch (Exception ex)
@@ -3944,8 +3132,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && co.EstatusFinal!= "RECHAZADO").ToList();
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
-                        var limiteOmitido = true;
-                        if (!limiteOmitido && HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
+                        /*if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
                         {
                             item.EstatusProceso = "NO_APLICA_X_LIMITE_HORAS";
                             //=====================================================================
@@ -3962,9 +3149,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             //=====================================================================
                         }
                         else
-                        {
+                        {*/
                             horasAcumuladasEmployee += tsReportado.TotalHours;
-                        }
+                        /*}*/
 
 
 
@@ -4770,7 +3957,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     var _tipo = "OVERTIME1";
 
-                    if (i > this.hInicio && i < this.hFin) _tipo = "HORARIO";
+                    if (i >= this.hInicio && i <= this.hFin) _tipo = "HORARIO";
                     else
                     {
 
@@ -4809,7 +3996,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     var _tipo = "OVERTIME1";
 
-                    if (i > this.hInicio && i < this.hFin) _tipo = "HORARIO";
+                    if (i >= this.hInicio && i <= this.hFin) _tipo = "HORARIO";
                     else
                     {
 
