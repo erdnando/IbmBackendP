@@ -21,6 +21,7 @@ using Algar.Hours.Domain.Entities.User;
 using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using Azure;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Office2010.Drawing;
 using EFCore.BulkExtensions;
 using Google.Protobuf.WellKnownTypes;
@@ -3314,7 +3315,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                //PROCESO DE VALIDACION OVER-LAPING ENTRE CARGAS!!!!
+                //PROCESO DE VALIDACION OVER-LAPING ENTRE CARGAS COINCIDENCIA 100%!!!!
                 var rowARPGral = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowSTEGral = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowTSEGral = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
@@ -3356,17 +3357,56 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 await _dataBaseService.SaveAsync();
 
-                //---------------------------------------------------------------------------------------------------------------------------------------
+                //------------2a VALIDACION ENTRE CARGAS COINCIDENCIA PARCIAL---------------------------------------------------------------------------------------------------------------------------
 
                 var rowARPGral2 = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowSTEGral2 = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowTSEGral2 = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
 
 
-                var listIntegrados = new List<ParametersArpInitialEntity>();
+                var listIntegrados2 = new List<ParametersArpInitialEntity>();
+
+
+               
+
+
                 foreach (var item in rowARPGral2)
                 {
-                    listIntegrados.Add(item);
+
+                    item.HoraInicio = addZerotime(item.HoraInicio);
+                    item.HoraFin = addZerotime(item.HoraFin);
+
+
+                    var startDate = DateTime.ParseExact(item.FECHA_REP.Substring(0,10) +" "+ item.HoraInicio, "dd/MM/yyyy HH:mm",System.Globalization.CultureInfo.InvariantCulture);
+                    var endDate = DateTime.ParseExact(item.FECHA_REP.Substring(0, 10) + " " + item.HoraFin, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                    //Se crea el rango
+                    //var range = new DateRange(startDate, endDate);
+
+                    foreach (var reporteEvaluado in listIntegrados2)
+                    {
+                        var startDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP.Substring(0, 10) + " " + reporteEvaluado.HoraInicio, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                        var endDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP.Substring(0, 10) + " " + reporteEvaluado.HoraFin, "dd/MM/yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                        //se valida contra el rango contra los anteriores
+                        //var rangex = new DateRange(startDatex, endDatex);
+
+
+                        /*if(range.WithOverlapping(rangex))
+                        {
+                            reporteEvaluado.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                            break;
+                        }*/
+                       if( OverlappingDates(startDate, endDate, startDatex, endDatex))
+                        {
+                            reporteEvaluado.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                            break;
+                        }
+                    }
+                    
+
+                    listIntegrados2.Add(item);
+
+
+
                 }
 
                 foreach (var item in rowTSEGral2)
@@ -3394,7 +3434,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     itemTse.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
 
 
-                    listIntegrados.Add(itemTse);
+                    listIntegrados2.Add(itemTse);
                 }
 
                 foreach (var item in rowSTEGral2)
@@ -3421,12 +3461,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     itemSte.Semana = item.Semana;
                     itemSte.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
 
-                    listIntegrados.Add(itemSte);
+                    listIntegrados2.Add(itemSte);
                 }
 
 
                 //----------------------------------------------------------------------------------------------------------------------------------------
-
+                //her validation 2
 
 
 
@@ -3565,6 +3605,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 return summary;
             }
+        }
+        private string addZerotime(string time)
+        {
+            if (time.Length==4)
+            {
+                return "0" + time;
+            }
+            else return time;
+        }
+
+        public bool OverlappingDates(DateTime startDate1, DateTime endDate1, DateTime startDate2, DateTime endDate2)
+        {
+            return startDate1 < endDate2 && startDate2 < endDate1;
         }
 
         private STELoadEntity validaHoraSTEGMT(STELoadEntity tseRegistro, List<PaisRelacionGMTEntity> paisGMT, CountryModel paisEntidad)
@@ -4870,6 +4923,43 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
     {
         public decimal hora { get; set; }
         public string tipo { get; set; }
+        
+    }
+
+    public interface IRange
+    {
+        DateTime StartRango { get; }
+        DateTime EndRango { get; }
+        bool WithOverlapping(DateTime value);
+        bool WithOverlapping(IRange range);
+    }
+
+    public class DateRange : IRange
+    {
+        public DateTime StartRango { get; set; }
+        public DateTime EndRango { get; set; }
+
+        
+
+        public DateRange(DateTime start, DateTime end)
+        {
+            StartRango = start;
+            EndRango = end;
+        }
+
+        public bool WithOverlapping(DateTime value)
+        {
+            if ((StartRango <= value) && (value <= EndRango))return true;
+            else return false;
+
+           
+        }
+
+        public bool WithOverlapping(IRange range)
+        {
+            return (StartRango <= range.StartRango) && (range.EndRango <= EndRango);
+        }
+
         
     }
 }
