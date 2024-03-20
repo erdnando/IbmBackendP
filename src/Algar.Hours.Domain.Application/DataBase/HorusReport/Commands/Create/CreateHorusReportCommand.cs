@@ -250,7 +250,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
             var listExeptios = _dataBaseService.UsersExceptions.ToList();
-            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.ToString("dd/MM/yyyy") == horusModel.StrStartDate);
+            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == horusModel.StrStartDate);
             var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
 
             int[] status = [(byte) AprobacionPortalDB.Pendiente, (byte)AprobacionPortalDB.AprobadoN1, (byte)AprobacionPortalDB.AprobadoN2, (byte)AprobacionPortalDB.Cerrada, (byte)AprobacionPortalDB.AprobadoN0];

@@ -15,7 +15,7 @@ namespace Algar.Hours.Domain.Entities.UsersExceptions
         public virtual UserEntity? User { get; set; }
         public Guid AssignedUserId { get; set; }
  
-        public DateTime StartDate { get; set; } 
+        public DateTimeOffset StartDate { get; set; } 
 
         public float horas { get; set; }
 
