@@ -3443,7 +3443,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Escenario coincidencia 100%
                 //=================================================================
                 var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
                     (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -3546,11 +3546,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 string[] r1 = itemTSE.HoraInicio.Split(":");
                 string[] r2 = itemTSE.HoraFin.Split(":");
                 var startTime = DateTime.Parse("00:00:00");
-                startTime.AddHours(int.Parse(r1[0]));
-                startTime.AddMinutes(int.Parse(r1[1]));
+                startTime = startTime.AddHours(int.Parse(r1[0]));
+                startTime = startTime.AddMinutes(int.Parse(r1[1]));
                 var endTime = DateTime.Parse("00:00:00");
-                endTime.AddHours(int.Parse(r2[0]));
-                endTime.AddMinutes(int.Parse(r2[1]));
+                endTime = endTime.AddHours(int.Parse(r2[0]));
+                endTime = endTime.AddMinutes(int.Parse(r2[1]));
 
                 DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
@@ -3558,7 +3558,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Escenario coincidencia 100%
                 //=================================================================
                 var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
                     (TimeInRange(h.StartTime, startTime, endTime) &&
@@ -3662,11 +3662,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 string[] r1 = itemSTE.HoraInicio.Split(":");
                 string[] r2 = itemSTE.HoraFin.Split(":");
                 var startTime = DateTime.Parse("00:00:00");
-                startTime.AddHours(int.Parse(r1[0]));
-                startTime.AddMinutes(int.Parse(r1[1]));
+                startTime = startTime.AddHours(int.Parse(r1[0]));
+                startTime = startTime.AddMinutes(int.Parse(r1[1]));
                 var endTime = DateTime.Parse("00:00:00");
-                endTime.AddHours(int.Parse(r2[0]));
-                endTime.AddMinutes(int.Parse(r2[1]));
+                endTime = endTime.AddHours(int.Parse(r2[0]));
+                endTime = endTime.AddMinutes(int.Parse(r2[1]));
 
                 DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
@@ -3674,7 +3674,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Escenario coincidencia 100%
                 //=================================================================
                 var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser)
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTE.HoraInicio, itemSTE.HoraFin) ||
                     (TimeInRange(h.StartTime, startTime, endTime) &&
