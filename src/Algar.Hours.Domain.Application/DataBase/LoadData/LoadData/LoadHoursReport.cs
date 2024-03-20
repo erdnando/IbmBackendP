@@ -22,6 +22,7 @@ using Algar.Hours.Domain.Entities.UsersExceptions;
 using AutoMapper;
 using Azure;
 using DocumentFormat.OpenXml.Office2010.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
 using EFCore.BulkExtensions;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.EntityFrameworkCore;
@@ -1104,39 +1105,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //Evaluating schedullers
                         //-----------------------------------------------------------------------------------------------
 
-                        var repo = new ReportOvertime();
-                        repo.hInicio = decimal.Parse(horario[indexHorario].HoraInicio.Substring(0, 5).Replace(":", "."));
-                        repo.hFin = decimal.Parse(horario[indexHorario].HoraFin.Substring(0, 5).Replace(":", "."));
+                        var scheduleStartDateTime = DateTime.ParseExact($"{tse.StartTime.Substring(0, 10)} {horario[indexHorario].HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                        var scheduleEndDateTime = DateTime.ParseExact($"{tse.EndTime.Substring(0, 10)} {horario[indexHorario].HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                        var excelStartDateTime = DateTime.ParseExact($"{tse.StartTime.Substring(0, 10)} {parametersTse.HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                        var excelEndDateTime = DateTime.ParseExact($"{tse.EndTime.Substring(0, 10)} {parametersTse.HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                        var beforeTime = (excelEndDateTime < scheduleStartDateTime ? excelEndDateTime : scheduleStartDateTime) - excelStartDateTime;
 
-                        repo.rInicio = decimal.Parse(parametersTse.HoraInicio.Substring(0, 5).Replace(":", "."));
-                        repo.rFin = decimal.Parse(parametersTse.HoraFin.Substring(0, 5).Replace(":", "."));
+                        int overtimeCount = 0;
 
-                        repo.generaHorarioDefinicion();
-                        repo.detectaFirstAndLast();
-
-
-                        bool bOvertime = false;
                         //listParametersInitialEntity.Add(parametersARP);
-                        if (repo.rInicioOK != 400)
+                        if (beforeTime.TotalMinutes > 0)
                         {
 
                             //OVERTIME 1
-                            parametersTse.HoraInicio = repo.rInicioOK.ToString().Replace(".", ":");
-                            parametersTse.HoraFin = repo.rFinOK.ToString().Replace(".", ":");
+                            parametersTse.HoraInicio = excelStartDateTime.ToString("HH:mm");
+                            parametersTse.HoraFin = (excelEndDateTime < scheduleStartDateTime ? excelEndDateTime : scheduleStartDateTime).ToString("HH:mm");
                             parametersTse.Reporte = parametersTse.Reporte;
                             listParametersInitialEntity.Add(parametersTse);
-                            bOvertime = true;
+                            overtimeCount++;
                         }
 
-                        if (repo.rInicio2OK != 400)
+                        if (excelEndDateTime.Day != excelStartDateTime.Day)
                         {
 
                             //OVERTIME2
                             var parametersTse2 = new ParametersTseInitialEntity();
-                            parametersTse2.HoraInicio = repo.rInicio2OK.ToString().Replace(".", ":");
-                            parametersTse2.HoraFin = repo.rFin2OK.ToString().Replace(".", ":");
-                            parametersTse2.Reporte = parametersTse.Reporte + (bOvertime ? "-R2" : "");
-                            
+                            parametersTse2.HoraInicio = excelStartDateTime.ToString("HH:mm");
+                            parametersTse2.HoraFin = "24:00";
+                            parametersTse2.Reporte = $"{parametersTse.Reporte}-R{overtimeCount}";
+
                             parametersTse2.Anio = parametersTse.Anio;
                             parametersTse2.FECHA_REP = parametersTse.FECHA_REP;
                             parametersTse2.EstatusProceso = parametersTse.EstatusProceso;
@@ -1158,10 +1155,74 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse2.totalHoras = parametersTse.totalHoras;
 
                             listParametersInitialEntity.Add(parametersTse2);
-                            bOvertime = true;
+                            overtimeCount++;
+
+                            //OVERTIME3
+                            var parametersTse3 = new ParametersTseInitialEntity();
+                            parametersTse3.HoraInicio = "00:00";
+                            parametersTse3.HoraFin = excelEndDateTime.ToString("HH:mm");
+                            parametersTse3.Reporte = $"{parametersTse.Reporte}-R{overtimeCount}";
+
+                            parametersTse3.Anio = parametersTse.Anio;
+                            parametersTse3.FECHA_REP = parametersTse.FECHA_REP;
+                            parametersTse3.EstatusProceso = parametersTse.EstatusProceso;
+                            parametersTse3.Estado = parametersTse.Estado;
+                            parametersTse3.EmployeeCode = parametersTse.EmployeeCode;
+                            parametersTse3.EstatusOrigen = parametersTse.EstatusOrigen;
+                            parametersTse3.Festivo = parametersTse.Festivo;
+                            parametersTse3.HoraFinHorario = parametersTse.HoraFinHorario;
+                            parametersTse3.HoraInicioHoraio = parametersTse.HoraInicioHoraio;
+                            parametersTse3.totalHoras = parametersTse.totalHoras;
+                            parametersTse3.HorasFin = parametersTse.HorasFin;
+                            parametersTse3.HorasInicio = parametersTse.HorasInicio;
+                            parametersTse3.IdCarga = parametersTse.IdCarga;
+                            parametersTse3.IdParamTSEInitialId = Guid.NewGuid();
+                            parametersTse3.OutIme = parametersTse.OutIme;
+                            parametersTse3.OverTime = parametersTse.OverTime;
+                            parametersTse3.Semana = parametersTse.Semana;
+                            parametersTse3.TOTAL_MINUTOS = parametersTse.TOTAL_MINUTOS;
+                            parametersTse3.totalHoras = parametersTse.totalHoras;
+                            listParametersInitialEntity.Add(parametersTse3);
+
+                            overtimeCount++;
+                        } else
+                        {
+                            var afterTime = excelEndDateTime - scheduleEndDateTime;
+                            if (afterTime.TotalMinutes > 0)
+                            {
+                                //OVERTIME2
+                                var parametersTse2 = new ParametersTseInitialEntity();
+                                parametersTse2.HoraInicio = scheduleEndDateTime.ToString("HH:mm");
+                                parametersTse2.HoraFin = excelEndDateTime.ToString("HH:mm");
+                                parametersTse2.Reporte = $"{parametersTse.Reporte}-R{overtimeCount}";
+
+                                parametersTse2.Anio = parametersTse.Anio;
+                                parametersTse2.FECHA_REP = parametersTse.FECHA_REP;
+                                parametersTse2.EstatusProceso = parametersTse.EstatusProceso;
+                                parametersTse2.Estado = parametersTse.Estado;
+                                parametersTse2.EmployeeCode = parametersTse.EmployeeCode;
+                                parametersTse2.EstatusOrigen = parametersTse.EstatusOrigen;
+                                parametersTse2.Festivo = parametersTse.Festivo;
+                                parametersTse2.HoraFinHorario = parametersTse.HoraFinHorario;
+                                parametersTse2.HoraInicioHoraio = parametersTse.HoraInicioHoraio;
+                                parametersTse2.totalHoras = parametersTse.totalHoras;
+                                parametersTse2.HorasFin = parametersTse.HorasFin;
+                                parametersTse2.HorasInicio = parametersTse.HorasInicio;
+                                parametersTse2.IdCarga = parametersTse.IdCarga;
+                                parametersTse2.IdParamTSEInitialId = Guid.NewGuid();
+                                parametersTse2.OutIme = parametersTse.OutIme;
+                                parametersTse2.OverTime = parametersTse.OverTime;
+                                parametersTse2.Semana = parametersTse.Semana;
+                                parametersTse2.TOTAL_MINUTOS = parametersTse.TOTAL_MINUTOS;
+                                parametersTse2.totalHoras = parametersTse.totalHoras;
+
+                                listParametersInitialEntity.Add(parametersTse2);
+
+                                overtimeCount++;
+                            }
                         }
 
-                        if (!bOvertime)
+                        if (overtimeCount <= 0)
                         {
                             //NO hay horario
                             parametersTse.EstatusProceso = "NO_APLICA_X_HORARIO";
@@ -1738,359 +1799,20 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     string horarioRowGMT = convert.ZonaHoraria.Substring(0, 11);
                     int zonf = int.Parse(horarioRowGMT.Replace("(GMT", "").Replace(":00)", ""));
                     int ZonBase = int.Parse(GMTSelect);
-                    int gral = zonf - ZonBase;
+                    var zzz = $"{(Math.Sign(zonf) < 0 ? "-" : "+")}{Math.Abs(zonf).ToString().PadLeft(2, '0')}:00";
+                    var dt = DateTimeOffset.ParseExact($"{convert.StartTime} {zzz}", "d/MM/yyyy hh:mm tt zzz", CultureInfo.InvariantCulture);
+                    var zonBaseString = ZonBase.ToString();
+                    var format = $"{((ZonBase < 0) ? @"\-" : "")}h";
+                    var timeSpanStyle = ZonBase < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
+                    var offset = TimeSpan.ParseExact(zonBaseString, format, CultureInfo.InvariantCulture, timeSpanStyle);
+                    dt = dt.ToOffset(offset);
+                    convert.StartHours = dt.ToString("HH:mm");
+                    convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
 
-                    var dt = new DateTimeOffset();
-                    if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-
-                       dt= dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.StartTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.StartHours = dt.ToString("HH:mm");
-                    }
-
-
-
-                    if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-                    else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/d/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                    {
-                        dt = dt.AddHours(gral);
-                        convert.EndHours = dt.ToString("HH:mm");
-                    }
-
-
-
-
-
-
-
-                    try
-                    {
-                       
-
-                        if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                          //  convert.StartTime = dt.ToString("dd/MM/yyyy HH:mm:ss");
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
-                    }
-                    catch (Exception exx)
-                    {
-                       
-
-                    }
-
-
-
-                    try
-                    {
-
-
-                        if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.StartTime, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "MM/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "M/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "MM/dd/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.EndTime, "MM/dd/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
-                    }
-                    catch (Exception exx)
-                    {
-
-
-                    }
-
+                    dt = DateTimeOffset.ParseExact($"{convert.EndTime} {zzz}", "d/MM/yyyy hh:mm tt zzz", CultureInfo.InvariantCulture);
+                    dt = dt.ToOffset(offset);
+                    convert.EndHours = dt.ToString("HH:mm");
+                    convert.EndTime = dt.ToString("dd/MM/yyyy 00:00:00");
 
                 }
                 catch (Exception ex)
@@ -2132,7 +1854,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     int zonf = int.Parse(horarioRowGMT.Replace("(GMT", "").Replace(":00)", ""));
                     int ZonBase = int.Parse(GMTSelect);
                     var zzz = $"{(Math.Sign(zonf) < 0 ? "-" : "+")}{Math.Abs(zonf).ToString().PadLeft(2, '0')}:00";
-                    var dt = DateTimeOffset.ParseExact($"{convert.StartDateTime} {zzz}", "d/MM/yyyy HH:mm tt zzz", CultureInfo.InvariantCulture);
+                    var dt = DateTimeOffset.ParseExact($"{convert.StartDateTime} {zzz}", "d/MM/yyyy hh:mm tt zzz", CultureInfo.InvariantCulture);
                     var zonBaseString = ZonBase.ToString();
                     var format = $"{((ZonBase < 0) ? @"\-" : "")}h";
                     var timeSpanStyle = ZonBase < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
@@ -2141,7 +1863,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     convert.StartHours = dt.ToString("HH:mm");
                     convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
 
-                    dt = DateTimeOffset.ParseExact($"{convert.EndDateTime} {zzz}", "d/MM/yyyy HH:mm tt zzz", CultureInfo.InvariantCulture);
+                    dt = DateTimeOffset.ParseExact($"{convert.EndDateTime} {zzz}", "d/MM/yyyy hh:mm tt zzz", CultureInfo.InvariantCulture);
                     dt = dt.ToOffset(offset);
                     convert.EndHours = dt.ToString("HH:mm");
                     convert.EndDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
@@ -2384,45 +2106,38 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //Evaluating schedullers
                     //-----------------------------------------------------------------------------------------------
 
-                    var repo = new ReportOvertime();
-                    repo.hInicio = decimal.Parse(horario[indexHorario].HoraInicio.Substring(0, 5).Replace(":", "."));
-                    repo.hFin = decimal.Parse(horario[indexHorario].HoraFin.Substring(0, 5).Replace(":", "."));
-
-                    repo.rInicio = decimal.Parse(parametersSte.HoraInicio.Substring(0, 5).Replace(":", "."));
-                    repo.rFin = decimal.Parse(parametersSte.HoraFin.Substring(0, 5).Replace(":", "."));
-
-                    repo.generaHorarioDefinicion();
-                    repo.detectaFirstAndLast();
-
-
-                    bool bOvertime = false;
+                    var scheduleStartDateTime = DateTime.ParseExact($"{ste.StartDateTime.Substring(0, 10)} {horario[indexHorario].HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var scheduleEndDateTime = DateTime.ParseExact($"{ste.EndDateTime.Substring(0, 10)} {horario[indexHorario].HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var excelStartDateTime = DateTime.ParseExact($"{ste.StartDateTime.Substring(0, 10)} {parametersSte.HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var excelEndDateTime = DateTime.ParseExact($"{ste.EndDateTime.Substring(0, 10)} {parametersSte.HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var beforeTime = (excelEndDateTime < scheduleStartDateTime? excelEndDateTime : scheduleStartDateTime) - excelStartDateTime;
+                    
+                    int overtimeCount = 0;
                     var totMinOrig = parametersSte.TOTAL_MINUTOS; 
                     var totHorasOrig = parametersSte.totalHoras; 
 
-                    if (repo.rInicioOK != 400)
+                    if (beforeTime.TotalMinutes > 0)
                     {
-                        var cont = parametersSte.Reporte.Contains("R2");
+
                         //OVERTIME 1
-                        parametersSte.HoraInicio = repo.rInicioOK.ToString().Replace(".", ":");
-                        parametersSte.HoraFin = repo.rFinOK.ToString() == "23.59"? "00:00":repo.rFinOK.ToString().Replace(".", ":");
+                        parametersSte.HoraInicio = excelStartDateTime.ToString("HH:mm");
+                        parametersSte.HoraFin = (excelEndDateTime < scheduleStartDateTime ? excelEndDateTime : scheduleStartDateTime).ToString("HH:mm");
                         parametersSte.Reporte = parametersSte.Reporte;
-                        parametersSte.TOTAL_MINUTOS = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? "1": (int.Parse(totMinOrig) - 1).ToString(): parametersSte.TOTAL_MINUTOS;
-                        parametersSte.totalHoras = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? (1/60).ToString() : totHorasOrig : totHorasOrig;
+                        /*parametersSte.TOTAL_MINUTOS = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? "1": (int.Parse(totMinOrig) - 1).ToString(): parametersSte.TOTAL_MINUTOS;
+                        parametersSte.totalHoras = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? (1/60).ToString() : totHorasOrig : totHorasOrig;*/
                         listParametersInitialEntity.Add(parametersSte);
-                        bOvertime = true;
+                        overtimeCount++;
                     }
 
-                    if (repo.rInicio2OK != 400)
+                    if (excelEndDateTime.Day != excelStartDateTime.Day)
                     {
-
                         //OVERTIME2
-                        var cont = parametersSte.Reporte.Contains("R2");
                         var parametersSte2 = new ParametersSteInitialEntity();
-                        parametersSte2.HoraInicio = repo.rInicio2OK.ToString().Replace(".", ":");
-                        parametersSte2.HoraFin = repo.rFin2OK.ToString()=="23.59"?"00:00":repo.rFin2OK.ToString().Replace(".", ":");
-                        parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
-                        parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;
-                        parametersSte2.Reporte = parametersSte.Reporte + (bOvertime ? "-R2" : "");
+                        parametersSte2.HoraInicio = excelStartDateTime.ToString("HH:mm");
+                        parametersSte2.HoraFin = "24:00";
+                        /*parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
+                        parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
+                        parametersSte2.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
 
                         parametersSte2.Anio = parametersSte.Anio;
                         parametersSte2.FECHA_REP = parametersSte.FECHA_REP;
@@ -2443,12 +2158,78 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte2.Semana = parametersSte.Semana;
                         //parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
                         //parametersSte2.totalHoras = parametersSte.totalHoras;
-
                         listParametersInitialEntity.Add(parametersSte2);
-                        bOvertime = true;
+                        overtimeCount++;
+
+                        //OVERTIME3
+                        var parametersSte3 = new ParametersSteInitialEntity();
+                        parametersSte3.HoraInicio = "00:00";
+                        parametersSte3.HoraFin = excelEndDateTime.ToString("HH:mm");
+                        /*parametersSte3.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
+                        parametersSte3.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
+                        parametersSte3.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
+
+                        parametersSte3.Anio = parametersSte.Anio;
+                        parametersSte3.FECHA_REP = ste.EndDateTime;
+                        parametersSte3.EstatusProceso = parametersSte.EstatusProceso;
+                        parametersSte3.Estado = parametersSte.Estado;
+                        parametersSte3.EmployeeCode = parametersSte.EmployeeCode;
+                        parametersSte3.EstatusOrigen = parametersSte.EstatusOrigen;
+                        parametersSte3.Festivo = parametersSte.Festivo;
+                        parametersSte3.HoraFinHorario = parametersSte.HoraFinHorario;
+                        parametersSte3.HoraInicioHoraio = parametersSte.HoraInicioHoraio;
+                        //parametersSte3.totalHoras = parametersSte.totalHoras;
+                        parametersSte3.HorasFin = parametersSte.HorasFin;
+                        parametersSte3.HorasInicio = parametersSte.HorasInicio;
+                        parametersSte3.IdCarga = parametersSte.IdCarga;
+                        parametersSte3.IdParamSTEInitialId = Guid.NewGuid();
+                        parametersSte3.OutIme = parametersSte.OutIme;
+                        parametersSte3.OverTime = parametersSte.OverTime;
+                        parametersSte3.Semana = parametersSte.Semana;
+                        //parametersSte3.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                        //parametersSte3.totalHoras = parametersSte.totalHoras;
+                        listParametersInitialEntity.Add(parametersSte3);
+
+                        overtimeCount++;
+                    }
+                    else 
+                    {
+                        var afterTime = excelEndDateTime - scheduleEndDateTime;
+                        if (afterTime.TotalMinutes > 0) {
+                            //OVERTIME2
+                            var parametersSte2 = new ParametersSteInitialEntity();
+                            parametersSte2.HoraInicio = scheduleEndDateTime.ToString("HH:mm");
+                            parametersSte2.HoraFin = excelEndDateTime.ToString("HH:mm");
+                            /*parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
+                            parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
+                            parametersSte2.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
+
+                            parametersSte2.Anio = parametersSte.Anio;
+                            parametersSte2.FECHA_REP = parametersSte.FECHA_REP;
+                            parametersSte2.EstatusProceso = parametersSte.EstatusProceso;
+                            parametersSte2.Estado = parametersSte.Estado;
+                            parametersSte2.EmployeeCode = parametersSte.EmployeeCode;
+                            parametersSte2.EstatusOrigen = parametersSte.EstatusOrigen;
+                            parametersSte2.Festivo = parametersSte.Festivo;
+                            parametersSte2.HoraFinHorario = parametersSte.HoraFinHorario;
+                            parametersSte2.HoraInicioHoraio = parametersSte.HoraInicioHoraio;
+                            //parametersSte2.totalHoras = parametersSte.totalHoras;
+                            parametersSte2.HorasFin = parametersSte.HorasFin;
+                            parametersSte2.HorasInicio = parametersSte.HorasInicio;
+                            parametersSte2.IdCarga = parametersSte.IdCarga;
+                            parametersSte2.IdParamSTEInitialId = Guid.NewGuid();
+                            parametersSte2.OutIme = parametersSte.OutIme;
+                            parametersSte2.OverTime = parametersSte.OverTime;
+                            parametersSte2.Semana = parametersSte.Semana;
+                            //parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                            //parametersSte2.totalHoras = parametersSte.totalHoras;
+                            listParametersInitialEntity.Add(parametersSte2);
+
+                            overtimeCount++;
+                        }
                     }
 
-                    if (!bOvertime)
+                    if (overtimeCount <= 0)
                     {
                         //NO hay horario
                         parametersSte.EstatusProceso = "NO_APLICA_X_HORARIO";
@@ -3122,7 +2903,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     foreach (var item in itemsEmployee)
                     {
                         //get worked hours 
-                        TimeSpan tsReportado = DateTimeOffset.Parse(item.HoraFin.ToString()).TimeOfDay - DateTimeOffset.Parse(item.HoraInicio).TimeOfDay;
+                        string[] r1 = item.HoraInicio.Split(":");
+                        string[] r2 = item.HoraFin.Split(":");
+                        TimeSpan tsReportado = (new TimeSpan(int.Parse(r2[0]), int.Parse(r2[1]), 0)) - (new TimeSpan(int.Parse(r1[0]), int.Parse(r1[1]), 0));
                         //get employee ref from this employee
                         var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == item.EmployeeCode);
                         //get user exceptions
@@ -3275,8 +3058,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     else
                     {*/
                     //Generating HORUSREPORT
-                        var countHours = (TimeSpan.Parse(itemARPNew.HoraFin) - TimeSpan.Parse(itemARPNew.HoraInicio)).TotalHours;
-                        rowAdd = new()
+                    string[] r1 = itemARPNew.HoraInicio.Split(":");
+                    string[] r2 = itemARPNew.HoraFin.Split(":");
+                    var countHours = ((new TimeSpan(int.Parse(r2[0]), int.Parse(r2[1]), 0)) - (new TimeSpan(int.Parse(r1[0]), int.Parse(r1[1]), 0))).TotalHours;
+
+                    rowAdd = new()
                         {
                             IdHorusReport = Guid.NewGuid(),
                             UserEntityId = userRow.IdUser,
@@ -3373,7 +3159,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         rowAssignments.Add(rowAddAssig);
                     }
                     else { */
-                        rowAdd = new()
+                    string[] r1 = itemTSENew.HoraInicio.Split(":");
+                    string[] r2 = itemTSENew.HoraFin.Split(":");
+                    var countHours = ((new TimeSpan(int.Parse(r2[0]), int.Parse(r2[1]), 0)) - (new TimeSpan(int.Parse(r1[0]), int.Parse(r1[1]), 0))).TotalHours;
+                    rowAdd = new()
                         {
                             IdHorusReport = Guid.NewGuid(),
                             UserEntityId = userRow.IdUser,
@@ -3382,7 +3171,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             EndTime = itemTSENew.HoraFin,
                             ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
                             strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                            CountHours = itemTSENew.totalHoras,
+                            CountHours = countHours.ToString(),
                             StrReport = itemTSENew.Reporte,
                             ARPLoadingId = idCarga,
                             Acitivity = 1,//overtime
@@ -3466,7 +3255,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
                     else
                     {*/
-                        rowAdd = new()
+                    string[] r1 = itemSTENew.HoraInicio.Split(":");
+                    string[] r2 = itemSTENew.HoraFin.Split(":");
+                    var countHours = ((new TimeSpan(int.Parse(r2[0]), int.Parse(r2[1]), 0)) - (new TimeSpan(int.Parse(r1[0]), int.Parse(r1[1]), 0))).TotalHours;
+                    rowAdd = new()
                         {
                             IdHorusReport = Guid.NewGuid(),
                             UserEntityId = userRow.IdUser,
@@ -3475,7 +3267,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             EndTime = itemSTENew.HoraFin,
                             ClientEntityId = Guid.Parse("71f6bb04-e301-4b60-afe8-3bb7c2895a69"),
                             strCreationDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-                            CountHours = itemSTENew.totalHoras,
+                            CountHours = countHours.ToString(),
                             StrReport = itemSTENew.Reporte,
                             ARPLoadingId = idCarga,
                             Acitivity = 1,//overtime
@@ -3557,10 +3349,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //------------------------------------------------------------------------------------------------------------------
                 var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemARPp.EmployeeCode);
 
-
-
-                var startTime = DateTime.Parse(itemARPp.HoraInicio);
-                var endTime = DateTime.Parse(itemARPp.HoraFin);
+                string[] r1 = itemARPp.HoraInicio.Split(":");
+                string[] r2 = itemARPp.HoraFin.Split(":");
+                var startTime = DateTime.Parse("00:00:00");
+                startTime.AddHours(int.Parse(r1[0]));
+                startTime.AddMinutes(int.Parse(r1[1]));
+                var endTime = DateTime.Parse("00:00:00");
+                endTime.AddHours(int.Parse(r2[0]));
+                endTime.AddMinutes(int.Parse(r2[1]));
 
                 DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
@@ -3668,9 +3464,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemTSE.EmployeeCode);
 
 
-
-                var startTime = DateTime.Parse(itemTSE.HoraInicio);
-                var endTime = DateTime.Parse(itemTSE.HoraFin);
+                string[] r1 = itemTSE.HoraInicio.Split(":");
+                string[] r2 = itemTSE.HoraFin.Split(":");
+                var startTime = DateTime.Parse("00:00:00");
+                startTime.AddHours(int.Parse(r1[0]));
+                startTime.AddMinutes(int.Parse(r1[1]));
+                var endTime = DateTime.Parse("00:00:00");
+                endTime.AddHours(int.Parse(r2[0]));
+                endTime.AddMinutes(int.Parse(r2[1]));
 
                 DateTime fechaHoraOriginal = DateTime.ParseExact(itemTSE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
@@ -3779,8 +3580,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
 
-                var startTime = DateTime.Parse(itemSTE.HoraInicio);
-                var endTime = DateTime.Parse(itemSTE.HoraFin);
+                string[] r1 = itemSTE.HoraInicio.Split(":");
+                string[] r2 = itemSTE.HoraFin.Split(":");
+                var startTime = DateTime.Parse("00:00:00");
+                startTime.AddHours(int.Parse(r1[0]));
+                startTime.AddMinutes(int.Parse(r1[1]));
+                var endTime = DateTime.Parse("00:00:00");
+                endTime.AddHours(int.Parse(r2[0]));
+                endTime.AddMinutes(int.Parse(r2[1]));
 
                 DateTime fechaHoraOriginal = DateTime.ParseExact(itemSTE.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
