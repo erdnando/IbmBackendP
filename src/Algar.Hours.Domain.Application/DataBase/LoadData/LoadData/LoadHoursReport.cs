@@ -867,17 +867,36 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         }
         private bool TimeRangesOverlap(string existingStartTime, string existingEndTime, string newStartTime, string newEndTime)
         {
-            DateTime startTimeExisting = DateTime.Parse(existingStartTime);
-            DateTime endTimeExisting = DateTime.Parse(existingEndTime);
-            DateTime startTimeNew = DateTime.Parse(newStartTime);
-            DateTime endTimeNew = DateTime.Parse(newEndTime);
+            /*DateTime startTimeExisting = DateTime.Parse(existingStartTime);*/
+            string[] r = existingStartTime.Split(":");
+            DateTime startTimeExisting = DateTime.Parse("00:00:00");
+            startTimeExisting = startTimeExisting.AddHours(int.Parse(r[0]));
+            startTimeExisting = startTimeExisting.AddMinutes(int.Parse(r[1]));
+
+            r = existingEndTime.Split(":");
+            DateTime endTimeExisting = DateTime.Parse("00:00:00");
+            endTimeExisting = endTimeExisting.AddHours(int.Parse(r[0]));
+            endTimeExisting = endTimeExisting.AddMinutes(int.Parse(r[1]));
+
+            r = newStartTime.Split(":");
+            DateTime startTimeNew = DateTime.Parse("00:00:00");
+            startTimeNew = startTimeNew.AddHours(int.Parse(r[0]));
+            startTimeNew = startTimeNew.AddMinutes(int.Parse(r[1]));
+
+            r = newEndTime.Split(":");
+            DateTime endTimeNew = DateTime.Parse("00:00:00");
+            endTimeNew = endTimeNew.AddHours(int.Parse(r[0]));
+            endTimeNew = endTimeNew.AddMinutes(int.Parse(r[1]));
 
             return (startTimeNew < endTimeExisting && endTimeNew > startTimeExisting);
         }
 
         private bool TimeInRange(string timeString, DateTime rangeStart, DateTime rangeEnd)
         {
-            DateTime time = DateTime.Parse(timeString);
+            string[] r = timeString.Split(":");
+            DateTime time = DateTime.Parse("00:00:00");
+            time = time.AddHours(int.Parse(r[0]));
+            time = time.AddMinutes(int.Parse(r[1]));
             return time >= rangeStart && time <= rangeEnd;
         }
 
