@@ -1689,7 +1689,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     try
                     {
                          
-                        if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                         {
                             //convert.FECHA_REP = dt.ToString("dd/MM/yyyy HH:mm:ss");
                             convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
