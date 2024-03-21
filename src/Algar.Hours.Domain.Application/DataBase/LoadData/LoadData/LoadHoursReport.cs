@@ -1855,7 +1855,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 List<STELoadEntity> datosSTEExcelFull = Newtonsoft.Json.JsonConvert.DeserializeObject<List<STELoadEntity>>(model.Data.ToJsonString());
 
                 //Obtiene datos con totalduration>0
-                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.TotalDuration!="0").ToList();
+                List<STELoadEntity> datosSTEExcel = datosSTEExcelFull!.Where(x => x.TotalDuration != "0").ToList();
                 //
                 // datosSTEExcel.Where(e => string.IsNullOrEmpty(e.AccountCMRNumber) == true).ToList().ForEach(x => x.AccountCMRNumber = "1234");
 
@@ -1874,7 +1874,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
 
 
-                
+
                 //Obtiene listado de paises
                 var listaCountries = await _consultCountryCommand.List();
 
@@ -1887,7 +1887,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
                 var paisGeneral = await _dataBaseService.CountryEntity.ToListAsync();
 
-               
+
 
                 //Remueve duplicados 
                 datosSTEExcel = datosSTEExcel.DistinctBy(m => new { m.SessionEmployeeSerialNumber, m.StartDateTime, m.EndDateTime }).ToList();
@@ -1901,7 +1901,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var parametersSte = new ParametersSteInitialEntity();
                     parametersSte.IdParamSTEInitialId = Guid.NewGuid();
                     parametersSte.EstatusProceso = "";
-                    parametersSte.FECHA_REP = registrox.FechaRegistro==null ? currentDateTime.ToString(): registrox.FechaRegistro;
+                    parametersSte.FECHA_REP = registrox.FechaRegistro == null ? currentDateTime.ToString() : registrox.FechaRegistro;
                     parametersSte.TOTAL_MINUTOS = getMins(registrox.TotalDuration);
                     parametersSte.totalHoras = registrox.TotalDuration;
                     parametersSte.HorasInicio = 0;
@@ -1920,7 +1920,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSte.Estado = "";
                     parametersSte.Reporte = registrox.NumeroCaso;
                     parametersSte.EstatusOrigen = "STE"; //STE no maneja estatus
-                    
+
 
                     //valida pais
                     if (paisRegistro == null)
@@ -1930,7 +1930,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         listParametersInitialEntity.Add(parametersSte);
                         continue;
                     }
-                    var UserDB = _dataBaseService.UserZonaHoraria.FirstOrDefault(op=>op.EmployeeCode== registrox.SessionEmployeeSerialNumber);
+                    var UserDB = _dataBaseService.UserZonaHoraria.FirstOrDefault(op => op.EmployeeCode == registrox.SessionEmployeeSerialNumber);
                     if (UserDB == null)
                     {
                         parametersSte.EstatusProceso = "NO_APLICA_X_USUARIO_NO_EXISTE";
@@ -1941,7 +1941,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
                     var ste = fHomologaSTE(registrox, model.PaisSel, UserDB.ZonaHorariaU, paisRegistro!);
 
-                    if (ste.EndDateTime == null )
+                    if (ste.EndDateTime == null)
                     {
                         parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
                         listParametersInitialEntity.Add(parametersSte);
@@ -1949,7 +1949,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     }
 
-                    if ( ste.StartDateTime == null)
+                    if (ste.StartDateTime == null)
                     {
                         parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
                         listParametersInitialEntity.Add(parametersSte);
@@ -1958,12 +1958,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
 
                     semanahorario = DateTimeOffset.ParseExact(ste.StartDateTime, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                   
-                    
+
+
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
                     bool bValidacionHorario = false;
                     var horario = Lsthorario.FindAll(x => x.UserEntity.EmployeeCode == ste.SessionEmployeeSerialNumber && x.week == Semana.ToString());// && x.FechaWorking== semanahorario.DateTime);
-                    
+
                     int indexHorario = -1;
 
                     for (int i = 0; i < horario.Count; i++)
@@ -1976,7 +1976,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     }
 
                     var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId == paisRegistro!.IdCounty);
-                    
+
 
 
                     parametersSte.EstatusProceso = "EN_OVERTIME";
@@ -1986,7 +1986,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSte.HoraInicio = ste.StartHours;
                     parametersSte.HoraFin = ste.EndHours;
                     parametersSte.Semana = Semana;
-                    
+
 
 
 
@@ -2004,7 +2004,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             listParametersInitialEntity.Add(parametersSte);
                             continue;
                         }
-                        
+
                         bValidacionHorario = true;
                     }
                     else
@@ -2014,7 +2014,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         bValidacionHorario = false;
                     }
 
-                    if (horario.Count()>0)
+                    if (horario.Count() > 0)
                     {
                         if (indexHorario == -1)
                         {
@@ -2062,11 +2062,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var scheduleEndDateTime = DateTime.ParseExact($"{ste.EndDateTime.Substring(0, 10)} {horario[indexHorario].HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
                     var excelStartDateTime = DateTime.ParseExact($"{ste.StartDateTime.Substring(0, 10)} {parametersSte.HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
                     var excelEndDateTime = DateTime.ParseExact($"{ste.EndDateTime.Substring(0, 10)} {parametersSte.HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    var beforeTime = (excelEndDateTime < scheduleStartDateTime? excelEndDateTime : scheduleStartDateTime) - excelStartDateTime;
-                    
+                    var beforeTime = (excelEndDateTime < scheduleStartDateTime ? excelEndDateTime : scheduleStartDateTime) - excelStartDateTime;
+
                     int overtimeCount = 0;
-                    var totMinOrig = parametersSte.TOTAL_MINUTOS; 
-                    var totHorasOrig = parametersSte.totalHoras; 
+                    var totMinOrig = parametersSte.TOTAL_MINUTOS;
+                    var totHorasOrig = parametersSte.totalHoras;
 
                     if (beforeTime.TotalMinutes > 0)
                     {
@@ -2078,7 +2078,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         /*parametersSte.TOTAL_MINUTOS = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? "1": (int.Parse(totMinOrig) - 1).ToString(): parametersSte.TOTAL_MINUTOS;
                         parametersSte.totalHoras = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? (1/60).ToString() : totHorasOrig : totHorasOrig;*/
                         listParametersInitialEntity.Add(parametersSte);
-                        
+
                     }
 
                     if (excelEndDateTime.Day != excelStartDateTime.Day)
@@ -2113,7 +2113,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
                         //parametersSte2.totalHoras = parametersSte.totalHoras;
                         listParametersInitialEntity.Add(parametersSte2);
-                        
+
                         if (excelEndDateTime.ToString("HH:mm") != "00:00")
                         {
                             overtimeCount++;
@@ -2148,10 +2148,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         }
                     }
-                    else 
+                    else
                     {
                         var afterTime = excelEndDateTime - scheduleEndDateTime;
-                        if (afterTime.TotalMinutes > 0) {
+                        if (afterTime.TotalMinutes > 0)
+                        {
                             overtimeCount++;
 
                             //OVERTIME2
@@ -2197,7 +2198,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     //listParametersInitialEntity.Add(parametersSte);
                 }
 
-             
+
 
                 int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
                 List<List<ParametersSteInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE == 0 ? 1 : PAGE_SIZE);
@@ -2292,6 +2293,25 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var rowSTEGral2 = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
                 var rowTSEGral2 = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList();
 
+
+
+                //======================================================================================================================
+
+                //Integrar datos de las 3 cargas
+                /*var agrupados = integrados(rowARPGral2, rowSTEGral2, rowTSEGral2);
+
+                foreach (var itemsEmployee in agrupados)
+                {
+                    //for each employee
+                    foreach (var item in itemsEmployee)
+                    { 
+                    
+                    
+                    
+                    }
+                }*/
+                        //=======================================================================================================
+
                 //crea lista homolgada
                 var listParametros = new List<Parametrosaux>();
 
@@ -2350,7 +2370,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
                     }
 
-                    
+
                 }
 
                 await _dataBaseService.SaveAsync();
@@ -2494,9 +2514,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int arpNoAplicaXPais = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_PAIS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXFaltaDatoshoras = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_FALTA_DATOS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
 
-                
+
                 var cargaRegistro = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).FirstOrDefault();
-                
+
 
                 int tseNoAplicaXHorario = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXOverttime = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
@@ -2525,13 +2545,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.TSEXOvertime = tseNoAplicaXOverttime.ToString());
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.TSEXOverlaping = tseNoAplicaXOverLaping.ToString());
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.TSEXProceso = tseEnProceso.ToString());
-                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.TSEXDatosNovalidos = (tseNoAplicaXPais+ tseNoAplicaXFaltaDatoshoras).ToString());
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.TSEXDatosNovalidos = (tseNoAplicaXPais + tseNoAplicaXFaltaDatoshoras).ToString());
 
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.STEXHorario = steNoAplicaXHorario.ToString());
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.STEEXOvertime = steNoAplicaXOverttime.ToString());
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.STEXOverlaping = steNoAplicaXOverLaping.ToString());
                 _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.STEXProceso = steEnProceso.ToString());
-                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.STEXDatosNovalidos = (steNoAplicaXPais+steNoAplicaXFaltaDatoshoras ).ToString());
+                _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).ToList().ForEach(x => x.STEXDatosNovalidos = (steNoAplicaXPais + steNoAplicaXFaltaDatoshoras).ToString());
 
                 await _dataBaseService.SaveAsync();
 
@@ -2563,10 +2583,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.NO_APLICA_X_OVERLAPING_TSE = tseNoAplicaXOverLaping.ToString();
                 summary.EN_PROCESO_TSE = tseEnProceso.ToString();
 
-                summary.NO_APLICA_X_HORARIO_STE =steNoAplicaXHorario.ToString();
+                summary.NO_APLICA_X_HORARIO_STE = steNoAplicaXHorario.ToString();
                 summary.NO_APLICA_X_OVERTIME_STE = steNoAplicaXOverttime.ToString();
                 summary.NO_APLICA_X_OVERLAPING_STE = steNoAplicaXOverLaping.ToString();
-                summary.EN_PROCESO_STE =steEnProceso.ToString();
+                summary.EN_PROCESO_STE = steEnProceso.ToString();
                 summary.IdCarga = model.IdCarga;
 
                 summary.ARPOmitidosXDuplicidad = cargaRegistro.ARPOmitidosXDuplicidad;
@@ -2620,6 +2640,79 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 return summary;
             }
         }
+
+        private List<List<ParametersArpInitialEntity>> integrados(List<ParametersArpInitialEntity> rowARPGral2, List<ParametersSteInitialEntity> rowSTEGral2, List<ParametersTseInitialEntity> rowTSEGral2)
+        {
+            var listIntegrados = new List<ParametersArpInitialEntity>();
+            foreach (var item in rowARPGral2)
+            {
+                listIntegrados.Add(item);
+            }
+
+            foreach (var item in rowTSEGral2)
+            {
+                var itemTse = new ParametersArpInitialEntity();
+                itemTse.IdParametersInitialEntity = item.IdParamTSEInitialId;
+                itemTse.OverTime = item.OverTime;
+                itemTse.OutIme = item.OutIme;
+                itemTse.Anio = item.Anio;
+                itemTse.HoraInicio = item.HoraInicio;
+                itemTse.HoraInicioHoraio = item.HoraInicioHoraio;
+                itemTse.HoraFinHorario = item.HoraFinHorario;
+                itemTse.totalHoras = item.totalHoras;
+                itemTse.HorasFin = item.HorasFin;
+                itemTse.HoraFin = item.HoraFin;
+                itemTse.EmployeeCode = item.EmployeeCode;
+                itemTse.Estado = item.Estado;
+                itemTse.EstatusOrigen = item.EstatusOrigen;
+                itemTse.EstatusProceso = item.EstatusProceso;
+                itemTse.Reporte = item.Reporte;
+                itemTse.FECHA_REP = item.FECHA_REP;
+                itemTse.Festivo = item.Festivo;
+                itemTse.IdCarga = item.IdCarga;
+                itemTse.Semana = item.Semana;
+                itemTse.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
+
+
+                listIntegrados.Add(itemTse);
+            }
+
+            foreach (var item in rowSTEGral2)
+            {
+                var itemSte = new ParametersArpInitialEntity();
+                itemSte.IdParametersInitialEntity = item.IdParamSTEInitialId;
+                itemSte.OverTime = item.OverTime;
+                itemSte.OutIme = item.OutIme;
+                itemSte.Anio = item.Anio;
+                itemSte.HoraInicio = item.HoraInicio;
+                itemSte.HoraInicioHoraio = item.HoraInicioHoraio;
+                itemSte.HoraFinHorario = item.HoraFinHorario;
+                itemSte.totalHoras = item.totalHoras;
+                itemSte.HorasFin = item.HorasFin;
+                itemSte.HoraFin = item.HoraFin;
+                itemSte.EmployeeCode = item.EmployeeCode;
+                itemSte.Estado = item.Estado;
+                itemSte.EstatusOrigen = item.EstatusOrigen;
+                itemSte.EstatusProceso = item.EstatusProceso;
+                itemSte.Reporte = item.Reporte;
+                itemSte.FECHA_REP = item.FECHA_REP;
+                itemSte.Festivo = item.Festivo;
+                itemSte.IdCarga = item.IdCarga;
+                itemSte.Semana = item.Semana;
+                itemSte.TOTAL_MINUTOS = item.TOTAL_MINUTOS;
+
+                listIntegrados.Add(itemSte);
+            }
+
+
+
+            var lstGroupedByEmployeecode = listIntegrados.GroupBy(x => new { x.EmployeeCode })
+                 .Select(grp => grp.ToList())
+                 .ToList();
+
+            return lstGroupedByEmployeecode;
+        }
+
         private string addZerotime(string time)
         {
             if (time.Length==4)
