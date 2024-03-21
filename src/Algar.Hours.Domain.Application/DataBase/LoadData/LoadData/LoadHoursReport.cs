@@ -4002,7 +4002,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Escenario coincidencia 100%
                 //================================================================= 
                 var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.Origen == "STE" && h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTE.HoraInicio, itemSTE.HoraFin) ||
                     (TimeInRange(h.StartTime, startTime, endTime) &&
