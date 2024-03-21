@@ -497,10 +497,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     
                     if (afterTime.TotalMinutes > 0)
                     {
-
+                        TimeSpan horaInicio = excelStartTime > scheduleEndTime ? excelStartTime : scheduleEndTime;
                         //OVERTIME2
                         var parametersARP2 = new ParametersArpInitialEntity();
-                        parametersARP2.HoraInicio = scheduleEndTime.ToString(@"hh\:mm");
+                        parametersARP2.HoraInicio = horaInicio.ToString(@"hh\:mm");
                         parametersARP2.HoraFin = excelEndTime.ToString(@"hh\:mm");
                         parametersARP2.Reporte = parametersARP.Reporte + (bOvertime ? "-R2": "");
                         
@@ -1215,10 +1215,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             if (afterTime.TotalMinutes > 0)
                             {
                                 overtimeCount++;
+                                DateTime horaInicio = excelStartDateTime > scheduleEndDateTime? excelStartDateTime : scheduleEndDateTime;
 
                                 //OVERTIME2
                                 var parametersTse2 = new ParametersTseInitialEntity();
-                                parametersTse2.HoraInicio = scheduleEndDateTime.ToString("HH:mm");
+                                parametersTse2.HoraInicio = horaInicio.ToString("HH:mm");
                                 parametersTse2.HoraFin = excelEndDateTime.ToString("HH:mm");
                                 parametersTse2.Reporte = $"{parametersTse.Reporte}-R{overtimeCount}";
 
@@ -2154,10 +2155,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         if (afterTime.TotalMinutes > 0)
                         {
                             overtimeCount++;
+                            DateTime horaInicio = excelStartDateTime > scheduleEndDateTime ? excelStartDateTime : scheduleEndDateTime;
 
                             //OVERTIME2
                             var parametersSte2 = new ParametersSteInitialEntity();
-                            parametersSte2.HoraInicio = scheduleEndDateTime.ToString("HH:mm");
+                            parametersSte2.HoraInicio = horaInicio.ToString("HH:mm");
                             parametersSte2.HoraFin = excelEndDateTime.ToString("HH:mm");
                             /*parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
                             parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
