@@ -1920,7 +1920,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSte.Festivo = "N";
                     parametersSte.Estado = "";
                     parametersSte.Reporte = registrox.NumeroCaso;
-                    parametersSte.EstatusOrigen = "STE"; //STE no maneja estatus
+                    /*parametersSte.EstatusOrigen = "STE"; //STE no maneja estatus*/
+                    parametersSte.EstatusOrigen = "EXTRACTED";
 
 
                     //valida pais
@@ -3682,7 +3683,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             EstatusOrigen = itemSTENew.EstatusOrigen,
                             EstatusFinal = "ENPROGRESO",
                             DetalleEstatusFinal = "",
-                            Origen = "STE",
+                            /*Origen = "STE",*/
+                            Origen = "EXTRACTED",
                             Semana = getWeek(nuevaFechaHoraFormato)
                         };
                         rowsHorusNew.Add(rowAdd);
@@ -3998,9 +4000,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
 
                 //Escenario coincidencia 100%
-                //=================================================================
+                //================================================================= 
                 var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
+                    .Where(h => h.Origen == "STE" && h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "RECHAZADO")
                     .AsEnumerable()
                     .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTE.HoraInicio, itemSTE.HoraFin) ||
                     (TimeInRange(h.StartTime, startTime, endTime) &&
