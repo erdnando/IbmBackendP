@@ -2298,21 +2298,227 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //======================================================================================================================
 
                 //Integrar datos de las 3 cargas
-                /*var agrupados = integrados(rowARPGral2, rowSTEGral2, rowTSEGral2);
+               /* var agrupados = integrados(rowARPGral2, rowSTEGral2, rowTSEGral2);
 
                 foreach (var itemsEmployee in agrupados)
                 {
                     //for each employee
-                    foreach (var item in itemsEmployee)
-                    { 
-                    
-                    
-                    
+                    foreach (var empl in itemsEmployee)
+                    {
+                        var rowARPGralEmpl = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga) && e.EmployeeCode== empl.EmployeeCode ).ToList();
+                        var rowSTEGralEmpl = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga) && e.EmployeeCode == empl.EmployeeCode).ToList();
+                        var rowTSEGralEmpl = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga) && e.EmployeeCode == empl.EmployeeCode).ToList();
+                        //==========================================================================================================
+
+                        var listParametros = new List<Parametrosaux>();
+
+                        foreach (var item in rowARPGralEmpl)
+                        {
+
+                            item.HoraInicio = addZerotime(item.HoraInicio);
+                            item.HoraFin = addZerotime(item.HoraFin);
+
+                            var startDate = DateTime.ParseExact(item.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                            startDate = startDate.AddHours(Int32.Parse(item.HoraInicio.Split(":")[0]));
+                            startDate = startDate.AddMinutes(Int32.Parse(item.HoraInicio.Split(":")[1]));
+
+                            var endDate = DateTime.ParseExact(item.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                            endDate = endDate.AddHours(Int32.Parse(item.HoraFin.Split(":")[0]));
+                            endDate = endDate.AddMinutes(Int32.Parse(item.HoraFin.Split(":")[1]));
+
+                            if (listParametros.Count == 0)
+                            {
+                                var pAux = new Parametrosaux();
+                                pAux.FECHA_REP = item.FECHA_REP;
+                                pAux.HoraInicio = item.HoraInicio;
+                                pAux.HoraFin = item.HoraFin;
+
+                                listParametros.Add(pAux);
+
+                            }
+                            else
+                            {
+                                foreach (var reporteEvaluado in listParametros)
+                                {
+
+                                    var startDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                                    startDatex = startDatex.AddHours(Int32.Parse(reporteEvaluado.HoraInicio.Split(":")[0]));
+                                    startDatex = startDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraInicio.Split(":")[1]));
+
+                                    var endDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                                    endDatex = endDatex.AddHours(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[0]));
+                                    endDatex = endDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[1]));
+
+                                    if (OverlappingDates(startDate, endDate, startDatex, endDatex))
+                                    {
+                                        item.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        var pAux = new Parametrosaux();
+                                        pAux.FECHA_REP = item.FECHA_REP;
+                                        pAux.HoraInicio = item.HoraInicio;
+                                        pAux.HoraFin = item.HoraFin;
+
+                                        listParametros.Add(pAux);
+                                        break;
+                                    }
+                                }
+                            }
+
+
+                        }
+
+                        await _dataBaseService.SaveAsync();
+
+
+                        foreach (var item in rowSTEGralEmpl)
+                        {
+
+                            item.HoraInicio = addZerotime(item.HoraInicio);
+                            item.HoraFin = addZerotime(item.HoraFin);
+
+                            var startDate = DateTime.ParseExact(item.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                            startDate = startDate.AddHours(Int32.Parse(item.HoraInicio.Split(":")[0]));
+                            startDate = startDate.AddMinutes(Int32.Parse(item.HoraInicio.Split(":")[1]));
+
+                            var endDate = DateTime.ParseExact(item.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                            endDate = endDate.AddHours(Int32.Parse(item.HoraFin.Split(":")[0]));
+                            endDate = endDate.AddMinutes(Int32.Parse(item.HoraFin.Split(":")[1]));
+
+                            if (listParametros.Count == 0)
+                            {
+                                var pAux = new Parametrosaux();
+                                pAux.FECHA_REP = item.FECHA_REP;
+                                pAux.HoraInicio = item.HoraInicio;
+                                pAux.HoraFin = item.HoraFin;
+
+                                listParametros.Add(pAux);
+
+                            }
+                            else
+                            {
+                                foreach (var reporteEvaluado in listParametros)
+                                {
+
+                                    var startDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                                    startDatex = startDatex.AddHours(Int32.Parse(reporteEvaluado.HoraInicio.Split(":")[0]));
+                                    startDatex = startDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraInicio.Split(":")[1]));
+
+                                    var endDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                                    endDatex = endDatex.AddHours(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[0]));
+                                    endDatex = endDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[1]));
+
+                                    if (OverlappingDates(startDate, endDate, startDatex, endDatex))
+                                    {
+                                        item.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        var pAux = new Parametrosaux();
+                                        pAux.FECHA_REP = item.FECHA_REP;
+                                        pAux.HoraInicio = item.HoraInicio;
+                                        pAux.HoraFin = item.HoraFin;
+
+                                        listParametros.Add(pAux);
+                                        break;
+                                    }
+                                }
+                            }
+
+
+                        }
+
+                        await _dataBaseService.SaveAsync();
+
+                        //testing
+                        foreach (var item in rowTSEGralEmpl)
+                        {
+
+                            item.HoraInicio = addZerotime(item.HoraInicio);
+                            item.HoraFin = addZerotime(item.HoraFin);
+
+                            var startDate = DateTime.ParseExact(item.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                            startDate = startDate.AddHours(Int32.Parse(item.HoraInicio.Split(":")[0]));
+                            startDate = startDate.AddMinutes(Int32.Parse(item.HoraInicio.Split(":")[1]));
+
+                            var endDate = DateTime.ParseExact(item.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                            endDate = endDate.AddHours(Int32.Parse(item.HoraFin.Split(":")[0]));
+                            endDate = endDate.AddMinutes(Int32.Parse(item.HoraFin.Split(":")[1]));
+
+                            if (listParametros.Count == 0)
+                            {
+                                var pAux = new Parametrosaux();
+                                pAux.FECHA_REP = item.FECHA_REP;
+                                pAux.HoraInicio = item.HoraInicio;
+                                pAux.HoraFin = item.HoraFin;
+
+                                listParametros.Add(pAux);
+
+                            }
+                            else
+                            {
+                                foreach (var reporteEvaluado in listParametros)
+                                {
+
+                                    var startDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                                    startDatex = startDatex.AddHours(Int32.Parse(reporteEvaluado.HoraInicio.Split(":")[0]));
+                                    startDatex = startDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraInicio.Split(":")[1]));
+
+                                    var endDatex = DateTime.ParseExact(reporteEvaluado.FECHA_REP, "dd/MM/yyyy 00:00:00", System.Globalization.CultureInfo.InvariantCulture);
+                                    endDatex = endDatex.AddHours(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[0]));
+                                    endDatex = endDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[1]));
+
+                                    if (OverlappingDates(startDate, endDate, startDatex, endDatex))
+                                    {
+                                        item.EstatusProceso = "NO_APLICA_X_OVERLAPING";
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        var pAux = new Parametrosaux();
+                                        pAux.FECHA_REP = item.FECHA_REP;
+                                        pAux.HoraInicio = item.HoraInicio;
+                                        pAux.HoraFin = item.HoraFin;
+
+                                        listParametros.Add(pAux);
+                                        break;
+                                    }
+                                }
+                            }
+
+
+                        }
+
+                        await _dataBaseService.SaveAsync();
+                        //==========================================================================================================
+
                     }
                 }*/
-                        //=======================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                //=======================================================================================================
 
                 //crea lista homolgada
+                
                 var listParametros = new List<Parametrosaux>();
 
                 foreach (var item in rowARPGral2)
@@ -2496,7 +2702,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
 
                 await _dataBaseService.SaveAsync();
-
+                
 
 
                 //----------------------------------------------------------------------------------------------------------------------------------------
