@@ -1116,18 +1116,18 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //listParametersInitialEntity.Add(parametersARP);
                         if (beforeTime.TotalMinutes > 0)
                         {
-
+                            overtimeCount++;
                             //OVERTIME 1
                             parametersTse.HoraInicio = excelStartDateTime.ToString("HH:mm");
                             parametersTse.HoraFin = (excelEndDateTime < scheduleStartDateTime ? excelEndDateTime : scheduleStartDateTime).ToString("HH:mm");
                             parametersTse.Reporte = parametersTse.Reporte;
                             listParametersInitialEntity.Add(parametersTse);
-                            overtimeCount++;
+                            
                         }
 
                         if (excelEndDateTime.Day != excelStartDateTime.Day)
                         {
-
+                            overtimeCount++;
                             //OVERTIME2
                             var parametersTse2 = new ParametersTseInitialEntity();
                             parametersTse2.HoraInicio = excelStartDateTime.ToString("HH:mm");
@@ -1155,41 +1155,47 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse2.totalHoras = parametersTse.totalHoras;
 
                             listParametersInitialEntity.Add(parametersTse2);
-                            overtimeCount++;
+                            
 
-                            //OVERTIME3
-                            var parametersTse3 = new ParametersTseInitialEntity();
-                            parametersTse3.HoraInicio = "00:00";
-                            parametersTse3.HoraFin = excelEndDateTime.ToString("HH:mm");
-                            parametersTse3.Reporte = $"{parametersTse.Reporte}-R{overtimeCount}";
+                            if (excelEndDateTime.ToString("HH:mm") != "00:00") {
+                                overtimeCount++;
 
-                            parametersTse3.Anio = parametersTse.Anio;
-                            parametersTse3.FECHA_REP = parametersTse.FECHA_REP;
-                            parametersTse3.EstatusProceso = parametersTse.EstatusProceso;
-                            parametersTse3.Estado = parametersTse.Estado;
-                            parametersTse3.EmployeeCode = parametersTse.EmployeeCode;
-                            parametersTse3.EstatusOrigen = parametersTse.EstatusOrigen;
-                            parametersTse3.Festivo = parametersTse.Festivo;
-                            parametersTse3.HoraFinHorario = parametersTse.HoraFinHorario;
-                            parametersTse3.HoraInicioHoraio = parametersTse.HoraInicioHoraio;
-                            parametersTse3.totalHoras = parametersTse.totalHoras;
-                            parametersTse3.HorasFin = parametersTse.HorasFin;
-                            parametersTse3.HorasInicio = parametersTse.HorasInicio;
-                            parametersTse3.IdCarga = parametersTse.IdCarga;
-                            parametersTse3.IdParamTSEInitialId = Guid.NewGuid();
-                            parametersTse3.OutIme = parametersTse.OutIme;
-                            parametersTse3.OverTime = parametersTse.OverTime;
-                            parametersTse3.Semana = parametersTse.Semana;
-                            parametersTse3.TOTAL_MINUTOS = parametersTse.TOTAL_MINUTOS;
-                            parametersTse3.totalHoras = parametersTse.totalHoras;
-                            listParametersInitialEntity.Add(parametersTse3);
+                                //OVERTIME3
+                                var parametersTse3 = new ParametersTseInitialEntity();
+                                parametersTse3.HoraInicio = "00:00";
+                                parametersTse3.HoraFin = excelEndDateTime.ToString("HH:mm");
+                                parametersTse3.Reporte = $"{parametersTse.Reporte}-R{overtimeCount}";
 
-                            overtimeCount++;
+                                parametersTse3.Anio = parametersTse.Anio;
+                                parametersTse3.FECHA_REP = parametersTse.FECHA_REP;
+                                parametersTse3.EstatusProceso = parametersTse.EstatusProceso;
+                                parametersTse3.Estado = parametersTse.Estado;
+                                parametersTse3.EmployeeCode = parametersTse.EmployeeCode;
+                                parametersTse3.EstatusOrigen = parametersTse.EstatusOrigen;
+                                parametersTse3.Festivo = parametersTse.Festivo;
+                                parametersTse3.HoraFinHorario = parametersTse.HoraFinHorario;
+                                parametersTse3.HoraInicioHoraio = parametersTse.HoraInicioHoraio;
+                                parametersTse3.totalHoras = parametersTse.totalHoras;
+                                parametersTse3.HorasFin = parametersTse.HorasFin;
+                                parametersTse3.HorasInicio = parametersTse.HorasInicio;
+                                parametersTse3.IdCarga = parametersTse.IdCarga;
+                                parametersTse3.IdParamTSEInitialId = Guid.NewGuid();
+                                parametersTse3.OutIme = parametersTse.OutIme;
+                                parametersTse3.OverTime = parametersTse.OverTime;
+                                parametersTse3.Semana = parametersTse.Semana;
+                                parametersTse3.TOTAL_MINUTOS = parametersTse.TOTAL_MINUTOS;
+                                parametersTse3.totalHoras = parametersTse.totalHoras;
+                                listParametersInitialEntity.Add(parametersTse3);
+
+                            }
+                            
                         } else
                         {
                             var afterTime = excelEndDateTime - scheduleEndDateTime;
                             if (afterTime.TotalMinutes > 0)
                             {
+                                overtimeCount++;
+
                                 //OVERTIME2
                                 var parametersTse2 = new ParametersTseInitialEntity();
                                 parametersTse2.HoraInicio = scheduleEndDateTime.ToString("HH:mm");
@@ -1217,9 +1223,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                 parametersTse2.totalHoras = parametersTse.totalHoras;
 
                                 listParametersInitialEntity.Add(parametersTse2);
-
-                                overtimeCount++;
-                            }
+}
                         }
 
                         if (overtimeCount <= 0)
@@ -1663,85 +1667,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     try
                     {
-
-                        if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                        
+                        if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
                         {
                             //convert.FECHA_REP = dt.ToString("dd/MM/yyyy HH:mm:ss");
                             convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
                         }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/dd/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "MM/d/yy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/MM/yyyy h:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/MM/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/M/yyyy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/MM/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "d/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "dd/M/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-                        else if (DateTimeOffset.TryParseExact(convert.FECHA_REP, "M/d/yy h:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
-                        {
-                            convert.FECHA_REP = dt.ToString("dd/MM/yyyy 00:00:00");
-                        }
-
+                        
                     }
                     catch (Exception exx)
                     {
@@ -2118,7 +2050,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                     if (beforeTime.TotalMinutes > 0)
                     {
-
+                        overtimeCount++;
                         //OVERTIME 1
                         parametersSte.HoraInicio = excelStartDateTime.ToString("HH:mm");
                         parametersSte.HoraFin = (excelEndDateTime < scheduleStartDateTime ? excelEndDateTime : scheduleStartDateTime).ToString("HH:mm");
@@ -2126,11 +2058,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         /*parametersSte.TOTAL_MINUTOS = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? "1": (int.Parse(totMinOrig) - 1).ToString(): parametersSte.TOTAL_MINUTOS;
                         parametersSte.totalHoras = repo.rFinOK.ToString() == "23.59" ? bOvertime == false ? (1/60).ToString() : totHorasOrig : totHorasOrig;*/
                         listParametersInitialEntity.Add(parametersSte);
-                        overtimeCount++;
+                        
                     }
 
                     if (excelEndDateTime.Day != excelStartDateTime.Day)
                     {
+                        overtimeCount++;
+
                         //OVERTIME2
                         var parametersSte2 = new ParametersSteInitialEntity();
                         parametersSte2.HoraInicio = excelStartDateTime.ToString("HH:mm");
@@ -2159,43 +2093,47 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
                         //parametersSte2.totalHoras = parametersSte.totalHoras;
                         listParametersInitialEntity.Add(parametersSte2);
-                        overtimeCount++;
+                        
+                        if (excelEndDateTime.ToString("HH:mm") != "00:00")
+                        {
+                            overtimeCount++;
+                            //OVERTIME3
+                            var parametersSte3 = new ParametersSteInitialEntity();
+                            parametersSte3.HoraInicio = "00:00";
+                            parametersSte3.HoraFin = excelEndDateTime.ToString("HH:mm");
+                            /*parametersSte3.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
+                            parametersSte3.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
+                            parametersSte3.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
 
-                        //OVERTIME3
-                        var parametersSte3 = new ParametersSteInitialEntity();
-                        parametersSte3.HoraInicio = "00:00";
-                        parametersSte3.HoraFin = excelEndDateTime.ToString("HH:mm");
-                        /*parametersSte3.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
-                        parametersSte3.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
-                        parametersSte3.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
+                            parametersSte3.Anio = parametersSte.Anio;
+                            parametersSte3.FECHA_REP = ste.EndDateTime;
+                            parametersSte3.EstatusProceso = parametersSte.EstatusProceso;
+                            parametersSte3.Estado = parametersSte.Estado;
+                            parametersSte3.EmployeeCode = parametersSte.EmployeeCode;
+                            parametersSte3.EstatusOrigen = parametersSte.EstatusOrigen;
+                            parametersSte3.Festivo = parametersSte.Festivo;
+                            parametersSte3.HoraFinHorario = parametersSte.HoraFinHorario;
+                            parametersSte3.HoraInicioHoraio = parametersSte.HoraInicioHoraio;
+                            //parametersSte3.totalHoras = parametersSte.totalHoras;
+                            parametersSte3.HorasFin = parametersSte.HorasFin;
+                            parametersSte3.HorasInicio = parametersSte.HorasInicio;
+                            parametersSte3.IdCarga = parametersSte.IdCarga;
+                            parametersSte3.IdParamSTEInitialId = Guid.NewGuid();
+                            parametersSte3.OutIme = parametersSte.OutIme;
+                            parametersSte3.OverTime = parametersSte.OverTime;
+                            parametersSte3.Semana = parametersSte.Semana;
+                            //parametersSte3.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                            //parametersSte3.totalHoras = parametersSte.totalHoras;
+                            listParametersInitialEntity.Add(parametersSte3);
 
-                        parametersSte3.Anio = parametersSte.Anio;
-                        parametersSte3.FECHA_REP = ste.EndDateTime;
-                        parametersSte3.EstatusProceso = parametersSte.EstatusProceso;
-                        parametersSte3.Estado = parametersSte.Estado;
-                        parametersSte3.EmployeeCode = parametersSte.EmployeeCode;
-                        parametersSte3.EstatusOrigen = parametersSte.EstatusOrigen;
-                        parametersSte3.Festivo = parametersSte.Festivo;
-                        parametersSte3.HoraFinHorario = parametersSte.HoraFinHorario;
-                        parametersSte3.HoraInicioHoraio = parametersSte.HoraInicioHoraio;
-                        //parametersSte3.totalHoras = parametersSte.totalHoras;
-                        parametersSte3.HorasFin = parametersSte.HorasFin;
-                        parametersSte3.HorasInicio = parametersSte.HorasInicio;
-                        parametersSte3.IdCarga = parametersSte.IdCarga;
-                        parametersSte3.IdParamSTEInitialId = Guid.NewGuid();
-                        parametersSte3.OutIme = parametersSte.OutIme;
-                        parametersSte3.OverTime = parametersSte.OverTime;
-                        parametersSte3.Semana = parametersSte.Semana;
-                        //parametersSte3.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
-                        //parametersSte3.totalHoras = parametersSte.totalHoras;
-                        listParametersInitialEntity.Add(parametersSte3);
-
-                        overtimeCount++;
+                        }
                     }
                     else 
                     {
                         var afterTime = excelEndDateTime - scheduleEndDateTime;
                         if (afterTime.TotalMinutes > 0) {
+                            overtimeCount++;
+
                             //OVERTIME2
                             var parametersSte2 = new ParametersSteInitialEntity();
                             parametersSte2.HoraInicio = scheduleEndDateTime.ToString("HH:mm");
@@ -2225,7 +2163,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             //parametersSte2.totalHoras = parametersSte.totalHoras;
                             listParametersInitialEntity.Add(parametersSte2);
 
-                            overtimeCount++;
                         }
                     }
 
