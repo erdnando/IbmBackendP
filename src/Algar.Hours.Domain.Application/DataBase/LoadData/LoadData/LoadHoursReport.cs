@@ -2090,6 +2090,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var parametersSte2 = new ParametersSteInitialEntity();
                         parametersSte2.HoraInicio = excelStartDateTime.ToString("HH:mm");
                         parametersSte2.HoraFin = "24:00";
+                        parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                        parametersSte2.totalHoras = parametersSte.totalHoras;
                         /*parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
                         parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
                         parametersSte2.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
@@ -2122,6 +2124,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             var parametersSte3 = new ParametersSteInitialEntity();
                             parametersSte3.HoraInicio = "00:00";
                             parametersSte3.HoraFin = excelEndDateTime.ToString("HH:mm");
+                            parametersSte3.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                            parametersSte3.totalHoras = parametersSte.totalHoras;
                             /*parametersSte3.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
                             parametersSte3.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
                             parametersSte3.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
@@ -2161,6 +2165,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             var parametersSte2 = new ParametersSteInitialEntity();
                             parametersSte2.HoraInicio = horaInicio.ToString("HH:mm");
                             parametersSte2.HoraFin = excelEndDateTime.ToString("HH:mm");
+                            parametersSte2.TOTAL_MINUTOS = parametersSte.TOTAL_MINUTOS;
+                            parametersSte2.totalHoras = parametersSte.totalHoras;
                             /*parametersSte2.TOTAL_MINUTOS = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? "1" : (int.Parse(totMinOrig) - 1).ToString() : totMinOrig;
                             parametersSte2.totalHoras = repo.rFin2OK.ToString() == "23.59" ? bOvertime==false ? (1 / 60).ToString() : totHorasOrig : totHorasOrig;*/
                             parametersSte2.Reporte = $"{parametersSte.Reporte}-R{overtimeCount}";
