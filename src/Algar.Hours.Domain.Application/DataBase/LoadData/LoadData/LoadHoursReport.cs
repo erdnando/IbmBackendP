@@ -3745,8 +3745,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
                     UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
 
-                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} {parameter.HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} {parameter.HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    string[] r1 = parameter.HoraInicio.Split(":");
+                    string[] r2 = parameter.HoraFin.Split(":");
+                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
+                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    r1 = parameter.HoraInicio.Split(":");
+                    r2 = parameter.HoraFin.Split(":");
+                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
 
                     var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
                     var employeeCode = userEntity != null ? userEntity.EmployeeCode : "";
@@ -3796,8 +3802,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
                     UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
 
-                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} {parameter.HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} {parameter.HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    string[] r1 = parameter.HoraInicio.Split(":");
+                    string[] r2 = parameter.HoraFin.Split(":");
+                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
+                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    r1 = parameter.HoraInicio.Split(":");
+                    r2 = parameter.HoraFin.Split(":");
+                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
 
                     var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
                     var employeeCode = userEntity != null ? userEntity.EmployeeCode : "";
@@ -3847,8 +3859,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
                     UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
 
-                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} {parameter.HoraInicio}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} {parameter.HoraFin}", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    string[] r1 = parameter.HoraInicio.Split(":");
+                    string[] r2 = parameter.HoraFin.Split(":");
+                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
+                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    r1 = parameter.HoraInicio.Split(":");
+                    r2 = parameter.HoraFin.Split(":");
+                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
 
                     var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
                     var employeeCode = userEntity != null ? userEntity.EmployeeCode : "";
