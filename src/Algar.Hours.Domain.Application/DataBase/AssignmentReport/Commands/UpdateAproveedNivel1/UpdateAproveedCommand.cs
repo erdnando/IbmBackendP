@@ -56,8 +56,9 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 {
                     //Verificar limites Overtime
                     var dateTime = DateTime.ParseExact(currentHReport.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                    var HoraInicioReportado = DateTimeOffset.Parse(currentHReport.StartTime);
-                    var HoraFinReportado = DateTimeOffset.Parse(currentHReport.EndTime);
+                    string[] r1 = currentHReport.StartTime.Split(":");
+                    string[] r2 = currentHReport.EndTime.Split(":");
+                    TimeSpan tsReportado = (new TimeSpan(int.Parse(r2[0]), int.Parse(r2[1]), 0)) - (new TimeSpan(int.Parse(r1[0]), int.Parse(r1[1]), 0));
                     var parametrosCountry = _dataBaseService.UserEntity.Include("CountryEntity").FirstOrDefault(x => x.IdUser == currentHReport.UserEntityId);
                     var limitesCountry = _dataBaseService.ParametersEntity.FirstOrDefault(x => x.CountryEntityId == parametrosCountry.CountryEntityId && x.TypeHours == 1);
                     var HorasLimiteDia = limitesCountry.TargetTimeDay;
@@ -65,7 +66,6 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     var HorasLimiteMensuales = limitesCountry.TargetHourMonth;
                     var HorasLimiteAnuales = limitesCountry.TargetHourYear;
 
-                    TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
                     var listExeptios = _dataBaseService.UsersExceptions.ToList();
                     var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == currentHReport.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == dateTime.ToString("dd/MM/yyyy"));
                     var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;

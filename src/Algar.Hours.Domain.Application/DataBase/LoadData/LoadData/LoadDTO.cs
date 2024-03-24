@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Domain.Entities.ParametrosInicial;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

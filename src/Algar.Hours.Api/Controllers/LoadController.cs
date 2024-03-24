@@ -156,7 +156,13 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
 
-
+        [HttpGet("NotificationsFile")]
+        [Authorize(Roles = "standard")]
+        public async Task<FileStreamResult> NotificationsFile([FromQuery] string idCarga, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.GenerateNotificationsFile(idCarga);
+            return data;
+        }
 
 
     }

@@ -25,6 +25,9 @@ namespace Algar.Hours.Domain.Entities.ParametrosInicial
         public Guid IdCarga { get; set; }
         public string Reporte { get; set; }
         public string EstatusOrigen { get; set; }
+        public string? Problemas { get; set; }
+        public string? Acciones { get; set; }
+        public string? Actividad{ get; set; }
 
     }
 }

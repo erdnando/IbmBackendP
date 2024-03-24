@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.HorusReport.Commands;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         Task<bool> NotificacionesProceso1(string model,string idUserEntiyId);
         Task<SummaryPortalDB> ValidaLimitesExcepcionesOverlapping(string idCarga);
         Task<CountsCarga> CargaAvance(string idCarga);
+        Task<FileStreamResult> GenerateNotificationsFile(string idCarga);
 
     }
 
