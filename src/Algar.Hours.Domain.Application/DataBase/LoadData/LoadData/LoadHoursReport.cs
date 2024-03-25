@@ -301,9 +301,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Obteniendo listado de paises
                 var listaCountries = await _consultCountryCommand.List();
 
+                //Obtiene listado de festivos
+                esfestivos = _dataBaseService.FestivosEntity.ToList();
 
-                //Para ARP, busca festivos de Colombia solamente
-                esfestivos = _dataBaseService.FestivosEntity.Where(x => x.CountryId == new Guid("908465f1-4848-4c86-9e30-471982c01a2d")).ToList(); //&& x.CountryId == "");
+
                 var horariosGMT = await _dataBaseService.PaisRelacionGMTEntity.Where(e => e.NameCountrySelected == model.PaisSel).ToListAsync();
 
 
@@ -317,6 +318,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //Aplica validaciones del PROCESO TLS para overtime
                 foreach (var entity in datosARPExcel)
                 {
+                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.PAIS);  // entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
                     var arpx = fHomologaARP(entity!);
                     arpx.ID_EMPLEADO= entity.ID_EMPLEADO+ entity.PAIS;
                     var parametersARP = new ParametersArpInitialEntity();
@@ -343,9 +345,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersARP.Reporte = arpx.DOC_NUM;
                     parametersARP.EstatusOrigen = arpx.ESTADO.Trim().ToUpper();
                     parametersARP.Actividad = arpx.ACTIVIDAD;
-
-                    var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == entity.PAIS);  // entity.ID_EMPLEADO.Substring(entity.ID_EMPLEADO.Length - 3));
-
 
                     if (paisRegistro == null)
                     {
@@ -403,15 +402,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         
                     }
 
-                    //Valida si el dia del evento es un festivo del pais Colombia
-                    var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario);
-
+                    var esfestivo = esfestivos.FirstOrDefault(x => x.DiaFestivo.UtcDateTime.ToString("dd/MM/yyyy") == semanahorario.UtcDateTime.ToString("dd/MM/yyyy") && x.CountryId == paisRegistro!.IdCounty);
 
                     parametersARP.FECHA_REP = arp.FECHA_REP;
                     parametersARP.EstatusProceso = "EN_OVERTIME";
                     parametersARP.Anio = semanahorario.Year.ToString();
                     parametersARP.Festivo = esfestivo != null ? "Y" : "N";
                     parametersARP.Semana = Semana;
+
+                    if (parametersARP.Festivo == "Y")
+                    {
+                        listParametersInitialEntity.Add(parametersARP);
+                        continue;
+                    }
 
 
                     var hasHorarioSemana = false;
@@ -1093,7 +1096,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                             }
 
-                            var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId == paisRegistro!.IdCounty);
+                            var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo.UtcDateTime.ToString("dd/MM/yyyy") == semanahorario.UtcDateTime.ToString("dd/MM/yyyy") && x.CountryId == paisRegistro!.IdCounty);
 
                             parametersTse.EstatusProceso = "EN_OVERTIME";
                             parametersTse.Festivo = esfestivo != null ? "Y" : "N";
@@ -1102,6 +1105,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse.HoraFin = tse.EndHours;
                             parametersTse.Semana = Semana;
                             parametersTse.Anio = semanahorario.Year.ToString();
+
+                            if (parametersTse.Festivo == "Y")
+                            {
+                                listParametersInitialEntity.Add(parametersTse);
+                                continue;
+                            }
 
                             var hasHorarioSemana = false;
                             var hasHorarioDia = false;
@@ -1997,9 +2006,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         }
 
-                        var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo == semanahorario && x.CountryId == paisRegistro!.IdCounty);
-
-
+                        var esfestivo = listFestivos.FirstOrDefault(x => x.DiaFestivo.UtcDateTime.ToString("dd/MM/yyyy") == semanahorario.UtcDateTime.ToString("dd/MM/yyyy") && x.CountryId == paisRegistro!.IdCounty);
 
                         parametersSte.EstatusProceso = "EN_OVERTIME";
                         parametersSte.Anio = semanahorario.Year.ToString();
@@ -2007,6 +2014,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte.HoraInicio = ste.StartHours;
                         parametersSte.HoraFin = ste.EndHours;
                         parametersSte.Semana = Semana;
+
+                        if (parametersSte.Festivo == "Y") {
+                            listParametersInitialEntity.Add(parametersSte);
+                            continue;
+                        }
 
 
                         var hasHorarioSemana = false;
@@ -2051,7 +2063,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             if (indexHorario >= 0) {
                                 parametersSte.HoraInicioHoraio = horario[indexHorario].HoraInicio == null ? "0" : horario[indexHorario].HoraInicio;
                                 parametersSte.HoraFinHorario = horario[indexHorario].HoraFin == null ? "0" : horario[indexHorario].HoraFin;
-                                parametersSte.Estado = horario[indexHorario].HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";
+                                /*parametersSte.Estado = horario[indexHorario].HoraInicio == null ? "E204 NO TIENE HORARIO ASIGNADO" : "E205 PROCESO REALIZADO CORRECTAMENTE";*/
 
                                 //Para STE, no aplica la politica por overtime
 
