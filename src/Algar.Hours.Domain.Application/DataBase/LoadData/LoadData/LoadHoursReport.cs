@@ -295,7 +295,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
 
                 //Obteniendo politicas overtime
-                List<string> politicaOvertime = new() { "Vacations", "Absence", "Holiday", "Stand By" };
+                List<string> politicaOvertime = new() { "VACATIONS", "ABSENCE", "HOLIDAY", "STAND BY" };
 
 
                 //Obteniendo listado de paises
@@ -558,9 +558,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     if(!bOvertime)
                     {
                         //NO hay horario
-                        parametersARP.EstatusProceso = "NO_APLICA_X_HORARIO";
+                        parametersARP.EstatusProceso = "NO_APLICA_X_HORARIO_EMPLEADO";
                         parametersARP.Problemas = $"El registro se encuentra dentro del horario de trabajo del empleado";
-                        parametersARP.Acciones = $"Verifique y actualice el reporte en CSP(ARP)";
+                        parametersARP.Acciones = $"Verifique y actualice el reporte en ARP";
 
                         listParametersInitialEntity.Add(parametersARP);
                         continue;
@@ -1242,7 +1242,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             if (overtimeCount <= 0)
                             {
                                 //NO hay horario
-                                parametersTse.EstatusProceso = "NO_APLICA_X_HORARIO";
+                                parametersTse.EstatusProceso = "NO_APLICA_X_HORARIO_EMPLEADO";
                                 parametersTse.Problemas = $"El registro se encuentra dentro del horario de trabajo del empleado";
                                 parametersTse.Acciones = $"Verifique y actualice el reporte en CSP(TSE)";
                                 listParametersInitialEntity.Add(parametersTse);
@@ -2154,7 +2154,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         if (overtimeCount <= 0)
                         {
                             //NO hay horario
-                            parametersSte.EstatusProceso = "NO_APLICA_X_HORARIO";
+                            parametersSte.EstatusProceso = "NO_APLICA_X_HORARIO_EMPLEADO";
                             parametersSte.Problemas = $"El registro se encuentra dentro del horario de trabajo del empleado";
                             parametersSte.Acciones = $"Verifique y actualice el reporte en CSP(STE)";
                             listParametersInitialEntity.Add(parametersSte);
@@ -2240,13 +2240,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     rowSTEGral.ToList().Select(o => new { EmployeeCode = o.EmployeeCode, FECHA_REP = o.FECHA_REP, HoraInicio = o.HoraInicio, HoraFin = o.HoraFin, Semana = o.Semana }),
                     x => new { EmployeeCode = x.EmployeeCode, FECHA_REP = x.FECHA_REP, HoraInicio = x.HoraInicio, HoraFin = x.HoraFin, Semana = x.Semana }).IntersectBy(rowTSEGral.ToList().Select(r => new { EmployeeCode = r.EmployeeCode, FECHA_REP = r.FECHA_REP, HoraInicio = r.HoraInicio, HoraFin = r.HoraFin, Semana = r.Semana }), t => new { EmployeeCode = t.EmployeeCode, FECHA_REP = t.FECHA_REP, HoraInicio = t.HoraInicio, HoraFin = t.HoraFin, Semana = t.Semana }).ToList();
 
-                RowGralARPTSE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(TSE) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(TSE) o ARP"; });
-                RowGralTSEARP.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(ARP) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(ARP) o TSE"; });
-                RowGralARPSTE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(STE) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(STE) o ARP"; });
-                RowGralSTEARP.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(ARP) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(ARP) o STE"; });
-                RowGralTSESTE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(STE) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(STE) o TSE"; });
-                RowGralSTETSE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(TSE) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(TSE) o STE"; });
-                /*RowGralARPTSESTE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(ARP) en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(ARP) o PORTAL TLS"; });*/
+                RowGralARPTSE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(TSE) en el mismo rango de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(TSE) o ARP"; });
+                RowGralTSEARP.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de ARP en el mismo rango de tiempo"; x.Acciones = $"Verifique y actualice el reporte en ARP o CSP(TSE)"; });
+                RowGralARPSTE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(STE) en el mismo rango de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(STE) o ARP"; });
+                RowGralSTEARP.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de ARP en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en ARP o CS(STE)"; });
+                RowGralTSESTE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(STE) en el mismo rango de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(STE) o CSP(TSE)"; });
+                RowGralSTETSE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(TSE) en el mismo rango de tiempo"; x.Acciones = $"Verifique y actualice el reporte en CSP(TSE) o (STE)"; });
+                /*RowGralARPTSESTE.ToList().ForEach(x => { x.EstatusProceso = "NO_APLICA_X_OVERLAPING"; x.Problemas = $"El registro esta sobrepuesto con otros registros de ARP en el mismo rando de tiempo"; x.Acciones = $"Verifique y actualice el reporte en ARP o PORTAL TLS"; });*/
                 RowGralARPTSE.ToList().ForEach(x => x.EstatusProceso = "EN_OVERTIME");
 
                 await _dataBaseService.SaveAsync();
@@ -2529,8 +2529,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             if (OverlappingDates(startDate, endDate, startDatex, endDatex))
                             {
                                 item.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                                item.Problemas = $"El registro esta sobrepuesto con otros registros de CSP(ARP) en el mismo rando de tiempo";
-                                item.Acciones = $"Verifique y actualice el reporte en CSP(ARP)";
+                                item.Problemas = $"El registro esta sobrepuesto con otros registros de ARP en el mismo rango de tiempo";
+                                item.Acciones = $"Verifique y actualice el reporte en ARP";
                                 break;
                             }
                             else
@@ -2687,7 +2687,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
 
                 //getting metrics
-                int arpNoAplicaXHorario = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int arpNoAplicaXHorario = _dataBaseService.ParametersArpInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_HORARIO" || e.EstatusProceso == "NO_APLICA_X_HORARIO_EMPLEADO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXOverttime = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpEnProceso = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
@@ -2698,14 +2698,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var cargaRegistro = _dataBaseService.ARPLoadEntity.Where(e => e.IdArpLoad == new Guid(model.IdCarga)).FirstOrDefault();
 
 
-                int tseNoAplicaXHorario = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int tseNoAplicaXHorario = _dataBaseService.ParametersTseInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_HORARIO" || e.EstatusProceso == "NO_APLICA_X_HORARIO_EMPLEADO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXOverttime = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseEnProceso = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXPais = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_PAIS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXFaltaDatoshoras = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_FALTA_DATOS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
 
-                int steNoAplicaXHorario = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_HORARIO" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int steNoAplicaXHorario = _dataBaseService.ParametersSteInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_HORARIO" || e.EstatusProceso == "NO_APLICA_X_HORARIO_EMPLEADO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXOverttime = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steEnProceso = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
@@ -3725,16 +3725,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             worksheet.Cell("J1").Value = "NUMERO DE CASO SI ES ARP TSE O STE";
             worksheet.Cell("K1").Value = "ACTIVIDAD DEL REPORTE";
             worksheet.Cell("L1").Value = "TOTAL HORAS";
-            worksheet.Cell("M1").Value = "HERRAMIENTA TOOL DE DONDE SE GENERO"; 
+            worksheet.Cell("M1").Value = "HERRAMIENTA TOOL DE DONDE SE GENERO";
             worksheet.Cell("N1").Value = "ESTADO PORTAL TLS OVERLAPING HORARIOS";
             worksheet.Cell("O1").Value = "COMENTARIOS O DETALLE DEL ERROR";
 
             var initialRow = 2;
             var currentRow = initialRow;
             ARPLoadEntity? arpLoad = _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga));
-            List<ParametersArpInitialEntity> arpInitialParameters = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso != "EN_OVERTIME").ToList();
-            List<ParametersTseInitialEntity> tseInitialParameters = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso != "EN_OVERTIME").ToList();
-            List<ParametersSteInitialEntity> steInitialParameters = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso != "EN_OVERTIME").ToList();
+            List<ParametersArpInitialEntity> arpInitialParameters = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
+            List<ParametersTseInitialEntity> tseInitialParameters = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
+            List<ParametersSteInitialEntity> steInitialParameters = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
 
             if (arpLoad != null)
             {
@@ -3760,6 +3760,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var employeeEmail = userEntity != null ? userEntity.Email : "";
                     var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
                     var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
+                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
+                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
                     string issue = "";
                     switch (parameter.EstatusProceso)
                     {
@@ -3785,11 +3787,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var rt = worksheet.Cell(currentRow, 15).CreateRichText();
                     var rs = rt.AddText("Problema:");
                     rs.SetFontColor(XLColor.Blue);
-                    rt.AddText(parameter.Problemas);
+                    rt.AddText(problemas);
                     rt.AddNewLine();
                     rs = rt.AddText("Acciones:");
                     rs.SetFontColor(XLColor.Red);
-                    rt.AddText(parameter.Acciones);
+                    rt.AddText(acciones);
                     worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
 
                     currentRow++;
@@ -3817,6 +3819,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var employeeEmail = userEntity != null ? userEntity.Email : "";
                     var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
                     var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
+                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
+                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
                     string issue = "";
                     switch (parameter.EstatusProceso)
                     {
@@ -3842,11 +3846,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var rt = worksheet.Cell(currentRow, 15).CreateRichText();
                     var rs = rt.AddText("Problema:");
                     rs.SetFontColor(XLColor.Blue);
-                    rt.AddText(parameter.Problemas);
+                    rt.AddText(problemas);
                     rt.AddNewLine();
                     rs = rt.AddText("Acciones:");
                     rs.SetFontColor(XLColor.Red);
-                    rt.AddText(parameter.Acciones);
+                    rt.AddText(acciones);
                     worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
 
                     currentRow++;
@@ -3874,6 +3878,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var employeeEmail = userEntity != null ? userEntity.Email : "";
                     var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
                     var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
+                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
+                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
                     string issue = "";
                     switch (parameter.EstatusProceso)
                     {
@@ -3899,11 +3905,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var rt = worksheet.Cell(currentRow, 15).CreateRichText();
                     var rs = rt.AddText("Problema:");
                     rs.SetFontColor(XLColor.Blue);
-                    rt.AddText(parameter.Problemas);
+                    rt.AddText(problemas);
                     rt.AddNewLine();
                     rs = rt.AddText("Acciones:");
                     rs.SetFontColor(XLColor.Red);
-                    rt.AddText(parameter.Acciones);
+                    rt.AddText(acciones);
                     worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
 
                     currentRow++;
@@ -3919,6 +3925,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             stream.Position = 0;
             return new FileStreamResult(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = "Plantilla de Notificaciones.xlsx" };
 
+        }
+
+        private void addRowInNotificationFile<T>(IXLWorksheet worksheet, T parameter) { 
+            
         }
 
         private string getWeek(string strStartDate)
@@ -4010,8 +4020,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemARPp.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemARPp.HoraFin)
                 {
                     itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidenciaParcial[0].Origen}) o PORTAL TLS";
+                    itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de {_horusCoincidenciaParcial[0].Origen} en el mismo rando de tiempo";
+                    itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidenciaParcial[0].Origen} o PORTAL TLS";
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemARPp.HoraFin))
                 {
@@ -4035,7 +4045,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
                     itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidenciaParcial[0].Origen}) o PORTAL TLS";
+                    itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidenciaParcial[0].Origen} o PORTAL TLS";
                 }
             }
             //------------------------------------------------------------------------------------------------------------------
@@ -4046,8 +4056,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
             {
                 itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidencia[0].Origen}) en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidencia[0].Origen}) o PORTAL TLS";
+                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de {_horusCoincidencia[0].Origen} en el mismo rando de tiempo";
+                itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidencia[0].Origen} o PORTAL TLS";
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
             {
@@ -4058,8 +4068,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
             {
                 itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidencia[0].Origen}) en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidencia[0].Origen}) o PORTAL TLS";
+                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de {_horusCoincidencia[0].Origen} en el mismo rando de tiempo";
+                itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidencia[0].Origen} o PORTAL TLS";
             }
         }
 

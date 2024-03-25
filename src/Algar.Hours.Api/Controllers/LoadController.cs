@@ -157,7 +157,8 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("NotificationsFile")]
-        [Authorize(Roles = "standard")]
+        /*[Authorize(Roles = "standard")]*/
+        [AllowAnonymous]
         public async Task<FileStreamResult> NotificationsFile([FromQuery] string idCarga, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var data = await loadHoursReport.GenerateNotificationsFile(idCarga);
