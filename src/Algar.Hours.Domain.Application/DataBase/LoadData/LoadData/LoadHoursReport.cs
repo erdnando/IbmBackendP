@@ -454,20 +454,15 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             //fechas registadas en el horario asignado
                             parametersARP.HoraInicioHoraio = horario[indexHorario].HoraInicio == null ? "0" : horario[indexHorario].HoraInicio;
                             parametersARP.HoraFinHorario = horario[indexHorario].HoraFin == null ? "0" : horario[indexHorario].HoraFin;
-                            parametersARP.OverTime = horario[indexHorario].HoraInicio == null ? "N" : politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) == -1 ? "N" : "S";
-                            parametersARP.EstatusProceso = parametersARP.OverTime == "N" ? parametersARP.EstatusProceso : "NO_APLICA_X_OVERTIME";
-                            parametersARP.HorasInicio = previosAndPos[0];
-                            parametersARP.HorasFin = previosAndPos[1];
-
-
-                            if (parametersARP.OverTime == "S")
-                            {
-                                //---------------NO_APLICA_X_OVERTIME----------
-                                listParametersInitialEntity.Add(parametersARP);
-                                continue;
-                            }
                         }
                         
+                    }
+
+                    if (politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >= 0) {
+                        //---------------NO_APLICA_X_OVERTIME----------
+                        parametersARP.EstatusProceso = "NO_APLICA_X_OVERTIME";
+                        listParametersInitialEntity.Add(parametersARP);
+                        continue;
                     }
 
 
