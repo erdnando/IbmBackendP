@@ -2696,7 +2696,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //getting metrics
                 int arpNoAplicaXHorario = _dataBaseService.ParametersArpInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_HORARIO" || e.EstatusProceso == "NO_APLICA_X_HORARIO_EMPLEADO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXOverttime = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
-                int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_OVERLAPING" || e.EstatusProceso == "NO_APLICA_X_OVERLAPING_INTERNO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpEnProceso = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXPais = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_PAIS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int arpNoAplicaXFaltaDatoshoras = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_FALTA_DATOS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
@@ -2707,14 +2707,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 int tseNoAplicaXHorario = _dataBaseService.ParametersTseInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_HORARIO" || e.EstatusProceso == "NO_APLICA_X_HORARIO_EMPLEADO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXOverttime = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
-                int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_OVERLAPING" || e.EstatusProceso == "NO_APLICA_X_OVERLAPING_INTERNO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseEnProceso = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXPais = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_PAIS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int tseNoAplicaXFaltaDatoshoras = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_FALTA_DATOS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
 
                 int steNoAplicaXHorario = _dataBaseService.ParametersSteInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_HORARIO" || e.EstatusProceso == "NO_APLICA_X_HORARIO_EMPLEADO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXOverttime = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
-                int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
+                int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_OVERLAPING" || e.EstatusProceso == "NO_APLICA_X_OVERLAPING_INTERNO") && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steEnProceso = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "EN_OVERTIME" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXPais = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_PAIS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
                 int steNoAplicaXFaltaDatoshoras = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_FALTA_DATOS" && e.IdCarga == new Guid(model.IdCarga)).ToList().Count();
@@ -3346,9 +3346,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 var rowARPParameterGral = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterGral = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowSTEParameterGral = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
-                int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
-                int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
-                int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_OVERLAPING" && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int arpNoAplicaXOverLaping = _dataBaseService.ParametersArpInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_OVERLAPING" || e.EstatusProceso == "NO_APLICA_X_OVERLAPING_INTERNO") && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int tseNoAplicaXOverLaping = _dataBaseService.ParametersTseInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_OVERLAPING" || e.EstatusProceso == "NO_APLICA_X_OVERLAPING_INTERNO") && e.IdCarga == new Guid(idCarga)).ToList().Count();
+                int steNoAplicaXOverLaping = _dataBaseService.ParametersSteInitialEntity.Where(e => (e.EstatusProceso == "NO_APLICA_X_OVERLAPING" || e.EstatusProceso == "NO_APLICA_X_OVERLAPING_INTERNO") && e.IdCarga == new Guid(idCarga)).ToList().Count();
 
                 int arpNoAplicaLimites = _dataBaseService.ParametersArpInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_LIMITE_HORAS" && e.IdCarga == new Guid(idCarga)).ToList().Count();
                 int tseNoAplicaLimites = _dataBaseService.ParametersTseInitialEntity.Where(e => e.EstatusProceso == "NO_APLICA_X_LIMITE_HORAS" && e.IdCarga == new Guid(idCarga)).ToList().Count();
@@ -4026,9 +4026,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemARPp.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemARPp.HoraFin)
                 {
-                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de {_horusCoincidenciaParcial[0].Origen} en el mismo rando de tiempo";
-                    itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidenciaParcial[0].Origen} o PORTAL TLS";
+                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemARPp.HoraFin))
                 {
@@ -4050,9 +4048,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime == itemARPp.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemARPp.HoraFin))
                 {
-                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidenciaParcial[0].Origen} o PORTAL TLS";
+                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
                 }
             }
             //------------------------------------------------------------------------------------------------------------------
@@ -4062,9 +4058,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
             {
-                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de {_horusCoincidencia[0].Origen} en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidencia[0].Origen} o PORTAL TLS";
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
             {
@@ -4074,9 +4068,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
             {
-                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de {_horusCoincidencia[0].Origen} en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en {_horusCoincidencia[0].Origen} o PORTAL TLS";
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
             }
         }
 
@@ -4149,9 +4141,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemTSE.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin)
                 {
-                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemTSE.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemTSE.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidenciaParcial[0].Origen}) o PORTAL TLS";
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemTSE.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemTSE.HoraFin))
                 {
@@ -4173,9 +4163,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemTSE.EstatusOrigen == "FINAL" || itemTSE.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin))
                 {
-                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemTSE.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemTSE.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidenciaParcial[0].Origen}) o PORTAL TLS";
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
                 }
             }
             //------------------------------------------------------------------------------------------------------------------
@@ -4185,9 +4173,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
             {
-                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidencia[0].Origen}) en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidencia[0].Origen}) o PORTAL TLS";
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
             {
@@ -4197,9 +4183,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
             {
-                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidencia[0].Origen}) en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidencia[0].Origen}) o PORTAL TLS";
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
             }
         }
 
@@ -4273,9 +4257,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 if (_horusCoincidenciaParcial[0].EstatusOrigen == "EXTRACTED" && itemTSE.EstatusOrigen == "EXTRACTED" && _horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio && _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin)
                 {
-                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemTSE.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemTSE.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidenciaParcial[0].Origen}) o PORTAL TLS";
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemTSE.EstatusOrigen == "EXTRACTED" && (_horusCoincidenciaParcial[0].StartTime != itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime != itemTSE.HoraFin))
                 {
@@ -4297,9 +4279,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
                 else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemTSE.EstatusOrigen == "FINAL" || itemTSE.EstatusOrigen == "SUBMITTED") && (_horusCoincidenciaParcial[0].StartTime == itemTSE.HoraInicio || _horusCoincidenciaParcial[0].EndTime == itemTSE.HoraFin))
                 {
-                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                    itemTSE.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidenciaParcial[0].Origen}) en el mismo rando de tiempo";
-                    itemTSE.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidenciaParcial[0].Origen}) o PORTAL TLS";
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
                 }
             }
             //------------------------------------------------------------------------------------------------------------------
@@ -4309,9 +4289,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         {
             if (_horusCoincidencia[0].EstatusOrigen == "EXTRACTED" && itemARPp.EstatusOrigen == "EXTRACTED")
             {
-                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidencia[0].Origen}) en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidencia[0].Origen}) o PORTAL TLS";
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && itemARPp.EstatusOrigen == "EXTRACTED")
             {
@@ -4321,9 +4299,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
             else if ((_horusCoincidencia[0].EstatusOrigen == "FINAL" || _horusCoincidencia[0].EstatusOrigen == "SUBMITTED") && (itemARPp.EstatusOrigen == "FINAL" || itemARPp.EstatusOrigen == "SUBMITTED"))
             {
-                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING";
-                itemARPp.Problemas = $"El registro esta sobrepuesto con otros registros de CSP({_horusCoincidencia[0].Origen}) en el mismo rando de tiempo";
-                itemARPp.Acciones = $"Verifique y actualice el reporte en CSP({_horusCoincidencia[0].Origen}) o PORTAL TLS";
+                itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
             }
         }
 
