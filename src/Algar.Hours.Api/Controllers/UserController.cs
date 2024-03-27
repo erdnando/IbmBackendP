@@ -166,12 +166,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 -----END CERTIFICATE-----";
 
 
-            //using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
-            //////ILogger logger = factory.CreateLogger("Program");
-            //logger.LogInformation(Request.Form["SAMLResponse"]);
-            // 2. Let's read the data - SAML providers usually POST it into the "SAMLResponse" var
-            // var samlResponse = Request.Form["SAMLResponse"].ToString();
-
+            
            
            
             var samlResponse = new Response(samlCert, Request.Form["SAMLResponse"]);
@@ -214,8 +209,8 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                     email = samlResponse.GetCustomAttribute("emailAddress"),
                     nombre = samlResponse.GetCustomAttribute("firstName"),
                     lastName = samlResponse.GetCustomAttribute("lastName"),
-                    roleEntityId = data1?.RoleEntityId,
-                    nameRole = data1?.RoleEntity.NameRole, 
+                    roleEntityId = data1 == null ? new Guid("5a0ab2a2-f790-4f96-9dee-da0b9111f7c7") : data1?.RoleEntityId,//bug fix 345
+                    nameRole = data1 == null ? "Usuario estandar" : data1?.RoleEntity.NameRole,//bug fix 345 
                     countryEntityId = dataCountry.IdCounty,
                     nameCountry= dataCountry.NameCountry,
                     employeeCode = samlResponse.GetCustomAttribute("uid"),
