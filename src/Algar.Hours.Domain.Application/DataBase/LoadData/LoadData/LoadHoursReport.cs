@@ -3266,7 +3266,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.UtcDateTime.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
                         var exceptedHoursByEmployee = exceptionUser == null ? 0 : exceptionUser.horas;
                         //get employee hours from PortalDB
-                        var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && co.EstatusFinal!= "RECHAZADO").ToList();
+                        var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && (co.EstatusFinal!= "RECHAZADO" || co.EstatusFinal!="DESCARTADO")).ToList();
                         //get acummulated hours by this employee
                         var HorasGroupedByEmployeeInPortalDB = HorasDetectedInPortalDB.Select(x => double.Parse(x.CountHours)).Sum();
                         /*if (HorasLimiteDia != 0 && (tsReportado.TotalHours + HorasGroupedByEmployeeInPortalDB + horasAcumuladasEmployee) > (HorasLimiteDia + exceptedHoursByEmployee))
