@@ -290,7 +290,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             //obtine datos para validar si existe un registro previo (OVERLAPPING)
             var data = _dataBaseService.HorusReportEntity
-                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == model.UserEntityId && h.EstatusFinal!="RECHAZADO")
+                .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == model.UserEntityId && (h.EstatusFinal!="RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                 .AsEnumerable()
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, model.StartTime, model.EndTime) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
