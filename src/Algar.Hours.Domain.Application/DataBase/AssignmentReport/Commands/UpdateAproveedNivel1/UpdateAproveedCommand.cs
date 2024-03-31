@@ -130,8 +130,8 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
 
-                    //Se maerca reporte como pendiente
-                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+                    //Se maerca reporte como aprobado N1
+                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1;
                     currentHReport.DateApprovalSystem = DateTime.Now;
                     currentHReport.EstatusFinal = "ENPROGRESO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
