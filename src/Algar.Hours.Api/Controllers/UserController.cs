@@ -229,16 +229,17 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
 
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(jsonSaml)));
+                //DEV
+                // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
 
+                // QA
+                return Redirect("https://portaltlsqa.ibmsmartservices.com/#/dashboard?uxm_erd=" + encodedStr);
 
-                //  return Redirect("http://localhost:4200/dashboard/#/dashboard?uxm_erd=" + encodedStr);
-                //return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud/#/dashboard?uxm_erd=" + encodedStr);
-
+               
 
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 encodedStr = Convert.ToBase64String(Encoding.UTF8.GetBytes("Error al obtener datos SAML::"+ex.Message));
 
@@ -251,13 +252,17 @@ AB7XkC7atqVVYhLhRXClgxt45wme
 
 
                 }
-                return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud/#/dashboard?uxm_erd=" + encodedStr);
+
+                // QA
+                return Redirect("https://portaltlsqa.ibmsmartservices.com/#/dashboard?uxm_erd=" + encodedStr);
+               
             }
 
 
             // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
-            return Redirect("https://transversal-portaltls-front.shfyjbr2p4o.us-south.codeengine.appdomain.cloud?uxm_erd=" + encodedStr);
-
+            // QA
+            return Redirect("https://portaltlsqa.ibmsmartservices.com?uxm_erd=" + encodedStr);
+            
 
 
         }
