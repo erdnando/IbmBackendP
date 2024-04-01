@@ -70,7 +70,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == currentHReport.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == dateTime.ToString("dd/MM/yyyy"));
                     var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
 
-                    int[] status = [(byte)AprobacionPortalDB.Pendiente, (byte)AprobacionPortalDB.AprobadoN1, (byte)AprobacionPortalDB.AprobadoN2];
+                    int[] status = [(byte)AprobacionPortalDB.AprobadoN0, (byte)AprobacionPortalDB.AprobadoN1, (byte)AprobacionPortalDB.AprobadoN2];
                     var HorasPortalDBTDia = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{currentHReport.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND h.\"IdHorusReport\" != '{currentHReport.IdHorusReport}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
                     var dateTimeInicioSemana = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-dd")} 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(-((int)dateTime.DayOfWeek));
                     var dateTimeFinSemana = DateTime.ParseExact($"{dateTimeInicioSemana.ToString("yyyy-MM-dd")} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(6);
@@ -96,7 +96,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     }
 
                     //Se maerca reporte como pendiente y en progreso en el flujo de aprobacion
-                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Pendiente;
+                    currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN0;
                     currentHReport.DateApprovalSystem = DateTime.Now;
                     currentHReport.EstatusFinal = "ENPROGRESO";
                     _dataBaseService.HorusReportEntity.Update(currentHReport);
