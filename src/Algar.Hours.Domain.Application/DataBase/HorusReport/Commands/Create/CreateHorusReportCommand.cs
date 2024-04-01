@@ -199,10 +199,10 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
             var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy-MM-dd 00:00:00");
-            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.DateTime.Year.ToString() && x.FechaWorking.DayOfWeek == fechaReportada.DayOfWeek );
+            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.UtcDateTime.Year.ToString() && x.FechaWorking.UtcDateTime.DayOfWeek == fechaReportada.DayOfWeek );
              
             var isFestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == DateTimeOffset.ParseExact(fechaformateadaReporta, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) && x.CountryId == parametrosCountry.CountryEntityId).Count() > 0;
-             
+              
             //Validación del Horario reportado
             //================================================================================================================
             if (horarioAsignado != null && !isFestivo)
@@ -464,7 +464,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
                 TimeSpan tsAsignado = (DateTimeOffset.Parse(horarioAsigando.HoraFin) - DateTimeOffset.Parse(horarioAsigando.HoraInicio));
                 double totalHoursReportadas = tsReportado.TotalHours;
                 double totalHoursAsignadas = tsAsignado.TotalHours;
-                if ((_HoraInicioReportado.TimeOfDay >= DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay && _HoraInicioReportado.TimeOfDay < DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay) || (_HoraFinReportado.TimeOfDay > DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay && _HoraFinReportado.TimeOfDay <= DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay))
+                if (_HoraInicioReportado.TimeOfDay < DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay && DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay < _HoraFinReportado.TimeOfDay)
                 {
                     return false;
                 }
