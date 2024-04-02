@@ -92,7 +92,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
             String employeeCodesIn = $"'{String.Join("','", employeeCodes.ToArray())}'";
             exceptions = _dataBaseService.WorkdayExceptionEntity.FromSqlRaw($"SELECT * FROM \"WorkdayExceptionEntity\" WHERE \"Active\" = true AND \"EmployeeCode\" IN ({employeeCodesIn}) AND \"RealDate\" >= TO_DATE('{dateTime.ToString("dd/MM/yyyy")}', 'DD/MM/YYYY')").ToList();
-            var entities = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI')")
+            var entities = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND h.\"EstatusFinal\" != 'DESCARTADO'")
                 .Include(x => x.UserEntity)
                 .ToList();
 
@@ -117,7 +117,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 if (horusReportEntity != null) {
-                    var statusFinal = (horusReportEntity.EstatusFinal == "FINAL" || horusReportEntity.EstatusFinal == "SUBMITTED") ? "ENPROCESO" : "APROBADO";
+                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : ((horusReportEntity.EstatusFinal == "PREAPROBADO" || horusReportEntity.EstatusFinal == "ENPROGRESO") ? "ENPROCESO" : "RECHAZADO");
                     worksheet.Cell(currentRow, 1).Value = horusReportEntity.UserEntity.EmployeeCode;
                     worksheet.Cell(currentRow, 2).Value = workdayUserModel.Worker;
                     worksheet.Cell(currentRow, 3).Value = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy");
