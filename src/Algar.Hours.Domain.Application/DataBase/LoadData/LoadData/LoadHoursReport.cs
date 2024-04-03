@@ -3332,13 +3332,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 await _dataBaseService.SaveAsync();
 
 
-                //Verifica OVERLAPING INTERNO de todos los overtimes entrantes y les pone como NO_APLICA_X_OVERLAPING_INTERNO
-                _dataBaseService.ParametersArpInitialEntity.FromSqlRaw($"select a.* from \"ParametersArpInitialEntity\" a, \"HorusReportEntity\" h left join \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and u.\"EmployeeCode\" = a.\"EmployeeCode\" and a.\"FECHA_REP\" = h.\"StrStartDate\" and (a.\"HoraInicio\"::time, a.\"HoraFin\"::time) overlaps (h.\"StartTime\"::time, h.\"EndTime\"::time) and (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO");
-                _dataBaseService.ParametersTseInitialEntity.FromSqlRaw($"select a.* from \"ParametersTseInitialEntity\" a, \"HorusReportEntity\" h left join \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and u.\"EmployeeCode\" = a.\"EmployeeCode\" and a.\"FECHA_REP\" = h.\"StrStartDate\" and (a.\"HoraInicio\"::time, a.\"HoraFin\"::time) overlaps (h.\"StartTime\"::time, h.\"EndTime\"::time) and (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO");
-                _dataBaseService.ParametersSteInitialEntity.FromSqlRaw($"select a.* from \"ParametersSteInitialEntity\" a, \"HorusReportEntity\" h left join \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and u.\"EmployeeCode\" = a.\"EmployeeCode\" and a.\"FECHA_REP\" = h.\"StrStartDate\" and (a.\"HoraInicio\"::time, a.\"HoraFin\"::time) overlaps (h.\"StartTime\"::time, h.\"EndTime\"::time) and (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO");
-                await _dataBaseService.SaveAsync();
-                //Fin de Verifica OVERLAPING INTERNO
-
 
                 var rowARPParameterFinal = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameterFinal = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
@@ -3354,6 +3347,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 await _dataBaseService.SaveAsync();
                 //=======================================================================================================================
+
+                //Verifica OVERLAPING INTERNO de todos los overtimes entrantes y les pone como NO_APLICA_X_OVERLAPING_INTERNO
+                _dataBaseService.ParametersArpInitialEntity.FromSqlRaw($"select a.* from \"ParametersArpInitialEntity\" a, \"HorusReportEntity\" h left join \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and u.\"EmployeeCode\" = a.\"EmployeeCode\" and a.\"FECHA_REP\" = h.\"StrStartDate\" and (a.\"HoraInicio\"::time, a.\"HoraFin\"::time) overlaps (h.\"StartTime\"::time, h.\"EndTime\"::time) and (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO");
+                _dataBaseService.ParametersTseInitialEntity.FromSqlRaw($"select a.* from \"ParametersTseInitialEntity\" a, \"HorusReportEntity\" h left join \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and u.\"EmployeeCode\" = a.\"EmployeeCode\" and a.\"FECHA_REP\" = h.\"StrStartDate\" and (a.\"HoraInicio\"::time, a.\"HoraFin\"::time) overlaps (h.\"StartTime\"::time, h.\"EndTime\"::time) and (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO");
+                _dataBaseService.ParametersSteInitialEntity.FromSqlRaw($"select a.* from \"ParametersSteInitialEntity\" a, \"HorusReportEntity\" h left join \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and u.\"EmployeeCode\" = a.\"EmployeeCode\" and a.\"FECHA_REP\" = h.\"StrStartDate\" and (a.\"HoraInicio\"::time, a.\"HoraFin\"::time) overlaps (h.\"StartTime\"::time, h.\"EndTime\"::time) and (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO");
+                await _dataBaseService.SaveAsync();
+                //Fin de Verifica OVERLAPING INTERNO
+
 
                 //Metricas finales
                 //=======================================================================================================================
@@ -4009,29 +4010,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 DateTime fechaHoraOriginal = DateTime.ParseExact(itemARPp.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                 string nuevaFechaHoraFormato = fechaHoraOriginal.ToString("dd/MM/yyyy 00:00:00");
 
-                //Escenario coincidencia 100%
+                //Escenario coincidencia 100% 
                 //=================================================================
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemARPp.HoraInicio && h.EndTime == itemARPp.HoraFin && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "DESCARTADO")
                     .AsEnumerable()
-                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
-                    (TimeInRange(h.StartTime, startTime, endTime) &&
-                    TimeInRange(h.EndTime, startTime, endTime)))
-                    .Where(h => h.StrReport == itemARPp.Reporte)
-                    .ToList();
+                    .Where(h => h.StrReport.Split("-")[0] == itemARPp.Reporte.Split("-")[0])
+                    .FirstOrDefault();
 
-
-
-
-                if (_horusCoincidencia.Count > 0)
+                if (_horusCoincidencia != null)
                 {
-                    EscenarioCoincidenciaTotalARP(itemARPp, _horusCoincidencia);
-                }
-                else
-                {
-                    EscenarioCoincidenciaParcialARP(itemARPp, userRow, startTime, endTime, nuevaFechaHoraFormato, _horusCoincidencia);
-                }
+                    if (_horusCoincidencia.EstatusOrigen != "EXTRACTED")
+                    {
+                        _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemARPp.EstatusOrigen}";
+                        _horusCoincidencia.EstatusOrigen = itemARPp.EstatusOrigen;
 
+                        if (itemARPp.EstatusOrigen == "EXTRACTED") {
+                            if (_horusCoincidencia.EstatusFinal == "PREAPROBADO") {
+                                _horusCoincidencia.EstatusFinal = "APROBADO";
+                            }
+                        }
+                    }
+
+                    itemARPp.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
+                }
             }
         }
 
@@ -4047,7 +4048,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemARPp.HoraInicio, itemARPp.HoraFin) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
                 TimeInRange(h.EndTime, startTime, endTime)))
-                .Where(h => h.StrReport == itemARPp.Reporte)
+                .Where(h => h.StrReport.Split("-")[0] == itemARPp.Reporte.Split("-")[0])
                 .ToList();
 
 
@@ -4122,27 +4123,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100%
                 //=================================================================
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemTSE.HoraInicio && h.EndTime == itemTSE.HoraFin && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "DESCARTADO")
                     .AsEnumerable()
-                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
-                    (TimeInRange(h.StartTime, startTime, endTime) &&
-                    TimeInRange(h.EndTime, startTime, endTime)))
-                    .Where(h => h.StrReport == itemTSE.Reporte)
-                    .ToList();
+                    .Where(h => h.StrReport.Split("-")[0] == itemTSE.Reporte.Split("-")[0])
+                    .FirstOrDefault();
 
-
-
-
-                if (_horusCoincidencia.Count > 0)
+                if (_horusCoincidencia != null)
                 {
-                    EscenarioCoincidenciaTotalTSE(itemTSE, _horusCoincidencia);
-                }
-                else
-                {
-                    EscenarioCoincidenciaParcialTSE(itemTSE, userRow, startTime, endTime, nuevaFechaHoraFormato, _horusCoincidencia);
-                }
+                    if (_horusCoincidencia.EstatusOrigen != "EXTRACTED")
+                    {
+                        _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemTSE.EstatusOrigen}";
+                        _horusCoincidencia.EstatusOrigen = itemTSE.EstatusOrigen;
 
+                        if (itemTSE.EstatusOrigen == "EXTRACTED")
+                        {
+                            if (_horusCoincidencia.EstatusFinal == "PREAPROBADO")
+                            {
+                                _horusCoincidencia.EstatusFinal = "APROBADO";
+                            }
+                        }
+                    }
+
+                    itemTSE.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
+                }
             }
         }        
 
@@ -4158,7 +4161,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
                 TimeInRange(h.EndTime, startTime, endTime)))
-                .Where(h => h.StrReport == itemTSE.Reporte)
+                .Where(h => h.StrReport.Split("-")[0] == itemTSE.Reporte.Split("-")[0])
                 .ToList();
 
 
@@ -4222,8 +4225,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 //------------------------------------------------------------------------------------------------------------------
                 var userRow = UserLst.FirstOrDefault(op => op.EmployeeCode == itemSTE.EmployeeCode);
 
-
-
                 string[] r1 = itemSTE.HoraInicio.Split(":");
                 string[] r2 = itemSTE.HoraFin.Split(":");
                 var startTime = DateTime.Parse("00:00:00").AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
@@ -4234,27 +4235,29 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100%
                 //================================================================= 
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity
-                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.UserEntityId == userRow.IdUser && (h.EstatusFinal!="RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemSTE.HoraInicio && h.EndTime == itemSTE.HoraFin && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "DESCARTADO")
                     .AsEnumerable()
-                    .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemSTE.HoraInicio, itemSTE.HoraFin) ||
-                    (TimeInRange(h.StartTime, startTime, endTime) &&
-                    TimeInRange(h.EndTime, startTime, endTime)))
-                    .Where(h => h.StrReport == itemSTE.Reporte)
-                    .ToList();
+                    .Where(h => h.StrReport.Split("-")[0] == itemSTE.Reporte.Split("-")[0])
+                    .FirstOrDefault();
 
-
-
-
-                if (_horusCoincidencia.Count > 0)
+                if (_horusCoincidencia != null)
                 {
-                    EscenarioCoincidenciaTotalSTE(itemSTE, _horusCoincidencia);
-                }
-                else
-                {
-                    EscenarioCoincidenciaParcialSTE(itemSTE, userRow, startTime, endTime, nuevaFechaHoraFormato, _horusCoincidencia);
-                }
+                    if (_horusCoincidencia.EstatusOrigen != "STE")
+                    {
+                        _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemSTE.EstatusOrigen}";
+                        _horusCoincidencia.EstatusOrigen = itemSTE.EstatusOrigen;
 
+                        if (itemSTE.EstatusOrigen == "STE")
+                        {
+                            if (_horusCoincidencia.EstatusFinal == "PREAPROBADO")
+                            {
+                                _horusCoincidencia.EstatusFinal = "APROBADO";
+                            }
+                        }
+                    }
+
+                    itemSTE.EstatusProceso = "NO_APLICA_X_OVERLAPING_INTERNO";
+                }
             }
         }
 
@@ -4270,7 +4273,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 .Where(h => TimeRangesOverlap(h.StartTime, h.EndTime, itemTSE.HoraInicio, itemTSE.HoraFin) ||
                 (TimeInRange(h.StartTime, startTime, endTime) &&
                 TimeInRange(h.EndTime, startTime, endTime)))
-                .Where(h => h.StrReport == itemTSE.Reporte)
+                .Where(h => h.StrReport.Split("-")[0] == itemTSE.Reporte.Split("-")[0])
                 .ToList();
 
 
