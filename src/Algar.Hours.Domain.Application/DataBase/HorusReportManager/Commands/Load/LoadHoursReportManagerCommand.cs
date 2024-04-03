@@ -94,6 +94,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
             exceptions = _dataBaseService.WorkdayExceptionEntity.FromSqlRaw($"SELECT * FROM \"WorkdayExceptionEntity\" WHERE \"Active\" = true AND \"EmployeeCode\" IN ({employeeCodesIn}) AND \"RealDate\" >= TO_DATE('{dateTime.ToString("dd/MM/yyyy")}', 'DD/MM/YYYY')").ToList();
             var entities = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND h.\"EstatusFinal\" != 'DESCARTADO'")
                 .Include(x => x.UserEntity)
+                .AsEnumerable()
+                .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
                 .ToList();
 
             for (var i = 0; i < whModels.Count(); i++) {

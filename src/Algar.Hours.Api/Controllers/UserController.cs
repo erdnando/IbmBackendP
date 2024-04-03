@@ -270,9 +270,9 @@ AB7XkC7atqVVYhLhRXClgxt45wme
         [HttpGet("Aproved")]
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Aproved(
-       [FromQuery] int nivel, [FromServices] IConsultAprobadorCommand ConsultAprobadorCommand)
+       [FromQuery] int nivel, [FromQuery] Guid pais, [FromServices] IConsultAprobadorCommand ConsultAprobadorCommand)
         {
-            var data = ConsultAprobadorCommand.Execute(nivel);
+            var data = ConsultAprobadorCommand.Execute(nivel, pais);
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
 
         }

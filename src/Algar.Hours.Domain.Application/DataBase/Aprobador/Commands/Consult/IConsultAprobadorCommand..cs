@@ -10,7 +10,7 @@ namespace Algar.Hours.Application.DataBase.Aprobador.Commands.Consult
 {
     public interface IConsultAprobadorCommand
     {
-        Task<List<AprobadorUsuarioModel>> Execute(int nivel);
+        Task<List<AprobadorUsuarioModel>> Execute(int nivel, Guid idPais);
         Task<List<AprobadorModel>> ListAll();
         Task<List<AprobadorModel>> ConsultById(Guid AprobadorId);
     }
