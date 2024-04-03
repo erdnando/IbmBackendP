@@ -4021,6 +4021,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     if (_horusCoincidencia.EstatusOrigen != "EXTRACTED")
                     {
+                        //add validation to check if it was rejected by n1 or n2
+                        if (_horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N1" || _horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N2") continue;
                         _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemARPp.EstatusOrigen}";
                         _horusCoincidencia.EstatusOrigen = itemARPp.EstatusOrigen;
 
@@ -4132,6 +4134,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     if (_horusCoincidencia.EstatusOrigen != "EXTRACTED")
                     {
+                        //add validation to check if it was rejected by n1 or n2
+                        if (_horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N1" || _horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N2") continue;
+
                         _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemTSE.EstatusOrigen}";
                         _horusCoincidencia.EstatusOrigen = itemTSE.EstatusOrigen;
 
@@ -4244,6 +4249,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     if (_horusCoincidencia.EstatusOrigen != "STE")
                     {
+                        //add validation to check if it was rejected by n1 or n2
+                        if (_horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N1" || _horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N2") continue;
+
                         _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemSTE.EstatusOrigen}";
                         _horusCoincidencia.EstatusOrigen = itemSTE.EstatusOrigen;
 
