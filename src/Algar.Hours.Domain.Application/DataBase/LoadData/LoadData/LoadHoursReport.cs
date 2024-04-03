@@ -4012,7 +4012,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100% 
                 //=================================================================
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemARPp.HoraInicio && h.EndTime == itemARPp.HoraFin && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "DESCARTADO")
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemARPp.HoraInicio && h.EndTime == itemARPp.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                     .AsEnumerable()
                     .Where(h => h.StrReport.Split("-")[0] == itemARPp.Reporte.Split("-")[0])
                     .FirstOrDefault();
@@ -4021,10 +4021,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     if (_horusCoincidencia.EstatusOrigen != "EXTRACTED")
                     {
-                        //add validation to check if it was rejected by n1 or n2
-                        if (_horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N1" || _horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N2") continue;
                         _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemARPp.EstatusOrigen}";
-                        _horusCoincidencia.EstatusOrigen = itemARPp.EstatusOrigen;
+                        _horusCoincidencia.EstatusOrigen = itemARPp.EstatusOrigen; 
 
                         if (itemARPp.EstatusOrigen == "EXTRACTED") {
                             if (_horusCoincidencia.EstatusFinal == "PREAPROBADO") {
@@ -4125,7 +4123,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100%
                 //=================================================================
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemTSE.HoraInicio && h.EndTime == itemTSE.HoraFin && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "DESCARTADO")
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemTSE.HoraInicio && h.EndTime == itemTSE.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                     .AsEnumerable()
                     .Where(h => h.StrReport.Split("-")[0] == itemTSE.Reporte.Split("-")[0])
                     .FirstOrDefault();
@@ -4134,9 +4132,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     if (_horusCoincidencia.EstatusOrigen != "EXTRACTED")
                     {
-                        //add validation to check if it was rejected by n1 or n2
-                        if (_horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N1" || _horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N2") continue;
-
                         _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemTSE.EstatusOrigen}";
                         _horusCoincidencia.EstatusOrigen = itemTSE.EstatusOrigen;
 
@@ -4240,7 +4235,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100%
                 //================================================================= 
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemSTE.HoraInicio && h.EndTime == itemSTE.HoraFin && h.UserEntityId == userRow.IdUser && h.EstatusFinal != "DESCARTADO")
+                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemSTE.HoraInicio && h.EndTime == itemSTE.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                     .AsEnumerable()
                     .Where(h => h.StrReport.Split("-")[0] == itemSTE.Reporte.Split("-")[0])
                     .FirstOrDefault();
@@ -4249,9 +4244,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     if (_horusCoincidencia.EstatusOrigen != "STE")
                     {
-                        //add validation to check if it was rejected by n1 or n2
-                        if (_horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N1" || _horusCoincidencia.DetalleEstatusFinal == "RECHAZADO POR N2") continue;
-
                         _horusCoincidencia.DetalleEstatusFinal = $"Actualización de ESTATUS ORIGEN {_horusCoincidencia.EstatusOrigen} a {itemSTE.EstatusOrigen}";
                         _horusCoincidencia.EstatusOrigen = itemSTE.EstatusOrigen;
 
