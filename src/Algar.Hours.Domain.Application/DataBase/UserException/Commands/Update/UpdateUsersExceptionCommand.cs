@@ -37,6 +37,7 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Update
             usersE.StartDate = model.StartDate;
             usersE.horas = model.horas;
             usersE.Description = model.Description;
+            usersE.ReportType = model.ReportType;
 
             _dataBaseService.UsersExceptions.Update(usersE);
             await _dataBaseService.SaveAsync();

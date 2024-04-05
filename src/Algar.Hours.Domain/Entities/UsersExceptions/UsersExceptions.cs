@@ -19,8 +19,8 @@ namespace Algar.Hours.Domain.Entities.UsersExceptions
 
         public float horas { get; set; }
 
-        public string Description {  get; set; }    
-
+        public string Description {  get; set; }
+        public string ReportType { get; set; }
 
     }
 }

@@ -31,6 +31,7 @@ namespace Algar.Hours.Application.DataBase.UserException.Commands.Create
                 horas= createUsersException.horas,
                 IdUsersExceptions = Guid.NewGuid(),
                 StartDate = createUsersException.StartDate,
+                ReportType= createUsersException.ReportType,
             };
             //var entity = _mapper.Map<UsersExceptions>(createUsersException);
             //entity.IdUsersExceptions = Guid.NewGuid();

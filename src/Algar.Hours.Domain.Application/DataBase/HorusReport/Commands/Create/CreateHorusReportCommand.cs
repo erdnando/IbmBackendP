@@ -248,8 +248,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
             TimeSpan tsReportado = HoraFinReportado - HoraInicioReportado;
             var listExeptios = _dataBaseService.UsersExceptions.ToList();
-            var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == horusModel.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == horusModel.StrStartDate);
-            var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+            var exceptionUserOr = listExeptios.Where(x => x.UserId == horusModel.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == horusModel.StrStartDate && x.ReportType.Trim().ToUpper().Equals(("STANDBY").Trim().ToUpper())).ToList();
+            var exceptionUser = exceptionUserOr.Sum(op => op.horas);
+            var horasExceptuada = exceptionUser == 0 ? 0 : exceptionUser;
 
             int[] status = [(byte)AprobacionPortalDB.AprobadoN0, (byte)AprobacionPortalDB.AprobadoN1, (byte)AprobacionPortalDB.AprobadoN2];
             var HorasPortalDBTDia = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{horusModel.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();
