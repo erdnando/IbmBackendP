@@ -19,7 +19,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         Task<bool> NotificacionesProceso1(string model,string idUserEntiyId);
         Task<SummaryPortalDB> ValidaLimitesExcepcionesOverlapping(string idCarga);
         Task<CountsCarga> CargaAvance(string idCarga);
-        Task<FileStreamResult> GenerateNotificationsFile(string idCarga);
+        Task<List<InconsistenceModel>> GetInconsistences(string? idCarga, string? employeeCode);
+        Task<FileStreamResult> GenerateInconsistencesFile(string? idCarga, string? employeeCode);
 
     }
 

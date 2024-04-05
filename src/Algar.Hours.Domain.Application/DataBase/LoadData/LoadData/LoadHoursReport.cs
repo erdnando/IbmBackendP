@@ -3738,7 +3738,200 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             _dataBaseService.assignmentReports.AddAsync(assigmentEntity);
         }
 
-        public async Task<FileStreamResult> GenerateNotificationsFile(string idCarga) {
+        public async Task<List<InconsistenceModel>> GetInconsistences(string? idCarga = null, string? employeeCode = null)
+        {
+            /*worksheet.Cell("A1").Value = "PAIS DE EMPLEADO";
+            worksheet.Cell("B1").Value = "CODIGO DE EMPLEADO";
+            worksheet.Cell("C1").Value = "NOMBRE DEL EMPLEADO";
+            worksheet.Cell("D1").Value = "CORREO DEL EMPLEADO";
+            worksheet.Cell("E1").Value = "NOMBRE DEL GERENTE";
+            worksheet.Cell("F1").Value = "CORREO DEL GERENTE";
+            worksheet.Cell("G1").Value = "FECHA DE GENERADO EL INFORME";
+            worksheet.Cell("H1").Value = "FECHA Y HORA INICIO DEL REPORTE";
+            worksheet.Cell("I1").Value = "FECHA Y HORA FIN DEL REPORTE";
+            worksheet.Cell("J1").Value = "NUMERO DE CASO SI ES ARP TSE O STE";
+            worksheet.Cell("K1").Value = "ACTIVIDAD DEL REPORTE";
+            worksheet.Cell("L1").Value = "TOTAL HORAS";
+            worksheet.Cell("M1").Value = "HERRAMIENTA TOOL DE DONDE SE GENERO";
+            worksheet.Cell("N1").Value = "ESTADO PORTAL TLS OVERLAPING HORARIOS";
+            worksheet.Cell("O1").Value = "COMENTARIOS O DETALLE DEL ERROR";*/
+            List<InconsistenceModel> inconsistences = new();
+
+            ARPLoadEntity? arpLoad = idCarga != null? _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga)) : _dataBaseService.ARPLoadEntity.OrderByDescending(x => x.FechaCreacion).FirstOrDefault();
+            
+            if (arpLoad != null)
+            {
+                List<ParametersArpInitialEntity> arpInitialParameters = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == arpLoad.IdArpLoad && (employeeCode != null ? op.EmployeeCode == employeeCode : true) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
+                List<ParametersTseInitialEntity> tseInitialParameters = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == arpLoad.IdArpLoad && (employeeCode != null ? op.EmployeeCode == employeeCode : true) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
+                List<ParametersSteInitialEntity> steInitialParameters = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == arpLoad.IdArpLoad && (employeeCode != null ? op.EmployeeCode == employeeCode : true) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
+
+                DateTime loadDateTime = arpLoad.FechaCreacion;
+                for (var i = 0; i < arpInitialParameters.Count(); i++)
+                {
+                    var parameter = arpInitialParameters[i];
+                    UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+                    UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+
+                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    string[] r1 = parameter.HoraInicio.Split(":");
+                    string[] r2 = parameter.HoraFin.Split(":");
+                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
+                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    r1 = parameter.HoraInicio.Split(":");
+                    r2 = parameter.HoraFin.Split(":");
+                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
+
+                    var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
+                    var empCode = userEntity != null ? userEntity.EmployeeCode : "";
+                    var employeeName = userEntity != null ? $"{userEntity.NameUser} {userEntity.surnameUser}" : "";
+                    var employeeEmail = userEntity != null ? userEntity.Email : "";
+                    var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
+                    var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
+                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
+                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
+                    string issue = "";
+                    switch (parameter.EstatusProceso)
+                    {
+                        case "NO_APLICA_X_HORARIO": { issue = "Error de horario"; break; }
+                        case "NO_APLICA_X_OVERLAPING": { issue = "Overlaping"; break; }
+                    }
+
+
+                    InconsistenceModel inconsistence = new();
+                    inconsistence.codigoPais = codigoPais;
+                    inconsistence.employeeCode = empCode;
+                    inconsistence.employeeName = employeeName;
+                    inconsistence.employeeEmail = employeeEmail;
+                    inconsistence.managerName = managerName;
+                    inconsistence.managerEmail = managerEmail;
+                    inconsistence.creationDate = loadDateTime.ToString("M/d/yyyy");
+                    inconsistence.startDateTime = startDateTime.ToString("M/d/yyyy HH:mm tt");
+                    inconsistence.endDateTime = endDateTime.ToString("M/d/yyyy HH:mm tt");
+                    inconsistence.report = parameter.Reporte;
+                    inconsistence.activity = parameter.Actividad;
+                    inconsistence.totalHours = parameter.totalHoras;
+                    inconsistence.tool = "ARP";
+                    inconsistence.status = issue;
+                    inconsistence.problems = problemas;
+                    inconsistence.actions = acciones;
+
+                    inconsistences.Add(inconsistence);
+
+                }
+
+                for (var i = 0; i < tseInitialParameters.Count(); i++)
+                {
+                    var parameter = tseInitialParameters[i];
+                    UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+                    UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+
+                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    string[] r1 = parameter.HoraInicio.Split(":");
+                    string[] r2 = parameter.HoraFin.Split(":");
+                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
+                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    r1 = parameter.HoraInicio.Split(":");
+                    r2 = parameter.HoraFin.Split(":");
+                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
+
+                    var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
+                    var empCode = userEntity != null ? userEntity.EmployeeCode : "";
+                    var employeeName = userEntity != null ? $"{userEntity.NameUser} {userEntity.surnameUser}" : "";
+                    var employeeEmail = userEntity != null ? userEntity.Email : "";
+                    var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
+                    var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
+                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
+                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
+                    string issue = "";
+                    switch (parameter.EstatusProceso)
+                    {
+                        case "NO_APLICA_X_HORARIO": { issue = "Error de horario"; break; }
+                        case "NO_APLICA_X_OVERLAPING": { issue = "Overlaping"; break; }
+                    }
+
+
+                    InconsistenceModel inconsistence = new();
+                    inconsistence.codigoPais = codigoPais;
+                    inconsistence.employeeCode = empCode;
+                    inconsistence.employeeName = employeeName;
+                    inconsistence.employeeEmail = employeeEmail;
+                    inconsistence.managerName = managerName;
+                    inconsistence.managerEmail = managerEmail;
+                    inconsistence.creationDate = loadDateTime.ToString("M/d/yyyy");
+                    inconsistence.startDateTime = startDateTime.ToString("M/d/yyyy HH:mm tt");
+                    inconsistence.endDateTime = endDateTime.ToString("M/d/yyyy HH:mm tt");
+                    inconsistence.report = parameter.Reporte;
+                    inconsistence.activity = parameter.Actividad;
+                    inconsistence.totalHours = parameter.totalHoras;
+                    inconsistence.tool = "ARP";
+                    inconsistence.status = issue;
+                    inconsistence.problems = problemas;
+                    inconsistence.actions = acciones;
+
+                    inconsistences.Add(inconsistence);
+
+                }
+
+                for (var i = 0; i < steInitialParameters.Count(); i++)
+                {
+                    var parameter = steInitialParameters[i];
+                    UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+                    UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+
+                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    string[] r1 = parameter.HoraInicio.Split(":");
+                    string[] r2 = parameter.HoraFin.Split(":");
+                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
+                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    r1 = parameter.HoraInicio.Split(":");
+                    r2 = parameter.HoraFin.Split(":");
+                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
+
+                    var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
+                    var empCode = userEntity != null ? userEntity.EmployeeCode : "";
+                    var employeeName = userEntity != null ? $"{userEntity.NameUser} {userEntity.surnameUser}" : "";
+                    var employeeEmail = userEntity != null ? userEntity.Email : "";
+                    var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
+                    var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
+                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
+                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
+                    string issue = "";
+                    switch (parameter.EstatusProceso)
+                    {
+                        case "NO_APLICA_X_HORARIO": { issue = "Error de horario"; break; }
+                        case "NO_APLICA_X_OVERLAPING": { issue = "Overlaping"; break; }
+                    }
+
+
+                    InconsistenceModel inconsistence = new();
+                    inconsistence.codigoPais = codigoPais;
+                    inconsistence.employeeCode = empCode;
+                    inconsistence.employeeName = employeeName;
+                    inconsistence.employeeEmail = employeeEmail;
+                    inconsistence.managerName = managerName;
+                    inconsistence.managerEmail = managerEmail;
+                    inconsistence.creationDate = loadDateTime.ToString("M/d/yyyy");
+                    inconsistence.startDateTime = startDateTime.ToString("M/d/yyyy HH:mm tt");
+                    inconsistence.endDateTime = endDateTime.ToString("M/d/yyyy HH:mm tt");
+                    inconsistence.report = parameter.Reporte;
+                    inconsistence.activity = parameter.Actividad;
+                    inconsistence.totalHours = parameter.totalHoras;
+                    inconsistence.tool = "ARP";
+                    inconsistence.status = issue;
+                    inconsistence.problems = problemas;
+                    inconsistence.actions = acciones;
+
+                    inconsistences.Add(inconsistence);
+
+                }
+
+            }
+
+            return inconsistences;
+
+        }
+
+        public async Task<FileStreamResult> GenerateInconsistencesFile(string? idCarga, string? employeeCode = null) {
             var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Hoja1");
 
@@ -3775,190 +3968,35 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
             var initialRow = 2;
             var currentRow = initialRow;
-            ARPLoadEntity? arpLoad = _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga));
-            List<ParametersArpInitialEntity> arpInitialParameters = _dataBaseService.ParametersArpInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
-            List<ParametersTseInitialEntity> tseInitialParameters = _dataBaseService.ParametersTseInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
-            List<ParametersSteInitialEntity> steInitialParameters = _dataBaseService.ParametersSteInitialEntity.AsNoTracking().Where(op => op.IdCarga == Guid.Parse(idCarga) && (op.EstatusProceso == "NO_APLICA_X_OVERLAPING" || op.EstatusProceso == "NO_APLICA_X_HORARIO")).ToList();
+            var inconsistences = await GetInconsistences(idCarga, employeeCode);
+            for (var i = 0; i < inconsistences.Count(); i++) {
+                var inconsistence = inconsistences[i];
 
-            if (arpLoad != null)
-            {
-                DateTime loadDateTime = arpLoad.FechaCreacion;
-                for (var i = 0; i < arpInitialParameters.Count(); i++)
-                {
-                    var parameter = arpInitialParameters[i];
-                    UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
-                    UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
+                worksheet.Cell(currentRow, 1).Value = inconsistence.codigoPais;
+                worksheet.Cell(currentRow, 2).Value = inconsistence.employeeCode;
+                worksheet.Cell(currentRow, 3).Value = inconsistence.employeeName;
+                worksheet.Cell(currentRow, 4).Value = inconsistence.employeeEmail;
+                worksheet.Cell(currentRow, 5).Value = inconsistence.managerName;
+                worksheet.Cell(currentRow, 6).Value = inconsistence.managerEmail;
+                worksheet.Cell(currentRow, 7).Value = inconsistence.creationDate;
+                worksheet.Cell(currentRow, 8).Value = inconsistence.startDateTime;
+                worksheet.Cell(currentRow, 9).Value = inconsistence.endDateTime;
+                worksheet.Cell(currentRow, 10).Value = inconsistence.report;
+                worksheet.Cell(currentRow, 11).Value = inconsistence.activity;
+                worksheet.Cell(currentRow, 12).Value = inconsistence.totalHours;
+                worksheet.Cell(currentRow, 13).Value = inconsistence.tool;
+                worksheet.Cell(currentRow, 14).Value = inconsistence.status;
+                var rt = worksheet.Cell(currentRow, 15).CreateRichText();
+                var rs = rt.AddText("Problema:");
+                rs.SetFontColor(XLColor.Blue);
+                rt.AddText(inconsistence.problems);
+                rt.AddNewLine();
+                rs = rt.AddText("Acciones:");
+                rs.SetFontColor(XLColor.Red);
+                rt.AddText(inconsistence.actions);
+                worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
 
-                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    string[] r1 = parameter.HoraInicio.Split(":");
-                    string[] r2 = parameter.HoraFin.Split(":");
-                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
-                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    r1 = parameter.HoraInicio.Split(":");
-                    r2 = parameter.HoraFin.Split(":");
-                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
-
-                    var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
-                    var employeeCode = userEntity != null ? userEntity.EmployeeCode : "";
-                    var employeeName = userEntity != null ? $"{userEntity.NameUser} {userEntity.surnameUser}" : "";
-                    var employeeEmail = userEntity != null ? userEntity.Email : "";
-                    var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
-                    var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
-                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
-                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
-                    string issue = "";
-                    switch (parameter.EstatusProceso)
-                    {
-                        case "NO_APLICA_X_HORARIO": { issue = "Error de horario"; break; }
-                        case "NO_APLICA_X_OVERLAPING": { issue = "Overlaping"; break; }
-                    }
-
-
-                    worksheet.Cell(currentRow, 1).Value = codigoPais;
-                    worksheet.Cell(currentRow, 2).Value = employeeCode;
-                    worksheet.Cell(currentRow, 3).Value = employeeName;
-                    worksheet.Cell(currentRow, 4).Value = employeeEmail;
-                    worksheet.Cell(currentRow, 5).Value = managerName;
-                    worksheet.Cell(currentRow, 6).Value = managerEmail;
-                    worksheet.Cell(currentRow, 7).Value = loadDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 8).Value = startDateTime.ToString("M/d/yyyy HH:mm tt");
-                    worksheet.Cell(currentRow, 9).Value = endDateTime.ToString("M/d/yyyy HH:mm tt");
-                    worksheet.Cell(currentRow, 10).Value = parameter.Reporte;
-                    worksheet.Cell(currentRow, 11).Value = "ACT WITH PROJECT";
-                    worksheet.Cell(currentRow, 12).Value = parameter.totalHoras;
-                    worksheet.Cell(currentRow, 13).Value = "ARP";
-                    worksheet.Cell(currentRow, 14).Value = issue;
-                    var rt = worksheet.Cell(currentRow, 15).CreateRichText();
-                    var rs = rt.AddText("Problema:");
-                    rs.SetFontColor(XLColor.Blue);
-                    rt.AddText(problemas);
-                    rt.AddNewLine();
-                    rs = rt.AddText("Acciones:");
-                    rs.SetFontColor(XLColor.Red);
-                    rt.AddText(acciones);
-                    worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
-
-                    currentRow++;
-
-                }
-
-                for (var i = 0; i < tseInitialParameters.Count(); i++)
-                {
-                    var parameter = tseInitialParameters[i];
-                    UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
-                    UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
-
-                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    string[] r1 = parameter.HoraInicio.Split(":");
-                    string[] r2 = parameter.HoraFin.Split(":");
-                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
-                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    r1 = parameter.HoraInicio.Split(":");
-                    r2 = parameter.HoraFin.Split(":");
-                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
-
-                    var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
-                    var employeeCode = userEntity != null ? userEntity.EmployeeCode : "";
-                    var employeeName = userEntity != null ? $"{userEntity.NameUser} {userEntity.surnameUser}" : "";
-                    var employeeEmail = userEntity != null ? userEntity.Email : "";
-                    var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
-                    var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
-                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
-                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
-                    string issue = "";
-                    switch (parameter.EstatusProceso)
-                    {
-                        case "NO_APLICA_X_HORARIO": { issue = "Error de horario"; break; }
-                        case "NO_APLICA_X_OVERLAPING": { issue = "Overlaping"; break; }
-                    }
-
-
-                    worksheet.Cell(currentRow, 1).Value = codigoPais;
-                    worksheet.Cell(currentRow, 2).Value = employeeCode;
-                    worksheet.Cell(currentRow, 3).Value = employeeName;
-                    worksheet.Cell(currentRow, 4).Value = employeeEmail;
-                    worksheet.Cell(currentRow, 5).Value = managerName;
-                    worksheet.Cell(currentRow, 6).Value = managerEmail;
-                    worksheet.Cell(currentRow, 7).Value = loadDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 8).Value = startDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 9).Value = endDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 10).Value = parameter.Reporte;
-                    worksheet.Cell(currentRow, 11).Value = "ACT WITH PROJECT";
-                    worksheet.Cell(currentRow, 12).Value = parameter.totalHoras;
-                    worksheet.Cell(currentRow, 13).Value = "TSE";
-                    worksheet.Cell(currentRow, 14).Value = issue;
-                    var rt = worksheet.Cell(currentRow, 15).CreateRichText();
-                    var rs = rt.AddText("Problema:");
-                    rs.SetFontColor(XLColor.Blue);
-                    rt.AddText(problemas);
-                    rt.AddNewLine();
-                    rs = rt.AddText("Acciones:");
-                    rs.SetFontColor(XLColor.Red);
-                    rt.AddText(acciones);
-                    worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
-
-                    currentRow++;
-
-                }
-
-                for (var i = 0; i < steInitialParameters.Count(); i++)
-                {
-                    var parameter = steInitialParameters[i];
-                    UserEntity? userEntity = _dataBaseService.UserEntity.AsNoTracking().Include("CountryEntity").Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
-                    UserManagerEntity? userManagerEntity = _dataBaseService.UserManagerEntity.AsNoTracking().Where(x => x.EmployeeCode == parameter.EmployeeCode).FirstOrDefault();
-
-                    var startDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    string[] r1 = parameter.HoraInicio.Split(":");
-                    string[] r2 = parameter.HoraFin.Split(":");
-                    startDateTime = startDateTime.AddHours(int.Parse(r1[0])).AddMinutes(int.Parse(r1[1]));
-                    var endDateTime = DateTime.ParseExact($"{parameter.FECHA_REP.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
-                    r1 = parameter.HoraInicio.Split(":");
-                    r2 = parameter.HoraFin.Split(":");
-                    endDateTime = endDateTime.AddHours(int.Parse(r2[0])).AddMinutes(int.Parse(r2[1]));
-
-                    var codigoPais = userEntity != null ? userEntity.CountryEntity.CodigoPais : "";
-                    var employeeCode = userEntity != null ? userEntity.EmployeeCode : "";
-                    var employeeName = userEntity != null ? $"{userEntity.NameUser} {userEntity.surnameUser}" : "";
-                    var employeeEmail = userEntity != null ? userEntity.Email : "";
-                    var managerName = userManagerEntity != null ? userManagerEntity.ManagerName : "";
-                    var managerEmail = userManagerEntity != null ? userManagerEntity.ManagerEmail : "";
-                    var problemas = parameter.Problemas != null ? parameter.Problemas : "";
-                    var acciones = parameter.Acciones != null ? parameter.Acciones : "";
-                    string issue = "";
-                    switch (parameter.EstatusProceso)
-                    {
-                        case "NO_APLICA_X_HORARIO": { issue = "Error de horario"; break; }
-                        case "NO_APLICA_X_OVERLAPING": { issue = "Overlaping"; break; }
-                    }
-
-
-                    worksheet.Cell(currentRow, 1).Value = codigoPais;
-                    worksheet.Cell(currentRow, 2).Value = employeeCode;
-                    worksheet.Cell(currentRow, 3).Value = employeeName;
-                    worksheet.Cell(currentRow, 4).Value = employeeEmail;
-                    worksheet.Cell(currentRow, 5).Value = managerName;
-                    worksheet.Cell(currentRow, 6).Value = managerEmail;
-                    worksheet.Cell(currentRow, 7).Value = loadDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 8).Value = startDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 9).Value = endDateTime.ToString("M/d/yyyy");
-                    worksheet.Cell(currentRow, 10).Value = parameter.Reporte;
-                    worksheet.Cell(currentRow, 11).Value = "ACT WITH PROJECT";
-                    worksheet.Cell(currentRow, 12).Value = parameter.totalHoras;
-                    worksheet.Cell(currentRow, 13).Value = "TSE";
-                    worksheet.Cell(currentRow, 14).Value = issue;
-                    var rt = worksheet.Cell(currentRow, 15).CreateRichText();
-                    var rs = rt.AddText("Problema:");
-                    rs.SetFontColor(XLColor.Blue);
-                    rt.AddText(problemas);
-                    rt.AddNewLine();
-                    rs = rt.AddText("Acciones:");
-                    rs.SetFontColor(XLColor.Red);
-                    rt.AddText(acciones);
-                    worksheet.Cell(currentRow, 15).Style.Alignment.WrapText = true;
-
-                    currentRow++;
-
-                }
+                currentRow++;
             }
 
             var table = worksheet.Range($"A1:O{(currentRow - 1)}").CreateTable("Table");
@@ -3967,7 +4005,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             var stream = new MemoryStream();
             workbook.SaveAs(stream);
             stream.Position = 0;
-            return new FileStreamResult(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = "Plantilla de Notificaciones.xlsx" };
+            return new FileStreamResult(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") { FileDownloadName = "Plantilla de Inconsistencias.xlsx" };
 
         }
 

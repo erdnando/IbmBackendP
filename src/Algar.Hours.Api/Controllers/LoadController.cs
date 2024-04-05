@@ -156,14 +156,21 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
 
-        [HttpGet("NotificationsFile")]
+        [HttpGet("Inconsistencies")]
         [Authorize(Roles = "standard")]
-        public async Task<FileStreamResult> NotificationsFile([FromQuery] string idCarga, [FromServices] ILoadHoursReport loadHoursReport)
+        public async Task<IActionResult> Inconsistencies([FromQuery] string? idCarga, [FromQuery] string? employeeCode, [FromServices] ILoadHoursReport loadHoursReport)
         {
-            var data = await loadHoursReport.GenerateNotificationsFile(idCarga);
-            return data;
+            var data = await loadHoursReport.GetInconsistences(idCarga, employeeCode);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
 
+        [HttpGet("InconsistencesFile")]
+        [Authorize(Roles = "standard")]
+        public async Task<FileStreamResult> InconsistencesFile([FromQuery] string? idCarga, [FromQuery] string? employeeCode, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.GenerateInconsistencesFile(idCarga, employeeCode);
+            return data;
+        }
 
     }
 }
