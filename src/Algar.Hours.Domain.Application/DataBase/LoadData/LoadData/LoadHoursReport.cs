@@ -3263,8 +3263,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         //get employee ref from this employee
                         var UserRow = UserLst.FirstOrDefault(op => op.EmployeeCode == item.EmployeeCode);
                         //get user exceptions
-                        var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.UtcDateTime.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
-                        var exceptedHoursByEmployee = exceptionUser == null ? 0 : exceptionUser.horas;
+                        //var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == UserRow.IdUser && x.StartDate.UtcDateTime.ToString("MM/dd/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy"));
+                        //var exceptedHoursByEmployee = exceptionUser == null ? 0 : exceptionUser.horas;
+
+
+                        var exceptionUserOr = listExeptios.Where(x => x.UserId == UserRow.IdUser && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == DateTimeOffset.ParseExact(item.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("MM/dd/yyyy") && x.ReportType.Trim().ToUpper().Equals(("OVERTIME").Trim().ToUpper())).ToList();
+                        var exceptionUser = exceptionUserOr.Sum(op => op.horas);
+                        var exceptedHoursByEmployee = exceptionUser == 0 ? 0 : exceptionUser;
+                        
                         //get employee hours from PortalDB
                         var HorasDetectedInPortalDB = listHorusReport.Where(co => co.StrStartDate == item.FECHA_REP && co.UserEntityId == UserRow.IdUser && (co.EstatusFinal!= "RECHAZADO" && co.EstatusFinal!="DESCARTADO")).ToList();
                         //get acummulated hours by this employee

@@ -67,8 +67,13 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     var HorasLimiteAnuales = limitesCountry.TargetHourYear;
 
                     var listExeptios = _dataBaseService.UsersExceptions.ToList();
-                    var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == currentHReport.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == dateTime.ToString("dd/MM/yyyy"));
-                    var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+                    //var exceptionUser = listExeptios.FirstOrDefault(x => x.UserId == currentHReport.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == dateTime.ToString("dd/MM/yyyy"));
+                    //var horasExceptuada = exceptionUser == null ? 0 : exceptionUser.horas;
+
+
+                    var exceptionUserOr = listExeptios.Where(x => x.UserId == currentHReport.UserEntityId && x.StartDate.UtcDateTime.ToString("dd/MM/yyyy") == dateTime.ToString("dd/MM/yyyy") && x.ReportType.Trim().ToUpper().Equals(("OVERTIME").Trim().ToUpper())).ToList();
+                    var exceptionUser = exceptionUserOr.Sum(op => op.horas);
+                    var horasExceptuada = exceptionUser == 0 ? 0 : exceptionUser;
 
                     int[] status = [(byte)AprobacionPortalDB.AprobadoN0, (byte)AprobacionPortalDB.AprobadoN1, (byte)AprobacionPortalDB.AprobadoN2];
                     var HorasPortalDBTDia = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h WHERE h.\"UserEntityId\" = '{currentHReport.UserEntityId}' AND h.\"Estado\" IN ({string.Join(",", status)}) AND h.\"IdHorusReport\" != '{currentHReport.IdHorusReport}' AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') <= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToList().Select(x => double.Parse(x.CountHours)).Sum();

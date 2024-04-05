@@ -15,6 +15,7 @@ namespace Algar.Hours.Persistence.Configuration
             entityBuilder.Property( x => x.horas).IsRequired();
             entityBuilder.Property(x => x.UserId).IsRequired();
             entityBuilder.Property(x=> x.AssignedUserId).IsRequired();
+            entityBuilder.Property(x=> x.ReportType).IsRequired();
             entityBuilder.Property(x => x.Description).IsRequired();
 
 
