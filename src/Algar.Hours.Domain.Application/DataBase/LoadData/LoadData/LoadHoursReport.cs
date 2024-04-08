@@ -1761,7 +1761,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var zonfString = zonf.ToString();
                     var format = $"{((zonf < 0) ? @"\-" : "")}h";
                     var timeSpanStyle = zonf < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
-                    var offset = TimeSpan.ParseExact(zonfString, format, CultureInfo.InvariantCulture, timeSpanStyle);
+                    var offset = zonfString == "0" ? TimeSpan.Parse("00:00:00") : TimeSpan.ParseExact(zonfString, format, CultureInfo.InvariantCulture, timeSpanStyle);
                     dt = dt.ToOffset(offset);
                     convert.StartHours = dt.ToString("HH:mm");
                     convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
@@ -1815,7 +1815,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     var zonfString = zonf.ToString();
                     var format = $"{((zonf < 0) ? @"\-" : "")}h";
                     var timeSpanStyle = zonf < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
-                    var offset = TimeSpan.ParseExact(zonfString, format, CultureInfo.InvariantCulture, timeSpanStyle);
+                    var offset = zonfString == "0"? TimeSpan.Parse("00:00:00") : TimeSpan.ParseExact(zonfString, format, CultureInfo.InvariantCulture, timeSpanStyle);
                     dt = dt.ToOffset(offset);
                     convert.StartHours = dt.ToString("HH:mm");
                     convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
@@ -1903,9 +1903,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 {
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.SessionEmployeeSerialNumber.Substring(registrox.SessionEmployeeSerialNumber.Length - 3));
                     var UserDB = _dataBaseService.UserZonaHoraria.FirstOrDefault(op => op.EmployeeCode == registrox.SessionEmployeeSerialNumber);
+                    var zonaHorariaU = UserDB != null ? UserDB.ZonaHorariaU : "(GMT+00:00) hora del meridiano de Greenwich (GMT)";
 
                     //var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
-                    var ste = fHomologaSTE(registrox, model.PaisSel, UserDB.ZonaHorariaU, paisRegistro!);
+                    var ste = fHomologaSTE(registrox, model.PaisSel, zonaHorariaU, paisRegistro!);
 
                     var excelStartDateTime = DateTime.ParseExact($"{ste.StartDateTime.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
                     var excelEndDateTime = DateTime.ParseExact($"{ste.EndDateTime.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
