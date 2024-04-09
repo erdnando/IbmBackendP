@@ -65,6 +65,8 @@ namespace Algar.Hours.Application.DataBase
         DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
         DbSet<UserSessionEntity> UserSessionEntity { get; set; }
 
+        DbContext Context();
+
         Task<bool> SaveAsync();
 
     }

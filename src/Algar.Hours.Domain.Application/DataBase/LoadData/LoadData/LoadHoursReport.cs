@@ -571,34 +571,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 }
 
-
-                int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
-                List<List<ParametersArpInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE == 0 ? 1 : PAGE_SIZE);
-                Int64 countElements = 0;
-                for (int i = 0; i < partitions.Count(); i++)
-                {
-                    var endpoint = i % 2 == 0 ? "1" : "2";
-                    try
-                    {
-                        countElements += partitions[i].Count();
-                        await updateCargaStatus(model.IdCarga, "Procesando " + countElements + " de " + listParametersInitialEntity.Count + " registros ARP...");
-                    }
-                    catch (Exception exx)
-                    {
-
-                    }
-                    try
-                    {
-                        LoadGeneric(partitions[i], endpoint);
-                    }
-                    catch (Exception ex)
-                    {
-                        var error = ex.Message;
-                    }
-
-                }
-
+                await updateCargaStatus(model.IdCarga, "Procesando " + listParametersInitialEntity.Count() + " de " + listParametersInitialEntity.Count + " registros ARP...");
+                _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
                 await updateCargaStatus(model.IdCarga, "ARP terminado...");
+
                 return model.IdCarga.ToString();
 
             }
@@ -1268,40 +1244,10 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     await updateCargaStatus(model.IdCarga, "Error carga en TSE..." + ex.Message);
                     string error = ex.Message;
                 }
-               
 
-                int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
-                
-                List<List<ParametersTseInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE==0?1:PAGE_SIZE);
-                Int64 countElements = 0;
-
-                for (int i = 0; i < partitions.Count(); i++)
-                {
-                    var endpoint = i % 2 == 0 ? "1" : "2";
-
-                    try
-                    {
-                        countElements += partitions[i].Count();
-                        await updateCargaStatus(model.IdCarga, "Procesando " + countElements + " de "+ listParametersInitialEntity.Count + " registros TSE...");
-                    }
-                    catch (Exception exx)
-                    {
-
-                    }
-
-                    try
-                    {
-                        LoadGenericTse(partitions[i], endpoint);
-                    }
-                    catch (Exception ex)
-                    {
-                        var error = ex.Message;
-                    }
-
-                }
-
+                await updateCargaStatus(model.IdCarga, "Procesando " + listParametersInitialEntity.Count() + " de " + listParametersInitialEntity.Count + " registros TSE...");
+                _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
                 await updateCargaStatus(model.IdCarga, "TSE terminado...");
-
 
                 return model.IdCarga.ToString();
 
@@ -1898,11 +1844,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 datosSTEExcel = datosSTEExcel.DistinctBy(m => new { m.SessionEmployeeSerialNumber, m.StartDateTime, m.EndDateTime }).ToList();
                 DateTime currentDateTime = DateTime.Now;
                 await updateCargaStatus(model.IdCarga, "Procesando STE...");
-
+                List<string> employeeCodes = datosSTEExcel.Select(x => x.SessionEmployeeSerialNumber).ToList();
+                List<UserZonaHoraria> userZonasHorarias = _dataBaseService.UserZonaHoraria.Where(x => employeeCodes.Contains(x.EmployeeCode)).ToList();
                 foreach (var registrox in datosSTEExcel)
                 {
                     var paisRegistro = listaCountries.FirstOrDefault(e => e.CodigoPais == registrox.SessionEmployeeSerialNumber.Substring(registrox.SessionEmployeeSerialNumber.Length - 3));
-                    var UserDB = _dataBaseService.UserZonaHoraria.FirstOrDefault(op => op.EmployeeCode == registrox.SessionEmployeeSerialNumber);
+                    var UserDB = userZonasHorarias.FirstOrDefault(op => op.EmployeeCode == registrox.SessionEmployeeSerialNumber);
                     var zonaHorariaU = UserDB != null ? UserDB.ZonaHorariaU : "(GMT+00:00) hora del meridiano de Greenwich (GMT)";
 
                     //var ste = fHomologaSTE(registrox, horariosGMT, paisRegistro!);
@@ -2174,44 +2121,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 }
 
-
-
-                int PAGE_SIZE = listParametersInitialEntity.Count() / 20;
-                List<List<ParametersSteInitialEntity>> partitions = listParametersInitialEntity.partition(PAGE_SIZE == 0 ? 1 : PAGE_SIZE);
-                Int64 countElements = 0;
-
-                for (int i = 0; i < partitions.Count(); i++)
-                {
-                    var endpoint = i % 2 == 0 ? "1" : "2";
-                    try
-                    {
-
-                        countElements += partitions[i].Count();
-                        await updateCargaStatus(model.IdCarga, "Procesando " + countElements + " de " + listParametersInitialEntity.Count + " registros STE...");
-                    }
-                    catch (Exception exx)
-                    {
-
-                    }
-                    try
-                    {
-                        LoadGenericSte(partitions[i], endpoint);
-                    }
-                    catch (Exception ex)
-                    {
-                        var error = ex.Message;
-                    }
-
-                }
-
-                await updateCargaStatus(model.IdCarga, "STE terminando...");
-
-
-
-
-
-
-
+                await updateCargaStatus(model.IdCarga, "Procesando " + listParametersInitialEntity.Count() + " de " + listParametersInitialEntity.Count + " registros STE...");
+                _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
+                await updateCargaStatus(model.IdCarga, "STE terminado...");
 
 
 

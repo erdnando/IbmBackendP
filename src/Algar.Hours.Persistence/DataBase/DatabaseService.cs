@@ -77,6 +77,11 @@ namespace Algar.Hours.Persistence.DataBase
         public DbSet<PortalDBAproveHistoryEntity> PortalDBAproveHistoryEntity { get; set; }
         public DbSet<UserSessionEntity> UserSessionEntity { get; set; }
 
+        public DbContext Context()
+        {
+            return this;
+        }
+
         public void BulkInsertParametersArpInitialEntity(List<ParametersArpInitialEntity> records)
         {
             this.BulkInsert(records);
