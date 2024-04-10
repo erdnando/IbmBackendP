@@ -1012,7 +1012,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersTse.EstatusOrigen = registrox.Status.Trim().ToUpper();
                         parametersTse.Actividad = registrox.WorkOrder;
 
-                        if (politicaOvertime.IndexOf(tse.Status.ToUpper()) >= 0)
+                        if (politicaOvertime.IndexOf(tse.Status.Trim().ToUpper()) >= 0)
                         {
                             //---------------NO_APLICA_X_OVERTIME----------
                             parametersTse.EstatusProceso = "NO_APLICA_X_OVERTIME";
@@ -1031,7 +1031,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         if (tse.StartTime == null || tse.EndTime == null)
                         {
-                            parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                            parametersTse.EstatusProceso = "NO_APLICA_X_FALTA_DATOS";
                             listParametersInitialEntity.Add(parametersTse);
                             continue;
                         }
@@ -1936,16 +1936,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         continue;
                     }
 
-                    if (UserDB == null)
-                    {
-                        parametersSte.EstatusProceso = "NO_APLICA_X_USUARIO_SIN_ZONA_HORARIA";
-                        listParametersInitialEntity.Add(parametersSte);
-                        continue;
-                    }
-
                     if (ste.EndDateTime == null || ste.StartDateTime == null)
                     {
-                        parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
+                        parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS";
                         listParametersInitialEntity.Add(parametersSte);
                         continue;
 
