@@ -346,6 +346,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersARP.EstatusOrigen = arpx.ESTADO.Trim().ToUpper();
                     parametersARP.Actividad = arpx.ACTIVIDAD;
 
+                    if (politicaOvertime.IndexOf(arpx.ACTIVIDAD.Trim().ToUpper()) >= 0)
+                    {
+                        //---------------NO_APLICA_X_OVERTIME----------
+                        parametersARP.EstatusProceso = "NO_APLICA_X_OVERTIME";
+                        listParametersInitialEntity.Add(parametersARP);
+                        continue;
+                    }
+
                     if (paisRegistro == null)
                     {
                         parametersARP.EstatusProceso = "NO_APLICA_X_PAIS";
@@ -386,7 +394,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
                        
                     }
-
 
                     int Semana = cul.Calendar.GetWeekOfYear(semanahorario.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
 
@@ -460,14 +467,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
                         
                     }
-
-                    if (politicaOvertime.IndexOf(arp.ACTIVIDAD.Trim().ToUpper()) >= 0) {
-                        //---------------NO_APLICA_X_OVERTIME----------
-                        parametersARP.EstatusProceso = "NO_APLICA_X_OVERTIME";
-                        listParametersInitialEntity.Add(parametersARP);
-                        continue;
-                    }
-
 
                     if (!hasHorarioSemana && !hasHorarioDia) {
                         //NO hay horario
