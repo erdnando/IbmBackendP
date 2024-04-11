@@ -40,7 +40,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                 {
                     var schedules = _databaseService.workinghoursEntity.Where(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano).ToList();
                     _databaseService.workinghoursEntity.RemoveRange(schedules);
-                    await _databaseService.SaveAsync();
+                    await _databaseService.SaveAsync(); 
                 }
 
                     foreach (var entity in entityList)
@@ -49,7 +49,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                     TimeSpan endTime = TimeSpan.Parse(entity.HoraFin);
                     if (startTime >= endTime) continue;
 
-                    entity.FechaWorking = entity.FechaWorking;
+                    entity.FechaWorking = entity.FechaWorking; 
                     var weekDayNumber = Convert.ToUInt32(entity.FechaWorking.DayOfWeek.ToString("d"));
                     entity.Day = this.weekDays[weekDayNumber];
                     var existingEntity = await  _databaseService.workinghoursEntity
