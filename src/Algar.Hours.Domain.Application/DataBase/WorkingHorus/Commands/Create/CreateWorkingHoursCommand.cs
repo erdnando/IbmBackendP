@@ -35,12 +35,16 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
             try
             {
                 var entityList = _mapper.Map<List<workinghoursEntity>>(model);
-
+                List<workinghoursEntity> schedules = new();
                 foreach (var entity in entityList)
                 {
-                    var schedules = _databaseService.workinghoursEntity.Where(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano).ToList();
+                    schedules.AddRange(_databaseService.workinghoursEntity.Where(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano).ToList());
+                }
+
+                if (schedules.Count() > 0) 
+                {
                     _databaseService.workinghoursEntity.RemoveRange(schedules);
-                    await _databaseService.SaveAsync(); 
+                    await _databaseService.SaveAsync();
                 }
 
                     foreach (var entity in entityList)
