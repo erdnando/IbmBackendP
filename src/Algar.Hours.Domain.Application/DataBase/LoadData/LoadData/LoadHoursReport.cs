@@ -3160,6 +3160,11 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             SummaryPortalDB summary = new SummaryPortalDB();
             try
             {
+                // Si el usuario no existe NO_APLICA_X_USUARIO_INEXISTENTE
+                _dataBaseService.ParametersArpInitialEntity.FromSqlRaw($"select a.* from \"ParametersArpInitialEntity\" a left join \"UserEntity\" b on b.\"EmployeeCode\" = a.\"EmployeeCode\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and b.\"IdUser\" is null").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_USUARIO_INEXISTENTE");
+                _dataBaseService.ParametersTseInitialEntity.FromSqlRaw($"select a.* from \"ParametersTseInitialEntity\" a left join \"UserEntity\" b on b.\"EmployeeCode\" = a.\"EmployeeCode\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and b.\"IdUser\" is null").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_USUARIO_INEXISTENTE");
+                _dataBaseService.ParametersSteInitialEntity.FromSqlRaw($"select a.* from \"ParametersSteInitialEntity\" a left join \"UserEntity\" b on b.\"EmployeeCode\" = a.\"EmployeeCode\" where a.\"IdCarga\" = '{idCarga}' and a.\"EstatusProceso\" = 'EN_OVERTIME' and b.\"IdUser\" is null").ToList().ForEach(x => x.EstatusProceso = "NO_APLICA_X_USUARIO_INEXISTENTE");
+                await _dataBaseService.SaveAsync();
 
                 var rowARPParameter = _dataBaseService.ParametersArpInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
                 var rowTSEParameter = _dataBaseService.ParametersTseInitialEntity.Where(op => op.IdCarga == Guid.Parse(idCarga) && op.EstatusProceso == "EN_OVERTIME").ToList();
