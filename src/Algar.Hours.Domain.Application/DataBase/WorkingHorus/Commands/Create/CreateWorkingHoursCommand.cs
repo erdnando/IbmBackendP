@@ -38,6 +38,13 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
 
                 foreach (var entity in entityList)
                 {
+                    var schedules = _databaseService.workinghoursEntity.Where(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano).ToList();
+                    _databaseService.workinghoursEntity.RemoveRange(schedules);
+                    await _databaseService.SaveAsync();
+                }
+
+                    foreach (var entity in entityList)
+                {
                     TimeSpan startTime = TimeSpan.Parse(entity.HoraInicio);
                     TimeSpan endTime = TimeSpan.Parse(entity.HoraFin);
                     if (startTime >= endTime) continue;
