@@ -461,7 +461,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         
                     }
 
-                    if (politicaOvertime.IndexOf(arp.ACTIVIDAD.ToUpper()) >= 0) {
+                    if (politicaOvertime.IndexOf(arp.ACTIVIDAD.Trim().ToUpper()) >= 0) {
                         //---------------NO_APLICA_X_OVERTIME----------
                         parametersARP.EstatusProceso = "NO_APLICA_X_OVERTIME";
                         listParametersInitialEntity.Add(parametersARP);
