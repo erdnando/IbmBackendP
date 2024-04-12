@@ -38,35 +38,30 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
         public async Task<bool> LoadExcel(JsonArray model)
         {
             List<CreateWorkingHoursModel> lista = new List<CreateWorkingHoursModel>();
-            
-            var idPais = default(string);
-            var idUser = default(string);
-            
+
             var count = 0;
 
+            var datosInvalidos = false;
             foreach (var entity in model)
             {
 
                 count += 1;
 
                 var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<LoadWorkingHoursModel>(entity.ToJsonString());
-                if (convert.dia == "") continue;
-
-                if(count == 1)
+                if (convert.dia == "" || convert.codigo_Empleado == "" || convert.pais == "" || convert.HoraInicio == "" || convert.HoraFin == "") 
                 {
-                    idPais = convert.pais;
-                    idUser = convert.codigo_Empleado;
+                    datosInvalidos = true;
+                    break;
                 }
-
-                convert.pais = idPais;
-                convert.codigo_Empleado = idUser;
-
                 var modeloHorario = await CreateModeloHorario2(convert);
                 lista.Add(modeloHorario);
             }
 
+            if (datosInvalidos) {
+                return false;
+            }
+
             await _createHorario.Execute(lista);
-            
             return true;
         }
 
