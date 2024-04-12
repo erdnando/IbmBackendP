@@ -402,7 +402,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     int indexHorario = -1;
                     for (int i=0;i<horario.Count;i++)
                     {
-                        if (horario[i].FechaWorking.ToString("dd/MM/yyyy 00:00:00") == arp.FECHA_REP)
+                        if (horario[i].FechaWorking.UtcDateTime.ToString("dd/MM/yyyy 00:00:00") == arp.FECHA_REP)
                         {
                             indexHorario = i;
                         }
@@ -505,7 +505,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         //OVERTIME 1
                         parametersARP.HoraInicio = excelStartTime.ToString(@"hh\:mm");
-                        parametersARP.HoraFin = scheduleStartTime.ToString(@"hh\:mm");
+                        parametersARP.HoraFin = (excelEndTime < scheduleStartTime ? excelEndTime : scheduleStartTime).ToString(@"hh\:mm");
                         string[] r1 = parametersARP.HoraInicio.Split(":");
                         string[] r2 = parametersARP.HoraFin.Split(":");
                         TimeSpan overtimeTime = (new TimeSpan(int.Parse(r2[0]), int.Parse(r2[1]), 0)) - (new TimeSpan(int.Parse(r1[0]), int.Parse(r1[1]), 0));
@@ -1110,7 +1110,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             int indexHorario = -1;
                             for (int j = 0; j < horario.Count; j++)
                             {
-                                if (horario[j].FechaWorking.ToString("dd/MM/yyyy 00:00:00") == startDateTime.ToString("dd/MM/yyyy 00:00:00"))
+                                if (horario[j].FechaWorking.UtcDateTime.ToString("dd/MM/yyyy 00:00:00") == startDateTime.ToString("dd/MM/yyyy 00:00:00"))
                                 {
                                     indexHorario = j;
                                 }
@@ -2027,7 +2027,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                         for (int j = 0; j < horario.Count; j++)
                         {
-                            if (horario[j].FechaWorking.ToString("dd/MM/yyyy 00:00:00") == startDateTime.ToString("dd/MM/yyyy 00:00:00"))
+                            if (horario[j].FechaWorking.UtcDateTime.ToString("dd/MM/yyyy 00:00:00") == startDateTime.ToString("dd/MM/yyyy 00:00:00"))
                             {
                                 indexHorario = j;
                             }
