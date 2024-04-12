@@ -48,7 +48,15 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Load
                 count += 1;
 
                 var convert = Newtonsoft.Json.JsonConvert.DeserializeObject<LoadWorkingHoursModel>(entity.ToJsonString());
-                if (convert.dia == "" || convert.codigo_Empleado == "" || convert.pais == "" || convert.HoraInicio == "" || convert.HoraFin == "") 
+                var diaVacio = convert.dia == "" || convert.dia == null;
+                var codigoEmpleadoVacio = convert.codigo_Empleado == "" || convert.codigo_Empleado == null;
+                var paisVacio = convert.pais == "" || convert.pais == null;
+                var horaInicioVacio = convert.HoraInicio == "" || convert.HoraInicio == null;
+                var horaFinVacio = convert.HoraFin == "" || convert.HoraFin == null;
+                var horarioVacio = diaVacio && codigoEmpleadoVacio && paisVacio && horaInicioVacio && horaFinVacio;
+                if (horarioVacio) continue;
+
+                if (diaVacio || codigoEmpleadoVacio || paisVacio || horaInicioVacio || horaFinVacio) 
                 {
                     datosInvalidos = true;
                     break;
