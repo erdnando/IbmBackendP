@@ -205,11 +205,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         }
 
 
-        public async Task<string> GeneraCarga()
+        public async Task<ResponseData<string>> GeneraCarga()
         {
             try
             {
-                
+                var hasTimeZones = _dataBaseService.UserZonaHoraria.Count() > 0;
+                if (!hasTimeZones) {
+                    return new ResponseData<string> { 
+                        Data = null,
+                        Error = true,
+                        Message = "No cuenta con zonas horarias cargadas"
+                    };
+                }
+
                 ARPLoadEntity aRPLoadEntity = new ARPLoadEntity
                 {
                     Estado = 1,//1 corriendo 2 terminado  3 error 
@@ -246,10 +254,19 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                  _dataBaseService.ARPLoadEntity.AddAsync(aRPLoadEntity);
                 await _dataBaseService.SaveAsync();
-                return aRPLoadEntity.IdArpLoad.ToString();
+
+                return new ResponseData<string> {
+                    Data = aRPLoadEntity.IdArpLoad.ToString(),
+                    Error = false,
+                    Message = ""
+                };
             }catch(Exception ex)
             {
-                return "-1";
+                return new ResponseData<string> {
+                    Data = "-1",
+                    Error = true,
+                    Message = ""
+                };
             }
         }
 

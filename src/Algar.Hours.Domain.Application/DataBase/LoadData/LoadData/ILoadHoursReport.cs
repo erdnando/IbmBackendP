@@ -11,7 +11,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 {
     public interface ILoadHoursReport
     {
-        Task<string> GeneraCarga();
+        Task<ResponseData<string>> GeneraCarga();
         Task<string> LoadARP(LoadJsonPais model);
         Task<string> LoadUserGMT(LoadJsonUserGMT model);
         Task<string> LoadTSE(LoadJsonPais model);
