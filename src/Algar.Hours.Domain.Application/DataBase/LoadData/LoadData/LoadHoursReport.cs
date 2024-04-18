@@ -3778,7 +3778,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             worksheet.Cell("O1").Value = "COMENTARIOS O DETALLE DEL ERROR";*/
             List<InconsistenceModel> inconsistences = new();
 
-            ARPLoadEntity? arpLoad = idCarga != null? _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga)) : _dataBaseService.ARPLoadEntity.OrderByDescending(x => x.FechaCreacion).FirstOrDefault();
+            ARPLoadEntity? arpLoad = idCarga != null? _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga)) : _dataBaseService.ARPLoadEntity.Where(x => x.Estado == 2).OrderByDescending(x => x.FechaCreacion).FirstOrDefault(); // Estado == 2 quiere decir estatus terminada
             
             if (arpLoad != null)
             {
