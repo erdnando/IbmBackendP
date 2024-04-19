@@ -1767,10 +1767,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     int ZonBase = int.Parse(GMTSelect);
                     var zzz = $"{(Math.Sign(ZonBase) < 0 ? "-" : "+")}{Math.Abs(ZonBase).ToString().PadLeft(2, '0')}:00";
                     var dt = DateTimeOffset.ParseExact($"{convert.StartTime} {zzz}", "d/MM/yyyy hh:mm tt zzz", CultureInfo.InvariantCulture);
-                    var zonfString = zonf.ToString();
-                    var format = $"{((zonf < 0) ? @"\-" : "")}h";
-                    var timeSpanStyle = zonf < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
-                    var offset = zonfString == "0" ? TimeSpan.Parse("00:00:00") : TimeSpan.ParseExact(zonfString, format, CultureInfo.InvariantCulture, timeSpanStyle);
+                    var offset = new TimeSpan(zonf, 0 , 0);
                     dt = dt.ToOffset(offset);
                     convert.StartHours = dt.ToString("HH:mm");
                     convert.StartTime = dt.ToString("dd/MM/yyyy 00:00:00");
@@ -1821,10 +1818,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     int ZonBase = int.Parse(GMTSelect);
                     var zzz = $"{(Math.Sign(ZonBase) < 0 ? "-" : "+")}{Math.Abs(ZonBase).ToString().PadLeft(2, '0')}:00";
                     var dt = DateTimeOffset.ParseExact($"{convert.StartDateTime} {zzz}", "d/MM/yyyy hh:mm tt zzz", CultureInfo.InvariantCulture);
-                    var zonfString = zonf.ToString();
-                    var format = $"{((zonf < 0) ? @"\-" : "")}h";
-                    var timeSpanStyle = zonf < 0 ? TimeSpanStyles.AssumeNegative : TimeSpanStyles.None;
-                    var offset = zonfString == "0"? TimeSpan.Parse("00:00:00") : TimeSpan.ParseExact(zonfString, format, CultureInfo.InvariantCulture, timeSpanStyle);
+                    var offset = new TimeSpan(zonf, 0, 0);
                     dt = dt.ToOffset(offset);
                     convert.StartHours = dt.ToString("HH:mm");
                     convert.StartDateTime = dt.ToString("dd/MM/yyyy 00:00:00");
@@ -1943,6 +1937,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSte.EstatusOrigen = "EXTRACTED";
                     parametersSte.Actividad = registrox.NumeroCaso;
 
+                    if (UserDB == null)
+                    {
+                        parametersSte.EstatusProceso = "NO_APLICA_X_USUARIO_SIN_ZONA_HORARIA";
+                        listParametersInitialEntity.Add(parametersSte);
+                        continue;
+                    }
+
                     //valida pais
                     if (paisRegistro == null)
                     {
@@ -1959,7 +1960,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         continue;
 
                     }
-
 
                     var excelStartDateTime = DateTime.ParseExact($"{ste.StartDateTime.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
                     var excelEndDateTime = DateTime.ParseExact($"{ste.EndDateTime.Substring(0, 10)} 00:00", "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
@@ -2017,14 +2017,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             continue;
                         }
 
-                        if (UserDB == null)
-                        {
-                            parametersSte.EstatusProceso = "NO_APLICA_X_USUARIO_SIN_ZONA_HORARIA";
-                            listParametersInitialEntity.Add(parametersSte);
-                            continue;
-                        }
-
-
+                        
                         if (ste.EndDateTime == null || ste.StartDateTime == null)
                         {
                             parametersSte.EstatusProceso = "NO_APLICA_X_FALTA_DATOS_INICIO_FIN";
