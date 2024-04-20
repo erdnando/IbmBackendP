@@ -25,6 +25,15 @@ namespace Algar.Hours.Api.Controllers
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
         }
 
+        [HttpGet("CancelarCarga")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CancelarCarga([FromQuery] string idCarga, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var dataFinal = await loadHoursReport.CancelarCarga(idCarga);
+
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
 
         [HttpGet("CargaAvance")]
         //[Authorize(Roles = "standard")]

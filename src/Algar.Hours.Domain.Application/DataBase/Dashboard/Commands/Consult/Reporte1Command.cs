@@ -47,20 +47,20 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             //=============================grafico de barras por mes========================================================================
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal != "RECHAZADO")
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0 && (hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 || hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2))
                                         select new
                                         {
-                                            Mes = hor.DateApprovalSystem.Month,
+                                            Mes = DateTime.ParseExact(hor.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).Month,
                                             totalHoras = hor.CountHours
                                         }
                              ).ToListAsync();
 
             var OverTimeRepGraf = await (from us in _dataBaseService.UserEntity
                                          join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.EstatusFinal != "RECHAZADO")
+                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && (hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 || hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2))
                                          select new
                                          {
-                                             Mes = hor.DateApprovalSystem.Month,
+                                             Mes = DateTime.ParseExact(hor.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).Month,
                                              totalHoras = hor.CountHours
                                          }
                               ).Distinct().ToListAsync();
@@ -70,10 +70,10 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
             var StandByRep = await (from us in _dataBaseService.UserEntity
                                     join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0 && hor.EstatusFinal == "APROBADO")
+                                    where (us.EmployeeCode == usuario && hor.Acitivity == 0 && (hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 || hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2))
                                     select new
                                     {
-                                        fechaRep = hor.DateApprovalSystem,
+                                        fechaRep = DateTime.ParseExact(hor.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
                                         totalHoras = hor.CountHours
                                     }
                               ).ToListAsync();
@@ -81,10 +81,10 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
          
             var OverTimeRep = await (from us in _dataBaseService.UserEntity
                                      join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.EstatusFinal == "APROBADO")
+                                     where (us.EmployeeCode == usuario && hor.Acitivity == 1 && (hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 || hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2))
                                      select new
                                      {
-                                         fechaRep = hor.DateApprovalSystem,
+                                         fechaRep = DateTime.ParseExact(hor.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
                                          totalHoras = hor.CountHours
                                      }
             ).ToListAsync();
@@ -95,34 +95,37 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
             var arp = await (from us in _dataBaseService.UserEntity
-                            join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                            where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.Origen=="ARP" && hor.Semana== semana.ToString() && hor.EstatusFinal != "RECHAZADO")
+                            join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
+                            join load in _dataBaseService.ARPLoadEntity on hor.IdCarga equals load.IdArpLoad
+                            where (us.EmployeeCode == usuario && load.Estado == 2)
                             select new
                             {
-                                fechaRep = hor.StrStartDate,
-                                totalMinutos = (double.Parse(hor.CountHours)*60).ToString()
+                                fechaRep = hor.FECHA_REP,
+                                totalMinutos = (double.Parse(hor.totalHoras)*60).ToString()
                             }
-                            ).ToListAsync();
+                            ).ToListAsync(); 
 
 
             var tse = await (from us in _dataBaseService.UserEntity
-                             join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                             where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.Origen == "TSE" && hor.Semana == semana.ToString() && hor.EstatusFinal != "RECHAZADO")
+                             join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
+                             join load in _dataBaseService.ARPLoadEntity on hor.IdCarga equals load.IdArpLoad
+                             where (us.EmployeeCode == usuario && load.Estado == 2)
                              select new
                              {
-                                 fechaRep = hor.StrStartDate,
-                                 totalMinutos = (double.Parse(hor.CountHours) * 60).ToString()
+                                 fechaRep = hor.FECHA_REP,
+                                 totalMinutos = (double.Parse(hor.totalHoras) * 60).ToString()
                              }
                              ).ToListAsync();
 
 
             var ste = await (from us in _dataBaseService.UserEntity
-                             join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                             where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.Origen == "STE" && hor.Semana == semana.ToString() && hor.EstatusFinal != "RECHAZADO")
+                             join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
+                             join load in _dataBaseService.ARPLoadEntity on hor.IdCarga equals load.IdArpLoad
+                             where (us.EmployeeCode == usuario && load.Estado == 2)
                              select new
                              {
-                                 fechaRep = hor.StrStartDate,
-                                 totalMinutos = (double.Parse(hor.CountHours) * 60).ToString()
+                                 fechaRep = hor.FECHA_REP,
+                                 totalMinutos = (double.Parse(hor.totalHoras) * 60).ToString()
                              }
                              ).ToListAsync();
 
@@ -301,20 +304,20 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
             // 
             var StandByRepGraf = await (from us in _dataBaseService.UserEntity
                                         join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0  && hor.DateApprovalSystem.Year == anio && hor.EstatusFinal != "RECHAZADO")
+                                        where (us.EmployeeCode == usuario && hor.Acitivity == 0  && hor.DateApprovalSystem.Year == anio && (hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 || hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2))
                                         select new
                                         {
-                                            Mes = hor.DateApprovalSystem.Month,
+                                            Mes = DateTime.ParseExact(hor.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).Month,
                                             totalHoras = hor.CountHours
                                         }
                               ).ToListAsync();
 
             var OverTimeRepGraf = await (from us in _dataBaseService.UserEntity
                                          join hor in _dataBaseService.HorusReportEntity on us.IdUser equals hor.UserEntityId
-                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.DateApprovalSystem.Year == anio && hor.EstatusFinal != "RECHAZADO")
+                                         where (us.EmployeeCode == usuario && hor.Acitivity == 1 && hor.DateApprovalSystem.Year == anio && (hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN1 || hor.Estado == (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2))
                                          select new
                                          {
-                                             Mes = hor.DateApprovalSystem.Month,
+                                             Mes = DateTime.ParseExact(hor.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).Month,
                                              totalHoras = hor.CountHours
                                          }
                               ).ToListAsync();

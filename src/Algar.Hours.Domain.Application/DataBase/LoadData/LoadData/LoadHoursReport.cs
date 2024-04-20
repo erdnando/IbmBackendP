@@ -270,6 +270,41 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             }
         }
 
+        public async Task<ResponseData<ARPLoadEntity>> CancelarCarga(string idCarga)
+        {
+            try
+            {
+                ARPLoadEntity? arpLoad = _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga));
+                if (arpLoad == null) {
+                    return new ResponseData<ARPLoadEntity>
+                    {
+                        Data = null,
+                        Error = false,
+                        Message = "La carga no existe"
+                    };
+                }
+
+                arpLoad.Estado = 4; // Cancelada
+                await _dataBaseService.SaveAsync();
+
+                return new ResponseData<ARPLoadEntity>
+                {
+                    Data = arpLoad,
+                    Error = false,
+                    Message = "Carga cancelada"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResponseData<ARPLoadEntity>
+                {
+                    Data = null,
+                    Error = true,
+                    Message = "Error al cancelar carga"
+                };
+            }
+        }
+
         public async Task<string> LoadARP(LoadJsonPais model)
         {
             await _logCommand.Log(model.idUserEntiyId,"Ejecuta carga OVERTIME ARP",model);
@@ -3754,21 +3789,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<List<InconsistenceModel>> GetInconsistences(string? idCarga = null, string? employeeCode = null)
         {
-            /*worksheet.Cell("A1").Value = "PAIS DE EMPLEADO";
-            worksheet.Cell("B1").Value = "CODIGO DE EMPLEADO";
-            worksheet.Cell("C1").Value = "NOMBRE DEL EMPLEADO";
-            worksheet.Cell("D1").Value = "CORREO DEL EMPLEADO";
-            worksheet.Cell("E1").Value = "NOMBRE DEL GERENTE";
-            worksheet.Cell("F1").Value = "CORREO DEL GERENTE";
-            worksheet.Cell("G1").Value = "FECHA DE GENERADO EL INFORME";
-            worksheet.Cell("H1").Value = "FECHA Y HORA INICIO DEL REPORTE";
-            worksheet.Cell("I1").Value = "FECHA Y HORA FIN DEL REPORTE";
-            worksheet.Cell("J1").Value = "NUMERO DE CASO SI ES ARP TSE O STE";
-            worksheet.Cell("K1").Value = "ACTIVIDAD DEL REPORTE";
-            worksheet.Cell("L1").Value = "TOTAL HORAS";
-            worksheet.Cell("M1").Value = "HERRAMIENTA TOOL DE DONDE SE GENERO";
-            worksheet.Cell("N1").Value = "ESTADO PORTAL TLS OVERLAPING HORARIOS";
-            worksheet.Cell("O1").Value = "COMENTARIOS O DETALLE DEL ERROR";*/
             List<InconsistenceModel> inconsistences = new();
 
             ARPLoadEntity? arpLoad = idCarga != null? _dataBaseService.ARPLoadEntity.Find(Guid.Parse(idCarga)) : _dataBaseService.ARPLoadEntity.Where(x => x.Estado == 2).OrderByDescending(x => x.FechaCreacion).FirstOrDefault(); // Estado == 2 quiere decir estatus terminada

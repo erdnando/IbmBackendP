@@ -1,4 +1,5 @@
 ﻿using Algar.Hours.Application.DataBase.HorusReport.Commands;
+using Algar.Hours.Domain.Entities.Load;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
     public interface ILoadHoursReport
     {
         Task<ResponseData<string>> GeneraCarga();
+        Task<ResponseData<ARPLoadEntity>> CancelarCarga(string idCarga);
         Task<string> LoadARP(LoadJsonPais model);
         Task<string> LoadUserGMT(LoadJsonUserGMT model);
         Task<string> LoadTSE(LoadJsonPais model);
