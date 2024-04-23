@@ -10,6 +10,8 @@ using MySql.Data.MySqlClient.Replication;
 using System.Diagnostics;
 using System;
 using System.Globalization;
+using System.Resources;
+using Algar.Hours.Domain.Entities.Load;
 
 namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 {
@@ -92,12 +94,12 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
             //=============================Horas reportadas en CAS / Horas (Suma Total) Desgloce ARP, TSE y STE=================================================
-
-
+            ARPLoadEntity? ultimaCarga = (from ultima in _dataBaseService.ARPLoadEntity where ultima.Estado == 2 orderby ultima.FechaCreacion select ultima).FirstOrDefault();
+            var idArpLoad = ultimaCarga != null? ultimaCarga.IdArpLoad : Guid.Parse("00000000-0000-0000-0000-000000000000"); 
             var arp = await (from us in _dataBaseService.UserEntity
                             join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
                             join load in _dataBaseService.ARPLoadEntity on hor.IdCarga equals load.IdArpLoad
-                            where (us.EmployeeCode == usuario && load.Estado == 2)
+                            where (us.EmployeeCode == usuario && load.Estado == 2 && (hor.Actividad != "STAND BY" && hor.Actividad != "DRAFT")) && load.IdArpLoad == idArpLoad
                             select new
                             {
                                 fechaRep = hor.FECHA_REP,
@@ -107,9 +109,9 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
             var tse = await (from us in _dataBaseService.UserEntity
-                             join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
+                             join hor in _dataBaseService.ParametersTseInitialEntity on us.EmployeeCode equals hor.EmployeeCode
                              join load in _dataBaseService.ARPLoadEntity on hor.IdCarga equals load.IdArpLoad
-                             where (us.EmployeeCode == usuario && load.Estado == 2)
+                             where (us.EmployeeCode == usuario && load.Estado == 2 && (hor.EstatusOrigen != "DRAFT")) && load.IdArpLoad == idArpLoad 
                              select new
                              {
                                  fechaRep = hor.FECHA_REP,
@@ -119,9 +121,9 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
             var ste = await (from us in _dataBaseService.UserEntity
-                             join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
+                             join hor in _dataBaseService.ParametersSteInitialEntity on us.EmployeeCode equals hor.EmployeeCode
                              join load in _dataBaseService.ARPLoadEntity on hor.IdCarga equals load.IdArpLoad
-                             where (us.EmployeeCode == usuario && load.Estado == 2)
+                             where (us.EmployeeCode == usuario && load.Estado == 2) && load.IdArpLoad == idArpLoad
                              select new
                              {
                                  fechaRep = hor.FECHA_REP,
