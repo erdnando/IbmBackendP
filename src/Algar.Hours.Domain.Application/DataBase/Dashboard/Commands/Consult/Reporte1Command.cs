@@ -94,7 +94,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
 
 
             //=============================Horas reportadas en CAS / Horas (Suma Total) Desgloce ARP, TSE y STE=================================================
-            ARPLoadEntity? ultimaCarga = (from ultima in _dataBaseService.ARPLoadEntity where ultima.Estado == 2 orderby ultima.FechaCreacion select ultima).FirstOrDefault();
+            ARPLoadEntity? ultimaCarga = (from ultima in _dataBaseService.ARPLoadEntity where ultima.Estado == 2 orderby ultima.FechaCreacion descending select ultima).FirstOrDefault(); 
             var idArpLoad = ultimaCarga != null? ultimaCarga.IdArpLoad : Guid.Parse("00000000-0000-0000-0000-000000000000"); 
             var arp = await (from us in _dataBaseService.UserEntity
                             join hor in _dataBaseService.ParametersArpInitialEntity on us.EmployeeCode equals hor.EmployeeCode
