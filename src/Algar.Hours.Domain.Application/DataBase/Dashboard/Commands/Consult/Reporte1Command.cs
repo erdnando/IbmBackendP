@@ -231,7 +231,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 weekDaysTls = new()
                 {
                     Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
-                    TotalHoras = SumaMinutos
+                    TotalHoras = SumaMinutos / 60 
                 };
                 SumaMinutos = 0.0;
                 repHoraTSE.weekDaysTls.Add(weekDaysTls);
@@ -244,7 +244,7 @@ namespace Algar.Hours.Application.DataBase.Dashboard.Commands.Consult
                 weekDaysTls = new()
                 {
                     Fecha = $"{a.Year}/{a.Month.ToString("00")}/{a.Day.ToString("00")}",
-                    TotalHoras = SumaMinutos
+                    TotalHoras = SumaMinutos / 60
                 };
                 SumaMinutos = 0.0;
                 repHoraSTE.weekDaysTls.Add(weekDaysTls);
