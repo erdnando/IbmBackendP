@@ -91,11 +91,11 @@ namespace Algar.Hours.Api.Controllers
 
         [HttpPost("LoadExcelMan")]
         [Authorize(Roles = "standard")]
-        public async Task<FileStreamResult> LoadExcelMan(
+        public async Task<IActionResult> LoadExcelMan(
                 [FromBody] LoadHoursReportManagerModel model, [FromServices] ILoadHorusReportManagerCommand loadHorusReportManagerCommand)
         {
             var data = await loadHorusReportManagerCommand.LoadExcel(model);
-            return data;
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
 
         [HttpGet("Template")]

@@ -42,8 +42,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
         }
 
-        public async Task<FileStreamResult> LoadExcel(LoadHoursReportManagerModel models) {
-            var workbook = new XLWorkbook();
+        public async Task<List<WorkdayResultModel>> LoadExcel(LoadHoursReportManagerModel models) {
+            /*var workbook = new XLWorkbook();
             var wsSummary = workbook.Worksheets.Add("Summary");
             var worksheet = workbook.Worksheets.Add("Workday");
 
@@ -67,7 +67,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
             worksheet.Cell("G1").Value = "LOG";
 
             var initialRow = 2;
-            var currentRow = initialRow;
+            var currentRow = initialRow;*/
             List<WorkdayExceptionEntity> exceptions = new List<WorkdayExceptionEntity>();
             List<string> employeeCodes = new List<string>();
             List<WorkdayHourModel> whModels = new List<WorkdayHourModel>();
@@ -98,6 +98,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
                 .ToList();
 
+            List<WorkdayResultModel> result = new();
             for (var i = 0; i < whModels.Count(); i++) {
                 WorkdayHourModel workdayHourModel = whModels[i];
                 WorkdayUserModel workdayUserModel = null;
@@ -110,6 +111,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 if (workdayUserModel == null) continue;
                 if (workdayHourModel.Type != "Standby" && workdayHourModel.Type != "Overtime" && workdayHourModel.Type != "Vacation" && workdayHourModel.Type != "Holiday Worked") continue;
 
+                WorkdayResultModel workdayRM = new();
+
                 var startTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8)).ToString("HH:mm");
                 var endTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8)).ToString("HH:mm");
 
@@ -120,39 +123,41 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
                 if (horusReportEntity != null) {
                     var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : ((horusReportEntity.EstatusFinal == "PREAPROBADO" || horusReportEntity.EstatusFinal == "ENPROGRESO") ? "ENPROCESO" : "RECHAZADO");
-                    worksheet.Cell(currentRow, 1).Value = horusReportEntity.UserEntity.EmployeeCode;
-                    worksheet.Cell(currentRow, 2).Value = workdayUserModel.Worker;
-                    worksheet.Cell(currentRow, 3).Value = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture).ToString("dd/MM/yyyy");
-                    worksheet.Cell(currentRow, 4).Value = horusReportEntity.EstatusOrigen;
-                    worksheet.Cell(currentRow, 5).Value = horusReportEntity.CountHours;
-                    worksheet.Cell(currentRow, 6).Value = statusFinal;
-                    worksheet.Cell(currentRow, 7).Value = "";
+                    result.Add(new WorkdayResultModel() { 
+                        employeeCode = horusReportEntity.UserEntity.EmployeeCode,
+                        employeeName = workdayUserModel.Worker,
+                        date = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
+                        startTime = TimeSpan.Parse(startTime),
+                        endTime = TimeSpan.Parse(endTime),
+                        type = horusReportEntity.EstatusOrigen,
+                        hours = Convert.ToDouble(horusReportEntity.CountHours),
+                        finalStatus = statusFinal
+                    });;
                 }
                 else {
                     var exception = exceptions.Where(x => x.EmployeeCode == workdayUserModel.HomeCNUM && x.RealDate.ToString("dd/MM/yyyy") == workdayHourModel.ReportedDate.ToString("dd/MM/yyyy") && x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime)
                     .FirstOrDefault();
 
-                    worksheet.Cell(currentRow, 1).Value = workdayUserModel.EmployeeID;
-                    worksheet.Cell(currentRow, 2).Value = workdayUserModel.Worker;
-                    worksheet.Cell(currentRow, 3).Value = workdayHourModel.ReportedDate;
-                    worksheet.Cell(currentRow, 4).Value = workdayHourModel.Type;
-                    worksheet.Cell(currentRow, 5).Value = workdayHourModel.Quantity;
-                    worksheet.Cell(currentRow, 7).Value = "";
-
-                    if (exception != null) {
-                        worksheet.Cell(currentRow, 6).Value = "APROBADO POR EXCEPCION";
-                    }
-                    else {
-                        worksheet.Cell(currentRow, 6).Value = "RECHAZADO";
-                    }
+                    var statusFinal = (exception != null)? "APROBADO POR EXCEPCION" : "RECHAZADO";
+                    
+                    result.Add(new WorkdayResultModel()
+                    {
+                        employeeCode = workdayUserModel.EmployeeID,
+                        employeeName = workdayUserModel.Worker, 
+                        date = workdayHourModel.ReportedDate,
+                        startTime = TimeSpan.Parse(startTime),
+                        endTime = TimeSpan.Parse(endTime),
+                        type = workdayHourModel.Type,
+                        hours = workdayHourModel.Quantity,
+                        finalStatus = statusFinal
+                    });
 
                 }
 
-                currentRow++;
-
             }
 
-            var pivotTable = wsSummary.PivotTables.Add("pvt", wsSummary.Cell("A1"), worksheet.Range($"A1:F{(currentRow-1)}"));
+            return result;
+            /*var pivotTable = wsSummary.PivotTables.Add("pvt", wsSummary.Cell("A1"), worksheet.Range($"A1:F{(currentRow-1)}"));
             pivotTable.RowLabels.Add("TIPO");
             pivotTable.ColumnLabels.Add("ESTADO FINAL");
             pivotTable.Values.Add("TIPO", "TIPOS").SetSummaryFormula(XLPivotSummary.Count);
@@ -161,7 +166,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
             var stream = new MemoryStream();
             workbook.SaveAs(stream);
             stream.Position = 0;
-            return new FileStreamResult(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") { FileDownloadName = "workday.xlsx" };
+            return new FileStreamResult(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") { FileDownloadName = "workday.xlsx" };*/
             
         }
 

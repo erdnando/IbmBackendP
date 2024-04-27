@@ -10,6 +10,6 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
     public interface ILoadHorusReportManagerCommand
     {
-        Task<FileStreamResult> LoadExcel(LoadHoursReportManagerModel model);
+        Task<List<WorkdayResultModel>> LoadExcel(LoadHoursReportManagerModel model);
     }
 }
