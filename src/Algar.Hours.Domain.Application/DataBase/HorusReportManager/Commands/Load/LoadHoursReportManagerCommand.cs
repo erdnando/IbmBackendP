@@ -142,7 +142,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                     
                     result.Add(new WorkdayResultModel()
                     {
-                        employeeCode = workdayUserModel.EmployeeID,
+                        employeeCode = workdayUserModel.HomeCNUM,
                         employeeName = workdayUserModel.Worker, 
                         date = workdayHourModel.ReportedDate,
                         startTime = TimeSpan.Parse(startTime),
