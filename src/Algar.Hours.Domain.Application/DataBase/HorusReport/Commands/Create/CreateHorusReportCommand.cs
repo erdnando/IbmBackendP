@@ -443,17 +443,17 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
 
         private bool TimeRangesOverlap(string existingStartTime, string existingEndTime, string newStartTime, string newEndTime)
         {
-            DateTime startTimeExisting = DateTime.Parse(existingStartTime);
-            DateTime endTimeExisting = DateTime.Parse(existingEndTime);
-            DateTime startTimeNew = DateTime.Parse(newStartTime);
-            DateTime endTimeNew = DateTime.Parse(newEndTime);
+            DateTime startTimeExisting = DateTime.Today.AddHours(Convert.ToDouble(existingStartTime.Split(":")[0])).AddMinutes(Convert.ToDouble(existingStartTime.Split(":")[1]));
+            DateTime endTimeExisting = DateTime.Today.AddHours(Convert.ToDouble(existingEndTime.Split(":")[0])).AddMinutes(Convert.ToDouble(existingEndTime.Split(":")[1]));
+            DateTime startTimeNew = DateTime.Today.AddHours(Convert.ToDouble(newStartTime.Split(":")[0])).AddMinutes(Convert.ToDouble(newStartTime.Split(":")[1]));
+            DateTime endTimeNew = DateTime.Today.AddHours(Convert.ToDouble(newEndTime.Split(":")[0])).AddMinutes(Convert.ToDouble(newEndTime.Split(":")[1]));
 
             return (startTimeNew < endTimeExisting && endTimeNew > startTimeExisting);
         }
 
         private bool TimeInRange(string timeString, DateTime rangeStart, DateTime rangeEnd)
         {
-            DateTime time = DateTime.Parse(timeString);
+            DateTime time = DateTime.Today.AddHours(Convert.ToDouble(timeString.Split(":")[0])).AddMinutes(Convert.ToDouble(timeString.Split(":")[1]));
             return time >= rangeStart && time <= rangeEnd;
         }
 
