@@ -123,13 +123,13 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
                 if (horusReportEntity != null) {
                     var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : ((horusReportEntity.EstatusFinal == "PREAPROBADO" || horusReportEntity.EstatusFinal == "ENPROGRESO") ? "ENPROCESO" : "RECHAZADO");
-                    result.Add(new WorkdayResultModel() { 
+                    result.Add(new WorkdayResultModel() {
                         employeeCode = horusReportEntity.UserEntity.EmployeeCode,
                         employeeName = workdayUserModel.Worker,
                         date = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
                         startTime = TimeSpan.Parse(startTime),
                         endTime = TimeSpan.Parse(endTime),
-                        type = horusReportEntity.EstatusOrigen,
+                        type = workdayHourModel.Type,
                         hours = Convert.ToDouble(horusReportEntity.CountHours),
                         finalStatus = statusFinal
                     });;
