@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Algar.Hours.Domain.Entities.HorusReport;
 using MySqlX.XDevAPI.Common;
 using Npgsql;
+using static Algar.Hours.Application.Enums.Enums;
 
 namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
@@ -109,27 +110,56 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 if (workdayUserModel == null) continue;
-                if (workdayHourModel.Type != "Standby" && workdayHourModel.Type != "Overtime" && workdayHourModel.Type != "Holiday Worked") continue;
+                if (workdayHourModel.Type != "Standby" && workdayHourModel.Type != "Overtime" && workdayHourModel.Type != "Holiday Worked" && workdayHourModel.Type != "Overtime on standby") continue;
 
-                WorkdayResultModel workdayRM = new();
-
+                var type = "";
+                switch (workdayHourModel.Type) {
+                    case "Holiday Worked":
+                    case "Overtime on standby":
+                        type = "Overtime";
+                        break;
+                    default:
+                        type = workdayHourModel.Type;
+                        break;
+                }
                 var startTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8)).ToString("HH:mm");
                 var endTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8)).ToString("HH:mm");
 
                 HorusReportEntity horusReportEntity = null;
+                // Primero se busca con la fecha, hora inicio y hora fin exacta
                 foreach (var entity in entities) {
                     if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { horusReportEntity = entity; break; };
                 }
+                //si no se encontró se verifica buscando si hay mas workday horas de ese empleado de esa misma fecha para obtener y comparar con la hora inicio menor y hora fin mayor. Esto por si en workday horas viene separado
+                if (horusReportEntity == null) {
+                    List<WorkdayHourModel> workdayHours = whModels.Where(x => x.EmployeeID == workdayHourModel.EmployeeID && x.ReportedDate == workdayHourModel.ReportedDate).ToList();
+                    var startDateTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8));
+                    var endDateTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8));
+                    foreach (var model in workdayHours) {
+                        var datetime = DateTime.Parse(model.StartTime.Substring(0, 8));
+                        startDateTime = datetime < startDateTime ? datetime : startDateTime;
+                    
+                        datetime = DateTime.Parse(model.EndTime.Substring(0, 8));
+                        endDateTime = datetime > endDateTime ? datetime : endDateTime;
+                    }
+
+                    startTime = startDateTime.ToString("HH:mm");
+                    endTime =endDateTime.ToString("HH:mm");
+
+                    foreach (var entity in entities) {
+                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { horusReportEntity = entity; break; };
+                    }
+                }
 
                 if (horusReportEntity != null) {
-                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : ((horusReportEntity.EstatusFinal == "PREAPROBADO" || horusReportEntity.EstatusFinal == "ENPROGRESO") ? "ENPROCESO" : "RECHAZADO");
+                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : (horusReportEntity.EstatusFinal == "RECHAZADO" ? "RECHAZADO" : (horusReportEntity.Estado != ((byte)AprobacionPortalDB.Pendiente) ? "ENPROCESO" : "PENDIENTE"));
                     result.Add(new WorkdayResultModel() {
                         employeeCode = horusReportEntity.UserEntity.EmployeeCode,
                         employeeName = workdayUserModel.Worker,
                         date = DateTime.ParseExact(horusReportEntity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture),
                         startTime = TimeSpan.Parse(startTime),
                         endTime = TimeSpan.Parse(endTime),
-                        type = workdayHourModel.Type,
+                        type = type,
                         hours = Convert.ToDouble(horusReportEntity.CountHours),
                         finalStatus = statusFinal
                     });;
@@ -147,7 +177,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                         date = workdayHourModel.ReportedDate,
                         startTime = TimeSpan.Parse(startTime),
                         endTime = TimeSpan.Parse(endTime),
-                        type = workdayHourModel.Type,
+                        type = type,
                         hours = workdayHourModel.Quantity,
                         finalStatus = statusFinal
                     });
