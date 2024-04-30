@@ -2530,6 +2530,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         pAux.FECHA_REP = item.FECHA_REP;
                         pAux.HoraInicio = item.HoraInicio;
                         pAux.HoraFin = item.HoraFin;
+                        pAux.EmployeeCode = item.EmployeeCode;
 
                         listParametros.Add(pAux);
 
@@ -2547,7 +2548,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             endDatex = endDatex.AddHours(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[0]));
                             endDatex = endDatex.AddMinutes(Int32.Parse(reporteEvaluado.HoraFin.Split(":")[1]));
 
-                            if (OverlappingDates(startDate, endDate, startDatex, endDatex))
+                            if (item.EmployeeCode == reporteEvaluado.EmployeeCode && OverlappingDates(startDate, endDate, startDatex, endDatex))
                             {
                                 item.EstatusProceso = "NO_APLICA_X_OVERLAPING";
                                 item.Problemas = $"El registro esta sobrepuesto con otros registros de ARP en el mismo rango de tiempo";
@@ -2560,6 +2561,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                                 pAux.FECHA_REP = item.FECHA_REP;
                                 pAux.HoraInicio = item.HoraInicio;
                                 pAux.HoraFin = item.HoraFin;
+                                pAux.EmployeeCode = item.EmployeeCode;
 
                                 listParametros.Add(pAux);
                                 break;
@@ -4625,6 +4627,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
         public string FECHA_REP { get; set; }
         public string HoraInicio { get; set; }
         public string HoraFin { get; set; }
+        public string EmployeeCode { get; set; }
     }
 
 
