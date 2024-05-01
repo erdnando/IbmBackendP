@@ -143,11 +143,11 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                         endDateTime = datetime > endDateTime ? datetime : endDateTime;
                     }
 
-                    startTime = startDateTime.ToString("HH:mm");
-                    endTime =endDateTime.ToString("HH:mm");
+                    var startTim = startDateTime.ToString("HH:mm");
+                    var endTim =endDateTime.ToString("HH:mm");
 
                     foreach (var entity in entities) {
-                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { horusReportEntity = entity; break; };
+                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTim && entity.EndTime == endTim) { horusReportEntity = entity; break; };
                     }
                 }
 
