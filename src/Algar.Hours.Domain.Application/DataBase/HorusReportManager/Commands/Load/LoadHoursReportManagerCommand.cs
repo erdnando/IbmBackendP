@@ -23,6 +23,7 @@ using Algar.Hours.Domain.Entities.HorusReport;
 using MySqlX.XDevAPI.Common;
 using Npgsql;
 using static Algar.Hours.Application.Enums.Enums;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
@@ -99,7 +100,35 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
                 .ToList();
 
+            List<HorusReportEntity> completeReports = new();
+            for (var i = 0; i < whModels.Count(); i++) {
+                WorkdayHourModel workdayHourModel = whModels[i];
+                WorkdayUserModel workdayUserModel = null;
+                foreach (var model in wuModels)
+                {
+                    if (workdayHourModel.EmployeeID == model.EmployeeID)
+                    {
+                        workdayUserModel = model; break;
+                    }
+                }
+
+                if (workdayUserModel == null) continue;
+                if (workdayHourModel.Type != "Standby" && workdayHourModel.Type != "Overtime" && workdayHourModel.Type != "Holiday Worked" && workdayHourModel.Type != "Overtime on standby") continue;
+
+                var startDateTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8));
+                var endDateTime = startDateTime.AddHours(workdayHourModel.OriginalQuantity);
+                
+                var startTime = startDateTime.ToString("HH:mm");
+                var endTime = endDateTime.ToString("HH:mm");
+
+                foreach (var entity in entities) {
+                    if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { completeReports.Add(entity); break; };
+                }
+            }
+
+
             List<WorkdayResultModel> result = new();
+            HorusReportEntity horusReportCompleteEntity = null;
             for (var i = 0; i < whModels.Count(); i++) {
                 WorkdayHourModel workdayHourModel = whModels[i];
                 WorkdayUserModel workdayUserModel = null;
@@ -126,28 +155,18 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 var endTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8)).ToString("HH:mm");
 
                 HorusReportEntity horusReportEntity = null;
+
                 // Primero se busca con la fecha, hora inicio y hora fin exacta
                 foreach (var entity in entities) {
                     if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { horusReportEntity = entity; break; };
                 }
                 //si no se encontró se verifica buscando si hay mas workday horas de ese empleado de esa misma fecha para obtener y comparar con la hora inicio menor y hora fin mayor. Esto por si en workday horas viene separado
                 if (horusReportEntity == null) {
-                    List<WorkdayHourModel> workdayHours = whModels.Where(x => x.EmployeeID == workdayHourModel.EmployeeID && x.ReportedDate == workdayHourModel.ReportedDate).ToList();
-                    var startDateTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8));
-                    var endDateTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8));
-                    foreach (var model in workdayHours) {
-                        var datetime = DateTime.Parse(model.StartTime.Substring(0, 8));
-                        startDateTime = datetime < startDateTime ? datetime : startDateTime;
-                    
-                        datetime = DateTime.Parse(model.EndTime.Substring(0, 8));
-                        endDateTime = datetime > endDateTime ? datetime : endDateTime;
-                    }
-
-                    var startTim = startDateTime.ToString("HH:mm");
-                    var endTim =endDateTime.ToString("HH:mm");
-
-                    foreach (var entity in entities) {
-                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTim && entity.EndTime == endTim) { horusReportEntity = entity; break; };
+                    foreach (var entity in completeReports) {
+                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && TimeRangesOverlap(entity.StartTime, entity.EndTime, startTime, endTime)) { 
+                            horusReportEntity = entity;
+                            break; 
+                        };
                     }
                 }
 
@@ -241,6 +260,22 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
             string[] splitTime = time.Split(':');
             splitTime[0] = splitTime[0].PadLeft(2, '0');
             return string.Join(":", splitTime);
+        }
+
+        private bool TimeRangesOverlap(string existingStartTime, string existingEndTime, string newStartTime, string newEndTime)
+        {
+            DateTime startTimeExisting = DateTime.Today.AddHours(Convert.ToDouble(existingStartTime.Split(":")[0])).AddMinutes(Convert.ToDouble(existingStartTime.Split(":")[1]));
+            DateTime endTimeExisting = DateTime.Today.AddHours(Convert.ToDouble(existingEndTime.Split(":")[0])).AddMinutes(Convert.ToDouble(existingEndTime.Split(":")[1]));
+            DateTime startTimeNew = DateTime.Today.AddHours(Convert.ToDouble(newStartTime.Split(":")[0])).AddMinutes(Convert.ToDouble(newStartTime.Split(":")[1]));
+            DateTime endTimeNew = DateTime.Today.AddHours(Convert.ToDouble(newEndTime.Split(":")[0])).AddMinutes(Convert.ToDouble(newEndTime.Split(":")[1]));
+
+            return (startTimeNew < endTimeExisting && endTimeNew > startTimeExisting);
+        }
+
+        private bool TimeInRange(string timeString, DateTime rangeStart, DateTime rangeEnd)
+        {
+            DateTime time = DateTime.Today.AddHours(Convert.ToDouble(timeString.Split(":")[0])).AddMinutes(Convert.ToDouble(timeString.Split(":")[1]));
+            return time >= rangeStart && time <= rangeEnd;
         }
     }
 }

@@ -16,6 +16,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
         public string Worker { get; set; }
         [JsonProperty("Reported Date")]
         public DateTime ReportedDate { get; set; }
+        [JsonProperty("Original Reported Quantity")]
+        public double OriginalQuantity { get; set; }
         [JsonProperty("Calculated Quantity")]
         public double Quantity { get; set; }
         public string Status { get; set; }
