@@ -168,7 +168,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
 
                 }
-                else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
+                else if (modelAprobador.roleAprobador == "Usuario Aprobador N2" || modelAprobador.roleAprobador == "Super Administrador" || modelAprobador.roleAprobador == "Administrador" || modelAprobador.roleAprobador == "Gerente")
                 {
                     //Se maerca reporte como aprobado N2
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.AprobadoN2;
@@ -252,7 +252,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                     await _logCommand.Log(modelAprobador.UserId.ToString(), "N1 Rechaza reporte", modelAprobador);
 
                 }
-                else if (modelAprobador.roleAprobador == "Usuario Aprobador N2")
+                else if (modelAprobador.roleAprobador == "Usuario Aprobador N2" || modelAprobador.roleAprobador == "Super Administrador" || modelAprobador.roleAprobador == "Administrador" || modelAprobador.roleAprobador == "Gerente")
                 {
                     //Se rechaza el reporte de hrs 
                     currentHReport.Estado = (byte)Enums.Enums.AprobacionPortalDB.Rechazado;
