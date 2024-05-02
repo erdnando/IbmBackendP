@@ -139,16 +139,17 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 if (workdayUserModel == null) continue;
-                if (workdayHourModel.Type != "Standby" && workdayHourModel.Type != "Overtime" && workdayHourModel.Type != "Holiday Worked" && workdayHourModel.Type != "Overtime on standby") continue;
+                var workdayHourType = workdayHourModel.Type.Trim();
+                if (workdayHourType != "STANDBY" && workdayHourType != "OVERTIME" && workdayHourType != "HOLIDAY WORKED" && workdayHourType != "OVERTIME ON STANDBY") continue;
 
                 var type = "";
-                switch (workdayHourModel.Type) {
-                    case "Holiday Worked":
-                    case "Overtime on standby":
-                        type = "Overtime";
+                switch (workdayHourType) {
+                    case "HOLIDAY WORKED":
+                    case "OVERTIME ON STANDBY":
+                        type = "OVERTIME";
                         break;
                     default:
-                        type = workdayHourModel.Type;
+                        type = workdayHourType;
                         break;
                 }
                 var startTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8)).ToString("HH:mm");
@@ -179,7 +180,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                         startTime = TimeSpan.Parse(startTime),
                         endTime = TimeSpan.Parse(endTime),
                         type = type,
-                        hours = Convert.ToDouble(horusReportEntity.CountHours),
+                        hours = workdayHourModel.Quantity,
                         finalStatus = statusFinal
                     });;
                 }
