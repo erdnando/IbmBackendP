@@ -139,7 +139,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 if (workdayUserModel == null) continue;
-                var workdayHourType = workdayHourModel.Type.Trim();
+                var workdayHourType = workdayHourModel.Type.Trim().ToUpper();
                 if (workdayHourType != "STANDBY" && workdayHourType != "OVERTIME" && workdayHourType != "HOLIDAY WORKED" && workdayHourType != "OVERTIME ON STANDBY") continue;
 
                 var type = "";
