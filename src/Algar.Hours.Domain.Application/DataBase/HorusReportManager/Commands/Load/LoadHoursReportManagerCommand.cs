@@ -117,7 +117,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 if (workdayHourType != "STANDBY" && workdayHourType != "OVERTIME" && workdayHourType != "HOLIDAY WORKED" && workdayHourType != "OVERTIME ON STANDBY") continue;
 
                 var startDateTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8));
-                var endDateTime = startDateTime.AddHours(workdayHourModel.OriginalQuantity);
+                var endDateTime = startDateTime.AddHours(workdayHourModel.OriginalQuantity); 
+                endDateTime = endDateTime.Second != 0 ? new DateTime(endDateTime.Year, endDateTime.Month, endDateTime.Day, endDateTime.Hour, endDateTime.Minute, 0).AddMinutes(1) : endDateTime;
                 
                 var startTime = startDateTime.ToString("HH:mm");
                 var endTime = endDateTime.ToString("HH:mm");
@@ -174,7 +175,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
                 var findException = horusReportEntity == null || horusReportEntity.EstatusFinal == "RECHAZADO" ? true : false;
                 if (horusReportEntity != null) {
-                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : (horusReportEntity.EstatusFinal == "RECHAZADO" ? "RECHAZADO" : (horusReportEntity.Estado != ((byte)AprobacionPortalDB.Pendiente) ? "ENPROCESO" : "PENDIENTE"));
+                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : (horusReportEntity.EstatusFinal == "RECHAZADO" ? "RECHAZADO" : (horusReportEntity.Estado != ((byte)AprobacionPortalDB.Pendiente) ? "EN PROCESO" : "PENDIENTE"));
                     if (statusFinal != "RECHAZADO") {
                         result.Add(new WorkdayResultModel() {
                             employeeCode = horusReportEntity.UserEntity.EmployeeCode,
