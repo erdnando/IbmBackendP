@@ -1103,7 +1103,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             if (totalDays > 1 && i < (totalDays - 1))
                             {
                                 endDateTime = startDateTime.AddHours(24);
-                                horaFin = "24:00";
+                                horaFin = "23:59";
                             }
                             else
                             {
