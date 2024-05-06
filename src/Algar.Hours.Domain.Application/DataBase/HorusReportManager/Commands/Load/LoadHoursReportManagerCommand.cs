@@ -80,6 +80,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 var model = models.hours[i];
                 var loadWorkdayModel = Newtonsoft.Json.JsonConvert.DeserializeObject<WorkdayHourModel>(model.ToJsonString());
                 if (loadWorkdayModel.StartTime == null || loadWorkdayModel.EndTime == null) continue;
+                if (loadWorkdayModel.Status != "Approved" && loadWorkdayModel.Status != "Submitted") continue;
+
                 whModels.Add(loadWorkdayModel);
 
                 if (loadWorkdayModel.ReportedDate < dateTime) dateTime = loadWorkdayModel.ReportedDate;
