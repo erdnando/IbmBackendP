@@ -175,7 +175,7 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 
                 var findException = horusReportEntity == null || horusReportEntity.EstatusFinal == "RECHAZADO" ? true : false;
                 if (horusReportEntity != null) {
-                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO")? "APROBADO" : (horusReportEntity.EstatusFinal == "RECHAZADO" ? "RECHAZADO" : (horusReportEntity.Estado != ((byte)AprobacionPortalDB.Pendiente) ? "EN PROCESO" : "PENDIENTE"));
+                    var statusFinal = (horusReportEntity.EstatusFinal == "APROBADO" || horusReportEntity.EstatusFinal == "RECHAZADO" || horusReportEntity.EstatusFinal == "PREAPROBADO") ? horusReportEntity.EstatusFinal : (horusReportEntity.Estado != ((byte)AprobacionPortalDB.Pendiente) ? "EN PROCESO" : "PENDIENTE");
                     if (statusFinal != "RECHAZADO") {
                         result.Add(new WorkdayResultModel() {
                             employeeCode = horusReportEntity.UserEntity.EmployeeCode,
