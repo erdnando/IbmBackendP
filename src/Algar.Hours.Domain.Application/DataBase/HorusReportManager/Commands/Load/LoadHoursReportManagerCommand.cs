@@ -158,6 +158,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
                 var startTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8)).ToString("HH:mm");
                 var endTime = DateTime.Parse(workdayHourModel.EndTime.Substring(0, 8)).ToString("HH:mm");
+                var reportStartTime = startTime;
+                var reportEndTime = endTime;
 
                 HorusReportEntity horusReportEntity = null;
 
@@ -170,6 +172,8 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                     foreach (var entity in completeReports) {
                         if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && TimeRangesOverlap(entity.StartTime, entity.EndTime, startTime, endTime)) { 
                             horusReportEntity = entity;
+                            reportStartTime = entity.StartTime;
+                            reportEndTime = entity.EndTime;
                             break; 
                         };
                     }
@@ -193,13 +197,13 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
 
                 if (findException) {
-                    var exception = exceptions.Where(x => x.EmployeeCode == workdayUserModel.HomeCNUM && x.RealDate.ToString("dd/MM/yyyy") == workdayHourModel.ReportedDate.ToString("dd/MM/yyyy") && x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime)
+                    var exception = exceptions.Where(x => x.EmployeeCode == workdayUserModel.HomeCNUM && x.RealDate.ToString("dd/MM/yyyy") == workdayHourModel.ReportedDate.ToString("dd/MM/yyyy") && ((x.RealStartTime.ToString(@"hh\:mm") == startTime && x.RealEndTime.ToString(@"hh\:mm") == endTime) || (x.RealStartTime.ToString(@"hh\:mm") == reportStartTime && x.RealEndTime.ToString(@"hh\:mm") == reportEndTime)))
                     .FirstOrDefault();
 
                     var statusFinal = (exception != null)? "APROBADO POR EXCEPCION" : "RECHAZADO";
                     
                     result.Add(new WorkdayResultModel()
-                    {
+                    { 
                         employeeCode = workdayUserModel.HomeCNUM,
                         employeeName = workdayUserModel.Worker, 
                         date = workdayHourModel.ReportedDate,
