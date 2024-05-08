@@ -99,7 +99,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
 
                 if (modelAprobador.roleAprobador == "Usuario estandar")
                 {
-                    if (modelAprobador.UserId == currentHReport.UserEntityId) { 
+                    if (modelAprobador.UserId == currentHReport.UserEntityId && currentHReport.Estado == ((byte)AprobacionPortalDB.Pendiente)) { 
                         //Verificar limites Overtime
                         var tipoLimiteExcedido = limitExceeded(currentHReport);
                         if (tipoLimiteExcedido != "")
@@ -144,7 +144,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N1")
                 {
-                    if (modelAprobador.UserId == currentHReport.UserEntityId)
+                    if (modelAprobador.UserId == currentHReport.UserEntityId && currentHReport.Estado == ((byte)AprobacionPortalDB.Pendiente))
                     {
                         //Verificar limites Overtime
                         var tipoLimiteExcedido = limitExceeded(currentHReport);
@@ -191,7 +191,7 @@ namespace Algar.Hours.Application.DataBase.AssignmentReport.Commands.UpdateAprov
                 }
                 else if (modelAprobador.roleAprobador == "Usuario Aprobador N2" || modelAprobador.roleAprobador == "Super Administrador" || modelAprobador.roleAprobador == "Administrador" || modelAprobador.roleAprobador == "Gerente")
                 {
-                    if (modelAprobador.UserId == currentHReport.UserEntityId)
+                    if (modelAprobador.UserId == currentHReport.UserEntityId && currentHReport.Estado == ((byte)AprobacionPortalDB.Pendiente))
                     {
                         //Verificar limites Overtime
                         var tipoLimiteExcedido = limitExceeded(currentHReport);
