@@ -191,17 +191,17 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             //--------------------------------------------------------------------------------------------------------------------------
             var parametrosCountry = _dataBaseService.UserEntity.Include("CountryEntity").FirstOrDefault(x => x.IdUser == horusModel.UserEntityId);
 
-            var fechaReportada = DateTimeOffset.Parse(model.StartDate.ToString());
+            var fechaReportada = DateTime.Parse(model.StartDate.ToString());
             var Lsthorario = _dataBaseService.workinghoursEntity.Include("UserEntity").ToList();
-            var HoraInicioReportado = DateTimeOffset.Parse(model.StartTime);
-            var HoraFinReportado = DateTimeOffset.Parse(model.EndTime);
+            var HoraInicioReportado = DateTime.Parse(model.StartTime);
+            var HoraFinReportado = DateTime.Parse(model.EndTime);
 
-            int Semana = cul.Calendar.GetWeekOfYear(fechaReportada.DateTime, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
+            int Semana = cul.Calendar.GetWeekOfYear(fechaReportada, CalendarWeekRule.FirstDay, DayOfWeek.Sunday);
             //Obtiene horario para este empleado en la fecha del evento
-            var fechaformateadaReporta = fechaReportada.DateTime.ToString("yyyy-MM-dd 00:00:00");
-            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.UtcDateTime.Year.ToString() && x.FechaWorking.UtcDateTime.DayOfWeek == fechaReportada.DayOfWeek );
+            var fechaformateadaReporta = fechaReportada.ToString("yyyy-MM-dd 00:00:00");
+            var horarioAsignado = Lsthorario.FirstOrDefault(x => x.UserEntity.IdUser == model.UserEntityId && x.week == Semana.ToString() && x.Ano == fechaReportada.Year.ToString() && x.FechaWorking.UtcDateTime.DayOfWeek == fechaReportada.DayOfWeek );
              
-            var isFestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo == DateTimeOffset.ParseExact(fechaformateadaReporta, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) && x.CountryId == parametrosCountry.CountryEntityId).Count() > 0;
+            var isFestivo = _dataBaseService.FestivosEntity.Where(x => x.DiaFestivo.UtcDateTime == DateTime.ParseExact(fechaformateadaReporta, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) && x.CountryId == parametrosCountry.CountryEntityId).Count() > 0;
               
             //Validación del Horario reportado
             //================================================================================================================
@@ -457,15 +457,15 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Create
             return time >= rangeStart && time <= rangeEnd;
         }
 
-        private bool ValidarHorarioEmployee(workinghoursEntity horarioAsigando, DateTimeOffset _fechaReportada, DateTimeOffset _HoraInicioReportado, DateTimeOffset _HoraFinReportado )
+        private bool ValidarHorarioEmployee(workinghoursEntity horarioAsigando, DateTime _fechaReportada, DateTime _HoraInicioReportado, DateTime _HoraFinReportado )
         {
             try
             {
                 TimeSpan tsReportado = _HoraFinReportado - _HoraInicioReportado;
-                TimeSpan tsAsignado = (DateTimeOffset.Parse(horarioAsigando.HoraFin) - DateTimeOffset.Parse(horarioAsigando.HoraInicio));
+                TimeSpan tsAsignado = (DateTime.Parse(horarioAsigando.HoraFin) - DateTime.Parse(horarioAsigando.HoraInicio));
                 double totalHoursReportadas = tsReportado.TotalHours;
                 double totalHoursAsignadas = tsAsignado.TotalHours;
-                if (_HoraInicioReportado.TimeOfDay < DateTimeOffset.Parse(horarioAsigando.HoraFin).TimeOfDay && DateTimeOffset.Parse(horarioAsigando.HoraInicio).TimeOfDay < _HoraFinReportado.TimeOfDay)
+                if (_HoraInicioReportado.TimeOfDay < DateTime.Parse(horarioAsigando.HoraFin).TimeOfDay && DateTime.Parse(horarioAsigando.HoraInicio).TimeOfDay < _HoraFinReportado.TimeOfDay)
                 {
                     return false;
                 }
