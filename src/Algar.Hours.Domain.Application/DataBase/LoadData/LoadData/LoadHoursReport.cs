@@ -1122,8 +1122,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse.HorasFin = 0;
                             parametersTse.EmployeeCode = registrox.NumeroEmpleado;
                             parametersTse.IdCarga = new Guid(model.IdCarga);
-                            parametersTse.HoraInicio = "0";
-                            parametersTse.HoraFin = "0";
+                            parametersTse.HoraInicio = startDateTime.ToString("HH:mm");
+                            parametersTse.HoraFin = horaFin; 
                             parametersTse.OutIme = "N";
                             parametersTse.Semana = 0;
                             parametersTse.HoraInicioHoraio = "0";
@@ -1174,8 +1174,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             parametersTse.EstatusProceso = "EN_OVERTIME";
                             parametersTse.Festivo = esfestivo != null ? "Y" : "N";
                             parametersTse.Estado = horario == null ? "E204 NO TIENE HORARIO ASIGNADO" : "";
-                            parametersTse.HoraInicio = tse.StartHours;
-                            parametersTse.HoraFin = tse.EndHours;
                             parametersTse.Semana = Semana;
                             parametersTse.Anio = semanahorario.Year.ToString();
 
@@ -1246,8 +1244,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                             }
 
                             if (hasHorarioSemana && !hasHorarioDia) {
-                                parametersTse.HoraInicio = startDateTime.ToString("HH:mm");
-                                parametersTse.HoraFin = horaFin; 
                                 listParametersInitialEntity.Add(parametersTse);
                                 continue;
                             }
@@ -1958,7 +1954,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                     parametersSte.EmployeeCode = registrox.SessionEmployeeSerialNumber;
                     parametersSte.IdCarga = new Guid(model.IdCarga);
                     parametersSte.HoraInicio = "0";
-                    parametersSte.HoraFin = "0";
+                    parametersSte.HoraFin = "0"; 
                     parametersSte.OutIme = "N";
                     parametersSte.Semana = 0;
                     parametersSte.HoraInicioHoraio = "0";
@@ -2027,8 +2023,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte.HorasFin = 0;
                         parametersSte.EmployeeCode = registrox.SessionEmployeeSerialNumber;
                         parametersSte.IdCarga = new Guid(model.IdCarga);
-                        parametersSte.HoraInicio = "0";
-                        parametersSte.HoraFin = "0";
+                        parametersSte.HoraInicio = startDateTime.ToString("HH:mm");
+                        parametersSte.HoraFin = horaFin;
                         parametersSte.OutIme = "N";
                         parametersSte.Semana = 0;
                         parametersSte.HoraInicioHoraio = "0";
@@ -2084,8 +2080,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         parametersSte.EstatusProceso = "EN_OVERTIME";
                         parametersSte.Anio = semanahorario.Year.ToString();
                         parametersSte.Festivo = esfestivo != null ? "Y" : "N";
-                        parametersSte.HoraInicio = ste.StartHours;
-                        parametersSte.HoraFin = ste.EndHours;
                         parametersSte.Semana = Semana;
 
                         if (parametersSte.Festivo == "Y") {
@@ -2158,8 +2152,6 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                         }
 
                         if (hasHorarioSemana && !hasHorarioDia) {
-                            parametersSte.HoraInicio = startDateTime.ToString("HH:mm");
-                            parametersSte.HoraFin = horaFin;
                             listParametersInitialEntity.Add(parametersSte);
                             continue;
                         }
