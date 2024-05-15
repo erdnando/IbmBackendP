@@ -24,6 +24,7 @@ using MySqlX.XDevAPI.Common;
 using Npgsql;
 using static Algar.Hours.Application.Enums.Enums;
 using DocumentFormat.OpenXml.Drawing;
+using System.Text.RegularExpressions;
 
 namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
 {
@@ -82,6 +83,10 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 if (loadWorkdayModel.StartTime == null || loadWorkdayModel.EndTime == null) continue;
                 if (loadWorkdayModel.Status != "Approved" && loadWorkdayModel.Status != "Submitted") continue;
 
+                loadWorkdayModel.StartTime = Regex.Replace(loadWorkdayModel.StartTime, @"a.\sm.", "AM");
+                loadWorkdayModel.StartTime = Regex.Replace(loadWorkdayModel.StartTime, @"p.\sm.", "PM");
+                loadWorkdayModel.EndTime = Regex.Replace(loadWorkdayModel.EndTime, @"a.\sm.", "AM");
+                loadWorkdayModel.EndTime = Regex.Replace(loadWorkdayModel.EndTime, @"p.\sm.", "PM");
                 whModels.Add(loadWorkdayModel);
 
                 if (loadWorkdayModel.ReportedDate < dateTime) dateTime = loadWorkdayModel.ReportedDate;
