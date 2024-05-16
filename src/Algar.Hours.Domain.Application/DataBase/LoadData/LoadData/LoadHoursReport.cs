@@ -4067,6 +4067,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         private void PreaprobadosARP(List<UserEntity> UserLst, List<ParametersArpInitialEntity> rowParameterFinal)
         {
+            DateTime dateTime = DateTime.Now;
+            List<string> employeeCodes = new List<string>();
+
+            for (var i = 0; i < rowParameterFinal.Count(); i++)
+            {
+                var p = rowParameterFinal[i];
+                employeeCodes.Add(p.EmployeeCode);
+                var reportDateTime = DateTime.ParseExact(p.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                if (reportDateTime < dateTime) dateTime = reportDateTime;
+            }
+
+            System.String employeeCodesIn = $"'{System.String.Join("','", employeeCodes.ToArray())}'";
+            var horusReports = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')")
+                .Include(x => x.UserEntity)
+                .AsEnumerable()
+                .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
+                .ToList();
+
             foreach (var itemARPp in rowParameterFinal)
             {
                 //------------------------------------------------------------------------------------------------------------------
@@ -4082,8 +4100,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100% 
                 //=================================================================
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemARPp.HoraInicio && h.EndTime == itemARPp.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
-                    .AsEnumerable()
+                var _horusCoincidencia = horusReports
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemARPp.HoraInicio && h.EndTime == itemARPp.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                     .Where(h => h.StrReport.Split("-")[0] == itemARPp.Reporte.Split("-")[0])
                     .FirstOrDefault();
 
@@ -4177,6 +4195,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         private void PreaprobadosTSE(List<UserEntity> UserLst, List<ParametersTseInitialEntity> rowTSEParameterFinal)
         {
+            DateTime dateTime = DateTime.Now;
+            List<string> employeeCodes = new List<string>();
+
+            for (var i = 0; i < rowTSEParameterFinal.Count(); i++)
+            {
+                var p = rowTSEParameterFinal[i];
+                employeeCodes.Add(p.EmployeeCode);
+                var reportDateTime = DateTime.ParseExact(p.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                if (reportDateTime < dateTime) dateTime = reportDateTime;
+            }
+
+            System.String employeeCodesIn = $"'{System.String.Join("','", employeeCodes.ToArray())}'";
+            var horusReports = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')")
+                .Include(x => x.UserEntity)
+                .AsEnumerable()
+                .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
+                .ToList();
+
             foreach (var itemTSE in rowTSEParameterFinal)
             {
                 //------------------------------------------------------------------------------------------------------------------
@@ -4193,8 +4229,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100%
                 //=================================================================
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemTSE.HoraInicio && h.EndTime == itemTSE.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
-                    .AsEnumerable()
+                var _horusCoincidencia = horusReports
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemTSE.HoraInicio && h.EndTime == itemTSE.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                     .Where(h => h.StrReport.Split("-")[0] == itemTSE.Reporte.Split("-")[0])
                     .FirstOrDefault();
 
@@ -4290,6 +4326,24 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         private void PreaprobadosSTE(List<UserEntity> UserLst, List<ParametersSteInitialEntity> rowTSEParameterFinal)
         {
+            DateTime dateTime = DateTime.Now;
+            List<string> employeeCodes = new List<string>();
+
+            for (var i = 0; i < rowTSEParameterFinal.Count(); i++)
+            {
+                var p = rowTSEParameterFinal[i];
+                employeeCodes.Add(p.EmployeeCode);
+                var reportDateTime = DateTime.ParseExact(p.FECHA_REP, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                if (reportDateTime < dateTime) dateTime = reportDateTime;
+            }
+
+            System.String employeeCodesIn = $"'{System.String.Join("','", employeeCodes.ToArray())}'";
+            var horusReports = _dataBaseService.HorusReportEntity.FromSqlRaw($"SELECT * FROM \"HorusReportEntity\" h INNER JOIN \"UserEntity\" u on u.\"IdUser\" = h.\"UserEntityId\" WHERE u.\"EmployeeCode\" IN ({employeeCodesIn}) AND TO_TIMESTAMP(h.\"StrStartDate\", 'DD/MM/YYYY HH24:MI') >= TO_TIMESTAMP('{dateTime.ToString("dd/MM/yyyy HH:mm")}', 'DD/MM/YYYY HH24:MI') AND (h.\"EstatusFinal\" != 'RECHAZADO' and h.\"EstatusFinal\" != 'DESCARTADO')")
+                .Include(x => x.UserEntity)
+                .AsEnumerable()
+                .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
+                .ToList();
+
             foreach (var itemSTE in rowTSEParameterFinal)
             {
                 //------------------------------------------------------------------------------------------------------------------
@@ -4305,8 +4359,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 //Escenario coincidencia 100%
                 //================================================================= 
-                var _horusCoincidencia = _dataBaseService.HorusReportEntity.Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemSTE.HoraInicio && h.EndTime == itemSTE.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
-                    .AsEnumerable()
+                var _horusCoincidencia = horusReports
+                    .Where(h => h.StrStartDate == nuevaFechaHoraFormato && h.StartTime == itemSTE.HoraInicio && h.EndTime == itemSTE.HoraFin && h.UserEntityId == userRow.IdUser && (h.EstatusFinal != "RECHAZADO" && h.EstatusFinal != "DESCARTADO"))
                     .Where(h => h.StrReport.Split("-")[0] == itemSTE.Reporte.Split("-")[0])
                     .FirstOrDefault();
 
