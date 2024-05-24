@@ -14,6 +14,7 @@ namespace Algar.Hours.Persistence.Configuration
         public ParametersInitialEnityConfiguration(EntityTypeBuilder<ParametersArpInitialEntity> entityBuilder)
         {
             entityBuilder.HasKey(x => x.IdParametersInitialEntity);
+            entityBuilder.HasOne(x => x.Carga).WithMany(x => x.arpParameters).HasForeignKey(x => x.IdCarga).IsRequired(false);
 
         }
 

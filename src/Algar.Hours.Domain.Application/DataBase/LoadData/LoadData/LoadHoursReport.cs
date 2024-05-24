@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.AssignmentReport.Commands;
 using Algar.Hours.Application.DataBase.Country.Commands;
 using Algar.Hours.Application.DataBase.Country.Commands.Consult;
+using Algar.Hours.Application.DataBase.HorusReport.Commands;
 using Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load;
 using Algar.Hours.Application.DataBase.PortalDB.Commands;
 using Algar.Hours.Application.DataBase.User.Commands.Email;
@@ -94,6 +95,41 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
             _consultCountryCommand = consultCountryCommand;
             _emailCommand = emailCommand;
             _logCommand = logCommand;
+        }
+
+        public async Task<List<ARPLoadEntity>> List()
+        {
+            var entities = await _dataBaseService.ARPLoadEntity.Include(x => x.userEntity).OrderByDescending(x => x.FechaCreacion)
+                .ToListAsync();
+            return entities;
+        }
+
+        public async Task<List<ParametersArpInitialEntity>> ArpParametersList(Guid idLoad)
+        {
+            var entities = await _dataBaseService.ParametersArpInitialEntity.Where(x => x.IdCarga == idLoad)
+                .ToListAsync();
+            return entities;
+        }
+
+        public async Task<List<ParametersTseInitialEntity>> TseParametersList(Guid idLoad)
+        {
+            var entities = await _dataBaseService.ParametersTseInitialEntity.Where(x => x.IdCarga == idLoad)
+                .ToListAsync();
+            return entities;
+        }
+
+        public async Task<List<ParametersSteInitialEntity>> SteParametersList(Guid idLoad)
+        {
+            var entities = await _dataBaseService.ParametersSteInitialEntity.Where(x => x.IdCarga == idLoad)
+                .ToListAsync();
+            return entities;
+        }
+
+        public async Task<ARPLoadEntity> Consult(Guid id)
+        {
+            var loadEntity = _dataBaseService.ARPLoadEntity.Where(d => d.IdArpLoad == id).FirstOrDefault();
+            /*var entity = _mapper.Map<HorusReportModel>(data);*/
+            return loadEntity;
         }
 
         ARPLoadDetailEntity validaFormatosFecha(ARPLoadDetailEntity arp)

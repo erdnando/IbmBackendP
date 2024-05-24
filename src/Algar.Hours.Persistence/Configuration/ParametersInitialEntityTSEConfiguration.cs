@@ -15,7 +15,7 @@ namespace Algar.Hours.Persistence.Configuration
         {
 
             entityBuilder.HasKey(x => x.IdParamTSEInitialId);
-
+            entityBuilder.HasOne(x => x.Carga).WithMany(x => x.tseParameters).HasForeignKey(x => x.IdCarga).IsRequired(false);
         }
 
     }

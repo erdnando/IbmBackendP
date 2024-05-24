@@ -1,5 +1,7 @@
-﻿using Algar.Hours.Application.DataBase.LoadData.LoadData;
+﻿using Algar.Hours.Application.DataBase.HoursReport.Commands.Consult;
+using Algar.Hours.Application.DataBase.LoadData.LoadData;
 using Algar.Hours.Application.DataBase.Menu.Commands;
+using Algar.Hours.Application.DataBase.WorkdayException.Commands.Consult;
 using Algar.Hours.Application.Exceptions;
 using Algar.Hours.Application.Feature;
 using Algar.Hours.Domain.Entities.ParametrosInicial;
@@ -16,7 +18,7 @@ namespace Algar.Hours.Api.Controllers
     {
 
         [HttpGet("GeneraCarga")]
-        //[Authorize(Roles = "standard")]
+        [Authorize(Roles = "standard")]
         [AllowAnonymous]
         public async Task<IActionResult> GeneraCarga( [FromServices] ILoadHoursReport loadHoursReport)
         {
@@ -26,13 +28,57 @@ namespace Algar.Hours.Api.Controllers
         }
 
         [HttpGet("CancelarCarga")]
-        //[Authorize(Roles = "standard")]
+        [Authorize(Roles = "standard")]
         [AllowAnonymous]
         public async Task<IActionResult> CancelarCarga([FromQuery] string idCarga, [FromServices] ILoadHoursReport loadHoursReport)
         {
             var dataFinal = await loadHoursReport.CancelarCarga(idCarga);
 
             return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, dataFinal));
+        }
+
+        [HttpGet("Consult")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> Consult(
+         [FromQuery] Guid id, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.Consult(id);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+
+        [HttpGet("ArpParameters/List")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> ArpParametersList(
+         [FromQuery] Guid idLoad, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.ArpParametersList(idLoad);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+
+        [HttpGet("TseParameters/List")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> TseParametersList(
+         [FromQuery] Guid idLoad, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.TseParametersList(idLoad);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+
+        [HttpGet("SteParameters/List")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> SteParametersList(
+         [FromQuery] Guid idLoad, [FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.SteParametersList(idLoad);
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
+        }
+
+        [HttpGet("List")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> List([FromServices] ILoadHoursReport loadHoursReport)
+        {
+            var data = await loadHoursReport.List();
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
         }
 
         [HttpGet("CargaAvance")]

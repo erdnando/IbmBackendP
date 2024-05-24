@@ -1,4 +1,5 @@
-﻿using Algar.Hours.Domain.Entities.User;
+﻿using Algar.Hours.Domain.Entities.ParametrosInicial;
+using Algar.Hours.Domain.Entities.User;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,13 @@ namespace Algar.Hours.Domain.Entities.Load
 {
     public class ARPLoadEntity
     {
-        public Guid IdArpLoad { get; set;}
+        public Guid IdArpLoad { get; set; }
 
         public DateTime FechaCreacion { get; set; }
 
         public Guid userEntityId { get; set; }
 
-        public UserEntity userEntity { get; set; }  
+        public UserEntity userEntity { get; set; }
 
         public int Estado { get; set; }
 
@@ -44,12 +45,16 @@ namespace Algar.Hours.Domain.Entities.Load
         public string ARPOmitidosXDuplicidad { get; set; }
         public string TSEOmitidosXDuplicidad { get; set; }
         public string STEOmitidosXDuplicidad { get; set; }
-        
+
         public string ARPXDatosNovalidos { get; set; }
         public string TSEXDatosNovalidos { get; set; }
         public string STEXDatosNovalidos { get; set; }
 
         public string EstadoCarga { get; set; }
+
+        public ICollection<ParametersArpInitialEntity>? arpParameters { get; set; }
+        public ICollection<ParametersTseInitialEntity>? tseParameters { get; set; }
+        public ICollection<ParametersSteInitialEntity>? steParameters { get; set; }
 
     }
 }
