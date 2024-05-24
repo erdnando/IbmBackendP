@@ -38,6 +38,7 @@ namespace Algar.Hours.Api.Controllers
         private IConsultCountryCommand _consultCountryCommand;
         private readonly IConfiguration _config;
         private ICreateLogCommand _logCommand;
+        private readonly IConfiguration _configuration;
 
         public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand, IConfiguration config, ICreateLogCommand logCommand)
         {
@@ -233,7 +234,7 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                 // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
 
                 // QA
-                return Redirect("https://portaltlsqa.ibmsmartservices.com/#/dashboard?uxm_erd=" + encodedStr);
+                return Redirect($"{_configuration["appUrl"]}/#/dashboard?uxm_erd=" + encodedStr);
 
                
 
@@ -254,14 +255,14 @@ AB7XkC7atqVVYhLhRXClgxt45wme
                 }
 
                 // QA
-                return Redirect("https://portaltlsqa.ibmsmartservices.com/#/dashboard?uxm_erd=" + encodedStr);
+                return Redirect($"{_configuration["appUrl"]}/#/dashboard?uxm_erd=" + encodedStr);
                
             }
 
 
             // return Redirect("http://localhost:4200/dashboard?uxm_erd=" + encodedStr);
             // QA
-            return Redirect("https://portaltlsqa.ibmsmartservices.com?uxm_erd=" + encodedStr);
+            return Redirect($"{_configuration["appUrl"]}?uxm_erd=" + encodedStr);
             
 
 
