@@ -23,6 +23,7 @@ using System.Security.Claims;
 using Algar.Hours.Domain.Entities.Rol;
 using Microsoft.AspNetCore.Authorization;
 using Algar.Hours.Application.DataBase.UserSession.Commands.CreateLog;
+using System.Configuration;
 
 
 namespace Algar.Hours.Api.Controllers
@@ -40,13 +41,14 @@ namespace Algar.Hours.Api.Controllers
         private ICreateLogCommand _logCommand;
         private readonly IConfiguration _configuration;
 
-        public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand, IConfiguration config, ICreateLogCommand logCommand)
+        public UserController(IGetListUsuarioCommand getListUsuarioCommand, ICreateUserCommand createUserCommand, IConsultCountryCommand consultCountryCommand, IConfiguration config, ICreateLogCommand logCommand, IConfiguration configuration)
         {
             _getListUsuarioCommand = getListUsuarioCommand;
             _createUserCommand = createUserCommand;
             _consultCountryCommand = consultCountryCommand;
             _config = config;
             _logCommand = logCommand;
+            _configuration = configuration;
         }
 
         [HttpPost("create")]
