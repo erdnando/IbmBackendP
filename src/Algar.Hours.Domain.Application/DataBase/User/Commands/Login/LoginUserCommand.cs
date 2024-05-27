@@ -41,7 +41,7 @@ namespace Algar.Hours.Application.DataBase.User.Commands.Login
 
 
             var ModelUser = _mapper.Map<CreateUserModel>(entity);
-            await daemon10();
+            /*await daemon10();*/
 
             if (entity != null)
             {
