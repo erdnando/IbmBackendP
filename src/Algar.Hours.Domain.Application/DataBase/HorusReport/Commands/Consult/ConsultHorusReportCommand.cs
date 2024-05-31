@@ -31,7 +31,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
 
 			var list = _mapper.Map<List<ConsultMoldeHosrusReportModel>>(dataList);
 
-			foreach(var item in list) 
+			/*foreach(var item in list) 
 			{
 				var country = _dataBaseService.CountryEntity.Where(x => x.IdCounty == item.UserEntity.CountryEntityId).FirstOrDefault();
 				if(country != null)
@@ -41,7 +41,7 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
 
 				}
 
-            }
+            }*/
 
 			return list;
 
