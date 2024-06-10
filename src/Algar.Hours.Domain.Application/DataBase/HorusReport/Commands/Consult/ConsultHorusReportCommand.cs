@@ -26,8 +26,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
 		{
 			var dataList = await _dataBaseService.HorusReportEntity
 				.Include(x=>x.UserEntity)
-				.ThenInclude(c=>c.CountryEntity)
-				.ToListAsync();
+				.ThenInclude(c=>c.CountryEntity).OrderByDescending(x =>x.strCreationDate ) 
+                .ToListAsync();
 
 			var list = _mapper.Map<List<ConsultMoldeHosrusReportModel>>(dataList);
 
