@@ -107,35 +107,6 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 .OrderByDescending(x => DateTime.ParseExact(x.strCreationDate, "dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture))
                 .ToList();
 
-            List<HorusReportEntity> completeReports = new();
-            for (var i = 0; i < whModels.Count(); i++) {
-                WorkdayHourModel workdayHourModel = whModels[i];
-                WorkdayUserModel workdayUserModel = null;
-                foreach (var model in wuModels)
-                {
-                    if (workdayHourModel.EmployeeID == model.EmployeeID)
-                    {
-                        workdayUserModel = model; break;
-                    }
-                }
-
-                if (workdayUserModel == null) continue;
-                var workdayHourType = workdayHourModel.Type.Trim().ToUpper();
-                if (workdayHourType != "STANDBY" && workdayHourType != "OVERTIME" && workdayHourType != "HOLIDAY WORKED" && workdayHourType != "OVERTIME ON STANDBY") continue;
-
-                var startDateTime = DateTime.Parse(workdayHourModel.StartTime.Substring(0, 8));
-                var endDateTime = startDateTime.AddHours(workdayHourModel.OriginalQuantity); 
-                endDateTime = endDateTime.Second != 0 ? new DateTime(endDateTime.Year, endDateTime.Month, endDateTime.Day, endDateTime.Hour, endDateTime.Minute, 0).AddMinutes(1) : endDateTime;
-                
-                var startTime = startDateTime.ToString("HH:mm");
-                var endTime = endDateTime.ToString("HH:mm");
-
-                foreach (var entity in entities) {
-                    if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && entity.StartTime == startTime && entity.EndTime == endTime) { completeReports.Add(entity); break; };
-                }
-            }
-
-
             List<WorkdayResultModel> result = new();
             HorusReportEntity horusReportCompleteEntity = null;
             for (var i = 0; i < whModels.Count(); i++) {
@@ -174,13 +145,10 @@ namespace Algar.Hours.Application.DataBase.HorusReportManager.Commands.Load
                 }
                 
                 if (horusReportEntity == null) {
-                    foreach (var entity in completeReports) {
-                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && TimeRangesOverlap(entity.StartTime, entity.EndTime, startTime, endTime)) { 
-                            horusReportEntity = entity;
-                            reportStartTime = entity.StartTime;
-                            reportEndTime = entity.EndTime;
-                            break; 
-                        };
+                    // Despues se busca con la fecha, hora inicio y hora dentro
+                    foreach (var entity in entities)
+                    {
+                        if (entity.UserEntity.EmployeeCode == workdayUserModel.HomeCNUM && DateTime.ParseExact(entity.StrStartDate, "dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) == workdayHourModel.ReportedDate && TimeSpan.Parse(startTime) >= TimeSpan.Parse(entity.StartTime) && TimeSpan.Parse(endTime) <= TimeSpan.Parse(entity.EndTime)) { horusReportEntity = entity; break; };
                     }
                 }
 
