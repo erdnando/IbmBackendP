@@ -19,6 +19,8 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
         public Guid ClientEntityId { get; set; }
         public string Description { get; set; }
         public DateTime CreationDate { get; set; }
+        
+        public string strCreationDate { get; set; }
         public int TipoReporte { get; set; }
         public DateTime DateApprovalSystem { get; set; }
         public int Acitivity { get; set; }
