@@ -30,7 +30,11 @@ namespace Algar.Hours.Application.DataBase.User.Commands.ListHoursUser
             var listHorus = _dataBaseService.HorusReportEntity
                 .Include(a => a.UserEntity)
                 .Include(a => a.ClientEntity)
-                .Where(x => x.UserEntityId == IdClient).OrderByDescending(x => x.StrStartDate).ToList();
+                .Where(x => x.UserEntityId == IdClient)
+                .OrderByDescending(y => y.Semana)
+                .ThenByDescending(x => x.StrStartDate)
+                .ThenByDescending(z => z.NumberReport)
+                .ToList();
 
            
             try

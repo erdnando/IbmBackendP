@@ -1,6 +1,7 @@
 ﻿using Algar.Hours.Application.DataBase.HoursReport.Commands.Consult;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
 {
@@ -26,12 +27,13 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
 		{
 			var dataList = await _dataBaseService.HorusReportEntity
 				.Include(x=>x.UserEntity)
-				.ThenInclude(c=>c.CountryEntity).OrderByDescending(x =>x.strCreationDate ) 
+				.ThenInclude(c=>c.CountryEntity).OrderByDescending(x => x.NumberReport).ThenByDescending(y => y.Semana)
                 .ToListAsync();
 
 			var list = _mapper.Map<List<ConsultMoldeHosrusReportModel>>(dataList);
 
-			/*foreach(var item in list) 
+
+            /*foreach(var item in list) 
 			{
 				var country = _dataBaseService.CountryEntity.Where(x => x.IdCounty == item.UserEntity.CountryEntityId).FirstOrDefault();
 				if(country != null)
@@ -43,7 +45,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.Consult
 
             }*/
 
-			return list;
+            //.ThenInclude(c=>c.CountryEntity).OrderByDescending(x => DateTime.ParseExact(x.StrStartDate, "dd/MM/yyyy", CultureInfo.InvariantCulture ) ) 
+
+            return list;
 
 		}
 	}
