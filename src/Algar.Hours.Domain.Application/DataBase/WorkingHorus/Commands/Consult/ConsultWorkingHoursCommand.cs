@@ -40,7 +40,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Consult
         {
             var dateTimeInicioSemana = DateTime.ParseExact($"{dateTime.ToString("yyyy-MM-dd")} 00:00", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(-((int)dateTime.DayOfWeek));
             var dateTimeFinSemana = DateTime.ParseExact($"{dateTimeInicioSemana.ToString("yyyy-MM-dd")} 23:59", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture).AddDays(6);
-            var data = await _dataBaseService.workinghoursEntity.FromSqlRaw($"SELECT * FROM \"workinghoursEntity\" w WHERE w.\"UserEntityId\"='{idUser}' AND w.\"FechaWorking\" >= TO_TIMESTAMP('{dateTimeInicioSemana.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND w.\"FechaWorking\" <= TO_TIMESTAMP('{dateTimeFinSemana.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI')").ToListAsync();
+            var data = await _dataBaseService.workinghoursEntity.FromSqlRaw($"SELECT * FROM \"workinghoursEntity\" w WHERE w.\"UserEntityId\"='{idUser}' AND w.\"FechaWorking\" >= TO_TIMESTAMP('{dateTimeInicioSemana.ToString("dd/MM/yyyy")} 00:00', 'DD/MM/YYYY HH24:MI') AND w.\"FechaWorking\" <= TO_TIMESTAMP('{dateTimeFinSemana.ToString("dd/MM/yyyy")} 23:59', 'DD/MM/YYYY HH24:MI') order by TO_TIMESTAMP(substring(w.\"FechaWorking\"::text,0,11)||' '||w.\"HoraInicio\", 'YYYY-MM-DD HH24:MI') asc").ToListAsync();
             
             if (data.Count==0)
             {
