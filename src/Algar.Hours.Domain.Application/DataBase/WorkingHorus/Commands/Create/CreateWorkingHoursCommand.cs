@@ -36,6 +36,22 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
             {
                 var entityList = _mapper.Map<List<workinghoursEntity>>(model);
                 List<workinghoursEntity> schedules = new();
+
+
+
+                if (entityList[0].HoraInicio == "delete")
+                {
+                    schedules.AddRange(_databaseService.workinghoursEntity.Where(e => e.UserEntityId == entityList[0].UserEntityId && e.week == entityList[0].week && e.Ano == entityList[0].Ano).ToList());
+                    _databaseService.workinghoursEntity.RemoveRange(schedules);
+                    await _databaseService.SaveAsync();
+
+                    return true;
+                }
+
+
+
+
+
                 foreach (var entity in entityList)
                 {
                     schedules.AddRange(_databaseService.workinghoursEntity.Where(e => e.UserEntityId == entity.UserEntityId && e.week == entity.week && e.Ano == entity.Ano).ToList());
@@ -81,7 +97,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Create
                 if (entityList.Count > 0)
                 {
                    
-                        _emailCommand.SendEmail(new EmailModel{To = (await _usuarioCommand.GetByUsuarioId(entityList[0].UserEntityId)).Email,Plantilla = "6"});
+                  //      _emailCommand.SendEmail(new EmailModel{To = (await _usuarioCommand.GetByUsuarioId(entityList[0].UserEntityId)).Email,Plantilla = "6"});
                    
                 }
                 

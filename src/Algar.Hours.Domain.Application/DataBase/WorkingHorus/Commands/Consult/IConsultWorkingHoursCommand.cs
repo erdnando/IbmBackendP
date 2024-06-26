@@ -14,6 +14,7 @@ namespace Algar.Hours.Application.DataBase.WorkingHorus.Commands.Consult
         Task<CreateUserModel> Execute(LoginUserModel model);
 
         Task<List<CreateWorkingHoursModel>> Consult(Guid idUser, DateTimeOffset date);
+        Task<List<CreateWorkingHoursModel>> ConsultaHorarioCompleto(Guid idUser, DateTimeOffset date);
 
     }
 }

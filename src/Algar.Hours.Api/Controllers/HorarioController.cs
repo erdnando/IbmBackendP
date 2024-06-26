@@ -72,12 +72,24 @@ namespace Algar.Hours.Api.Controllers
             {
 
                 return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, null));
+            } 
+        }
+
+        [HttpGet("ConsultaHorarioCompleto")]
+        [Authorize(Roles = "standard")]
+        public async Task<IActionResult> ConsultaHorarioCompleto(
+         [FromQuery] Guid IdUser, DateTimeOffset date, [FromServices] IConsultWorkingHoursCommand consultWorkingHours)
+        {
+            var data = await consultWorkingHours.ConsultaHorarioCompleto(IdUser, date);
+            if (data.Count() > 0)
+            {
+                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, data));
             }
-           
-                
-            
-           
-            
+            else
+            {
+
+                return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, null));
+            }
         }
 
         [HttpPost("LoadExcel")]
