@@ -2828,9 +2828,9 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 summary.TSEOmitidosXDuplicidad = cargaRegistro.TSEOmitidosXDuplicidad;
                 summary.STEOmitidosXDuplicidad = cargaRegistro.STEOmitidosXDuplicidad;
 
-                summary.ARPXDatosNovalidos = cargaRegistro.ARPXDatosNovalidos;
-                summary.TSEXDatosNovalidos = cargaRegistro.TSEXDatosNovalidos;
-                summary.STEXDatosNovalidos = cargaRegistro.STEXDatosNovalidos;
+                summary.ARPXDatosNovalidos = cargaRegistro.ARPXDatosNovalidos == null ? "0" : cargaRegistro.ARPXDatosNovalidos;
+                summary.TSEXDatosNovalidos = cargaRegistro.TSEXDatosNovalidos == null ? "0" : cargaRegistro.TSEXDatosNovalidos;
+                summary.STEXDatosNovalidos = cargaRegistro.STEXDatosNovalidos == null ? "0" : cargaRegistro.STEXDatosNovalidos;
 
                 return summary;
 
