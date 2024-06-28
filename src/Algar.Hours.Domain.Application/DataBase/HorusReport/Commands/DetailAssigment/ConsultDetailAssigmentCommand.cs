@@ -44,8 +44,9 @@ namespace Algar.Hours.Application.DataBase.HorusReport.Commands.DetailAssigment
                 .Include(a => a.UserEntity.RoleEntity)
                 .Include(b => b.HorusReportEntity)
                 .Where(x => x.HorusReportEntityId == IdReport)
-                .AsEnumerable()
-                .OrderBy(x => DateTime.ParseExact(x.strFechaAtencion, "dd/MM/yyyy HH:mm", null));
+                .AsEnumerable();
+            //TODO: revisar ordenamiento
+                //.OrderBy(x => DateTime.ParseExact(x.strFechaAtencion, "dd/MM/yyyy HH:mm", null));
 
             var assignmentList = assignmentQuery.ToList();
             var assignments = new List<Domain.Entities.AssignmentReport.AssignmentReport>();
