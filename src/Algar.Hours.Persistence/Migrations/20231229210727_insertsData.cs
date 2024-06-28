@@ -10,6 +10,7 @@ namespace Algar.Hours.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.Sql("INSERT into \"portal_tls\".\"Aprobador\" (\"IdAprobador\", \"Descripcion\", \"Nivel\") VALUES ('bdb101ed-5e37-4c74-86c8-112961948d7e', 'Aprobador', 1);");
             migrationBuilder.Sql("INSERT into \"portal_tls\".\"Aprobador\" (\"IdAprobador\", \"Descripcion\", \"Nivel\") VALUES ('4666494f-60d3-42da-89fd-998b20fb40bf', 'segun rango', 2);");
             migrationBuilder.Sql("INSERT into \"portal_tls\".\"Aprobador\" (\"IdAprobador\", \"Descripcion\", \"Nivel\") VALUES ('a35f141d-3fd5-4223-b4f9-fa5eec2ac565', 'aprobador1', 3);");
@@ -231,7 +232,7 @@ namespace Algar.Hours.Persistence.Migrations
             migrationBuilder.Sql("INSERT into \"portal_tls\".\"assignmentReports\" (\"IdAssignmentReport\", \"UserEntityId\", \"HorusReportEntityId\", \"State\", \"Description\", \"DateApprovalCancellation\") VALUES ('5af715e2-48bc-45d4-9852-4eb7637ae764', '3696718d-d05a-4831-96ce-ed500c5bbc97', '74262a17-423a-4c41-944d-e6fbf4ce532b', 3, 'pruebas', timestamp '0001-01-01T00:00:00.0000000');");
             migrationBuilder.Sql("INSERT into \"portal_tls\".\"assignmentReports\" (\"IdAssignmentReport\", \"UserEntityId\", \"HorusReportEntityId\", \"State\", \"Description\", \"DateApprovalCancellation\") VALUES ('c12f541f-5230-4346-a599-96b8939bcbb8', '79a55ef2-6b82-4db7-a1fe-bc467cc76dcb', 'ffd4366c-26c9-4b00-8d11-41cb24198be4', 1, 'Pruebas - Harold', timestamp '2023-12-18T14:55:05.1153250');");
 
-
+            */
 
 //migrationBuilder.Sql("INSERT into \"portal_tls\".\"__EFMigrationsHistory\" (\"MigrationId\", \"ProductVersion\") VALUES ('20231215041754_Initial', '7.0.11')
 

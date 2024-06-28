@@ -10,6 +10,7 @@ namespace Algar.Hours.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"ARPLoadDetailEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"ARPLoadEntity\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"Aprobador\"  OWNER to \"ibm-cloud-base-user\";");
@@ -36,6 +37,7 @@ namespace Algar.Hours.Persistence.Migrations
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"UsersExceptions\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"assignmentReports\"  OWNER to \"ibm-cloud-base-user\";");
             migrationBuilder.Sql("ALTER TABLE IF EXISTS portal_tls.\"workinghoursEntity\"  OWNER to \"ibm-cloud-base-user\";");
+            */
         }
 
         /// <inheritdoc />

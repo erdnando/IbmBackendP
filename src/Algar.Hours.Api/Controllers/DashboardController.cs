@@ -26,8 +26,8 @@ namespace Algar.Hours.Api.Controllers
         [Authorize(Roles = "standard")]
         public async Task<IActionResult> Reporte1(int semana, string usuario,int anio, [FromServices] IReporte1Command reporte)
         {
-            var data = await reporte.Reporte1(semana, usuario, anio);
-            return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
+                var data = await reporte.Reporte1(semana, usuario, anio);
+                return StatusCode(StatusCodes.Status200OK, ResponseApiService.Response(StatusCodes.Status200OK, data));
         }
 
         [HttpGet("ReporteGraficas/{anio}/{usuario}")]
