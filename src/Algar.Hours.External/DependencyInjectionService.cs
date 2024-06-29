@@ -19,7 +19,7 @@ namespace Algar.Hours.External
             // services.AddDbContext<DatabaseService>(options =>
             //options.UseNpgsql(configuration["SQLConnectionStringsPost"]));
 
-            /* services.AddDbContext<DatabaseService>(options =>
+             /* services.AddDbContext<DatabaseService>(options =>
              {
                  options.UseNpgsql(configuration["SQLConnectionStringsPost"],
                      providerOptions =>
@@ -34,8 +34,8 @@ namespace Algar.Hours.External
                      });
                  options.EnableSensitiveDataLogging();
                  options.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
-             });
-             */
+             });*/
+             
 
 
             services.AddDbContext<DatabaseService>(options => options.UseNpgsql(configuration["SQLConnectionStringsPost"],providerOptions => providerOptions.EnableRetryOnFailure() ));
