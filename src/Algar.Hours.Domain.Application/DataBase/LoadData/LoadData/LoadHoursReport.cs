@@ -668,6 +668,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var chunk in chunks)
                 {
                     _dataBaseService.Context().BulkInsert(chunk);
+                    await _dataBaseService.SaveAsync();
                 }
                 //_dataBaseService.Context().BulkInsert(listParametersInitialEntity);
                 await updateCargaStatus(model.IdCarga, "ARP terminado...");
@@ -1394,6 +1395,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var chunk in chunks)
                 {
                     _dataBaseService.Context().BulkInsert(chunk);
+                    await _dataBaseService.SaveAsync();
                 }
              
 
@@ -2304,6 +2306,7 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 foreach (var chunk in chunks)
                 {
                     _dataBaseService.Context().BulkInsert(chunk);
+                    await _dataBaseService.SaveAsync();
                 }
 
 
