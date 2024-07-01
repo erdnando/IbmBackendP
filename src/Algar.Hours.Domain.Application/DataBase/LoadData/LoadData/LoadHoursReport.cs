@@ -659,7 +659,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
 
                 await updateCargaStatus(model.IdCarga, "Procesando " + listParametersInitialEntity.Count() + " de " + listParametersInitialEntity.Count + " registros ARP...");
-                _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
+
+                int mitadLista = listParametersInitialEntity.Count() / 2;
+                List<ParametersArpInitialEntity[]> chunks = listParametersInitialEntity.Chunk(mitadLista).ToList();
+
+                _dataBaseService.Context().BulkInsert(chunks[0]);
+                _dataBaseService.Context().BulkInsert(chunks[1]);
+                //_dataBaseService.Context().BulkInsert(listParametersInitialEntity);
                 await updateCargaStatus(model.IdCarga, "ARP terminado...");
 
                 return model.IdCarga.ToString();
@@ -1375,7 +1381,16 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
 
                 await updateCargaStatus(model.IdCarga, "Procesando " + listParametersInitialEntity.Count() + " de " + listParametersInitialEntity.Count + " registros TSE...");
-                _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
+
+
+
+                int mitadLista = listParametersInitialEntity.Count() / 2;
+                List<ParametersTseInitialEntity[]> chunks = listParametersInitialEntity.Chunk(mitadLista).ToList();
+
+                _dataBaseService.Context().BulkInsert(chunks[0]);
+                _dataBaseService.Context().BulkInsert(chunks[1]);
+
+               // _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
                 await updateCargaStatus(model.IdCarga, "TSE terminado...");
 
                 return model.IdCarga.ToString();
@@ -2275,7 +2290,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 }
 
                 await updateCargaStatus(model.IdCarga, "Procesando " + listParametersInitialEntity.Count() + " de " + listParametersInitialEntity.Count + " registros STE...");
-                _dataBaseService.Context().BulkInsert(listParametersInitialEntity);
+                //_dataBaseService.Context().BulkInsert(listParametersInitialEntity);
+
+                int mitadLista = listParametersInitialEntity.Count() / 2;
+                List<ParametersSteInitialEntity[]> chunks = listParametersInitialEntity.Chunk(mitadLista).ToList();
+
+                _dataBaseService.Context().BulkInsert(chunks[0]);
+                _dataBaseService.Context().BulkInsert(chunks[1]);
+
                 await updateCargaStatus(model.IdCarga, "STE terminado...");
 
 
