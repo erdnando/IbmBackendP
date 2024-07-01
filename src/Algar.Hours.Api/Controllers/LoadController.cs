@@ -227,5 +227,13 @@ namespace Algar.Hours.Api.Controllers
             return data;
         }
 
+        [HttpGet("Version")]
+        //[Authorize(Roles = "standard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Version( )
+        {
+            return StatusCode(StatusCodes.Status201Created, ResponseApiService.Response(StatusCodes.Status201Created, "1.1.3"));
+        }
+
     }
 }
