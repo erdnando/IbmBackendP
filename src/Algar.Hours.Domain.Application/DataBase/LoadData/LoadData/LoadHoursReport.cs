@@ -664,11 +664,12 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
                 int mitadLista = listParametersInitialEntity.Count() / 20;
                 List<ParametersArpInitialEntity[]> chunks = listParametersInitialEntity.Chunk(mitadLista).ToList();
-
+               // _dataBaseService.Context().Database.SetCommandTimeout(3600);
                 foreach (var chunk in chunks)
                 {
                     _dataBaseService.Context().BulkInsert(chunk);
                     await _dataBaseService.SaveAsync();
+                    Thread.Sleep(300);
                 }
                 //_dataBaseService.Context().BulkInsert(listParametersInitialEntity);
                 await updateCargaStatus(model.IdCarga, "ARP terminado...");
@@ -1020,6 +1021,8 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
 
         public async Task<string> LoadTSE(LoadJsonPais model)
         {
+           
+
             await _logCommand.Log(model.idUserEntiyId, "Ejecuta carga OVERTIME TSE", model);
 
             await updateCargaStatus(model.IdCarga, "Procesando TSE...");
@@ -1392,10 +1395,13 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int mitadLista = listParametersInitialEntity.Count() / 20;
                 List<ParametersTseInitialEntity[]> chunks = listParametersInitialEntity.Chunk(mitadLista).ToList();
 
+                //_dataBaseService.Context().Database.SetCommandTimeout(3600);
+
                 foreach (var chunk in chunks)
                 {
                     _dataBaseService.Context().BulkInsert(chunk);
                     await _dataBaseService.SaveAsync();
+                    Thread.Sleep(300);
                 }
              
 
@@ -2303,10 +2309,14 @@ namespace Algar.Hours.Application.DataBase.LoadData.LoadData
                 int mitadLista = listParametersInitialEntity.Count() / 20;
                 List<ParametersSteInitialEntity[]> chunks = listParametersInitialEntity.Chunk(mitadLista).ToList();
 
+               // _dataBaseService.Context().Database.SetCommandTimeout(3600);
+
                 foreach (var chunk in chunks)
                 {
                     _dataBaseService.Context().BulkInsert(chunk);
                     await _dataBaseService.SaveAsync();
+                    Thread.Sleep(300);
+                        
                 }
 
 
